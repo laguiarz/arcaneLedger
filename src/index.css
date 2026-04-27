@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(46, 58, 89, 0.25), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(119, 90, 25, 0.18), transparent 60%),
+      linear-gradient(180deg, #110e09 0%, #16130e 60%, #121625 100%);
+    background-attachment: fixed;
+    color: #e9e1d8;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Newsreader", ui-serif, Georgia, serif;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #38342e;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #4e4639; background-clip: padding-box; border: 2px solid transparent; }
+
+  .material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    user-select: none;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(35, 31, 26, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Brass border with subtle gradient — works on solid surfaces */
+  .brass-border {
+    border: 1px solid;
+    border-image: linear-gradient(180deg, #c5a059, #4e3700) 1;
+  }
+
+  .etched-top {
+    border-top: 2px solid #c5a059;
+    background-image: linear-gradient(180deg, rgba(197, 160, 89, 0.06) 0%, transparent 100%);
+  }
+
+  .leather-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
+
+  .label-caps {
+    @apply text-label-caps uppercase tracking-[0.1em] font-bold;
+  }
+
+  .btn-brass {
+    @apply inline-flex items-center justify-center gap-2 px-sm py-2 rounded-md
+           bg-primary-container text-on-primary-container font-bold uppercase tracking-wider text-xs
+           border border-primary/40 shadow-[0_0_0_1px_rgba(233,193,118,0.15),0_2px_0_rgba(0,0,0,0.4)]
+           hover:brightness-110 active:scale-95 transition;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-sm py-2 rounded-md
+           bg-transparent text-primary border border-primary/40
+           hover:bg-primary/10 hover:text-primary-fixed active:scale-95 transition;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-md
+           bg-surface-container-high text-on-surface-variant border border-outline-variant/60
+           hover:text-primary hover:border-primary/50 active:scale-95 transition;
+  }
+
+  .chip {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.08em];
+  }
+
+  .input-inset {
+    @apply bg-surface-container-lowest border border-outline-variant/60 rounded-md px-3 py-2
+           text-on-surface placeholder:text-outline focus:outline-none focus:border-primary/70
+           focus:shadow-[0_0_0_2px_rgba(233,193,118,0.15)] transition;
+  }
+}

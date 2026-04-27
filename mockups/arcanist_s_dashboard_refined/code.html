@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "surface": "#16130e",
+                    "primary-container": "#c5a059",
+                    "surface-variant": "#38342e",
+                    "secondary-fixed": "#dae2ff",
+                    "outline-variant": "#4e4639",
+                    "primary-fixed": "#ffdea5",
+                    "primary-fixed-dim": "#e9c176",
+                    "inverse-primary": "#775a19",
+                    "surface-container-high": "#2d2924",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#d8e2ff",
+                    "on-tertiary": "#173059",
+                    "on-secondary": "#23304e",
+                    "tertiary-container": "#8fa5d6",
+                    "on-tertiary-container": "#233a65",
+                    "inverse-on-surface": "#34302a",
+                    "inverse-surface": "#e9e1d8",
+                    "surface-dim": "#16130e",
+                    "tertiary-fixed-dim": "#b0c6f9",
+                    "on-secondary-fixed-variant": "#3a4666",
+                    "surface-container": "#231f1a",
+                    "surface-container-lowest": "#110e09",
+                    "on-surface": "#e9e1d8",
+                    "on-primary-fixed-variant": "#5d4201",
+                    "outline": "#9a8f80",
+                    "surface-tint": "#e9c176",
+                    "surface-bright": "#3d3933",
+                    "on-primary": "#412d00",
+                    "on-secondary-fixed": "#0d1a38",
+                    "on-secondary-container": "#a8b4da",
+                    "background": "#16130e",
+                    "on-primary-container": "#4e3700",
+                    "primary": "#e9c176",
+                    "secondary-fixed-dim": "#bac6ec",
+                    "on-tertiary-fixed": "#001a41",
+                    "tertiary": "#b0c6f9",
+                    "error": "#ffb4ab",
+                    "secondary": "#bac6ec",
+                    "on-surface-variant": "#d1c5b4",
+                    "secondary-container": "#3a4666",
+                    "on-primary-fixed": "#261900",
+                    "surface-container-low": "#1e1b16",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed-variant": "#304671",
+                    "surface-container-highest": "#38342e",
+                    "on-background": "#e9e1d8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "lg": "40px",
+                    "container-padding": "32px",
+                    "md": "24px",
+                    "xl": "64px",
+                    "sm": "16px",
+                    "unit": "4px",
+                    "xs": "8px"
+            },
+            "fontFamily": {
+                    "title-sm": ["Newsreader"],
+                    "label-caps": ["Manrope"],
+                    "headline-md": ["Newsreader"],
+                    "body-lg": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "display-lg": ["Newsreader"]
+            },
+            "fontSize": {
+                    "title-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "headline-md": ["32px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .brass-border {
+        border: 1px solid;
+        border-image: linear-gradient(to bottom, #c5a059, #4e3700) 1;
+      }
+      .glass-card {
+        background: rgba(22, 19, 14, 0.8);
+        backdrop-filter: blur(12px);
+      }
+      .vitality-gauge {
+        background: conic-gradient(#e9c176 0% 84%, transparent 84% 100%);
+      }
+    </style>
+</head>
+<body class="bg-zinc-950 text-on-surface font-body-md overflow-x-hidden min-h-screen">
+<!-- Top AppBar -->
+<header class="bg-zinc-950 dark:bg-zinc-950 border-b-2 border-amber-700/30 shadow-[0_4px_20px_rgba(0,0,0,0.8)] shadow-inner shadow-black/50 flex justify-between items-center w-full px-6 py-4 h-16 fixed top-0 z-50">
+<div class="font-serif tracking-tight text-amber-500 text-xl font-bold font-serif tracking-widest text-amber-500 uppercase">Arcanist's Ledger</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-amber-500 cursor-pointer active:scale-95 hover:text-amber-300 transition-colors duration-300">favorite</span>
+<span class="material-symbols-outlined text-amber-500 cursor-pointer active:scale-95 hover:text-amber-300 transition-colors duration-300">bolt</span>
+<span class="material-symbols-outlined text-amber-500 cursor-pointer active:scale-95 hover:text-amber-300 transition-colors duration-300">savings</span>
+</div>
+<div class="h-8 w-px bg-amber-900/40"></div>
+<div class="flex items-center gap-3">
+<img alt="Arcanist Portrait" class="w-8 h-8 rounded-full border border-amber-500 shadow-[0_0_10px_rgba(233,193,118,0.3)]" data-alt="Portrait of an aged wizard with silver beard and dark purple robes, mystical lighting, cinematic fantasy style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCj_zlPBCBg3Od_AvDWX6AKTLOU4I_0pyQhkQpyQC7GV5obQlYm3maDORL-xtHzvRSwH24kYX_tfqqwwZMV2rjFuLV_5UwM1jwwtzCg5ionsCF-gfGZ0FO6ZAAdEQ0fkKwzLGqex94r7Ycz77HsGbvfYuQ570-XTdnzOu0uRPqNpBafn0MbhYSwcGAtJA54Knlwb3aOtTURD6kX259aRv6z6BHYQQ_7-G_GPjKiF_XluEvIpmN5ekryCXc0_gWZNu59e8FgohQFjo"/>
+<span class="font-title-sm text-primary hidden md:block">Master Arcanist</span>
+</div>
+</div>
+</header>
+<div class="flex pt-16 h-screen">
+<!-- Side NavBar -->
+<aside class="bg-zinc-900 dark:bg-zinc-900 border-r-2 border-amber-900/40 shadow-[inset_-10px_0_20px_rgba(0,0,0,0.6)] w-64 hidden md:flex flex-col h-full py-8">
+<nav class="flex-1 space-y-2 px-3">
+<a class="flex items-center gap-3 px-4 py-3 bg-zinc-800 text-amber-400 border-l-4 border-amber-500 shadow-[0_0_15px_rgba(46,58,89,0.4)] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">auto_awesome_motion</span>
+<span class="font-serif text-sm antialiased">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-serif text-sm antialiased">Spellbook</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span class="font-serif text-sm antialiased">Attributes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200" href="#">
+<span class="material-symbols-outlined">backpack</span>
+<span class="font-serif text-sm antialiased">Inventory</span>
+</a>
+</nav>
+<div class="px-6 py-4 border-t border-amber-900/20">
+<button class="w-full py-3 bg-primary-container text-on-primary-container font-label-caps uppercase rounded-sm border-b-2 border-amber-800 shadow-lg active:scale-95 transition-transform">
+                    Transmute
+                </button>
+</div>
+<div class="px-3 space-y-2 pb-4">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-serif text-sm antialiased">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#121625] px-sm md:px-xl py-xl">
+<div class="max-w-6xl mx-auto space-y-lg">
+<!-- Hero Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md items-stretch">
+<!-- Vitality Core -->
+<div class="md:col-span-4 glass-card p-md brass-border flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+<div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dark-leather.png')]"></div>
+<div class="relative z-10 text-center space-y-sm">
+<span class="font-label-caps text-primary/70 uppercase">Vitality Core</span>
+<div class="relative w-40 h-40 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-4 border-zinc-800"></div>
+<div class="absolute inset-0 rounded-full border-4 vitality-gauge opacity-80 blur-[2px]"></div>
+<div class="absolute inset-0 rounded-full border-4 vitality-gauge"></div>
+<div class="text-center">
+<div class="font-display-lg text-primary">78</div>
+<div class="font-label-caps text-on-surface-variant">OF 92 HP</div>
+</div>
+</div>
+<div class="flex gap-2 justify-center">
+<span class="material-symbols-outlined text-error text-sm">favorite</span>
+<span class="font-body-md text-on-surface-variant italic">Stable State</span>
+</div>
+</div>
+</div>
+<!-- Arcane Capacitors -->
+<div class="md:col-span-8 glass-card p-md brass-border shadow-2xl relative">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h2 class="font-headline-md text-primary">Arcane Capacitors</h2>
+<p class="font-body-md text-on-surface-variant">Mana flow synchronized at 94%</p>
+</div>
+<span class="material-symbols-outlined text-tertiary text-4xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="space-y-md">
+<!-- Tier 1 -->
+<div class="space-y-xs">
+<div class="flex justify-between font-label-caps text-xs">
+<span>Tier 1 Resonance</span>
+<span class="text-primary">4 / 4 Slots</span>
+</div>
+<div class="flex gap-2">
+<div class="h-3 flex-1 bg-secondary shadow-[0_0_10px_rgba(186,198,236,0.5)] rounded-full"></div>
+<div class="h-3 flex-1 bg-secondary shadow-[0_0_10px_rgba(186,198,236,0.5)] rounded-full"></div>
+<div class="h-3 flex-1 bg-secondary shadow-[0_0_10px_rgba(186,198,236,0.5)] rounded-full"></div>
+<div class="h-3 flex-1 bg-secondary shadow-[0_0_10px_rgba(186,198,236,0.5)] rounded-full"></div>
+</div>
+</div>
+<!-- Tier 2 -->
+<div class="space-y-xs">
+<div class="flex justify-between font-label-caps text-xs">
+<span>Tier 2 Resonance</span>
+<span class="text-primary">2 / 3 Slots</span>
+</div>
+<div class="flex gap-2">
+<div class="h-3 flex-1 bg-tertiary shadow-[0_0_10px_rgba(176,198,249,0.5)] rounded-full"></div>
+<div class="h-3 flex-1 bg-tertiary shadow-[0_0_10px_rgba(176,198,249,0.5)] rounded-full"></div>
+<div class="h-3 flex-1 bg-zinc-800 rounded-full border border-zinc-700/50"></div>
+</div>
+</div>
+<!-- Tier 3 -->
+<div class="space-y-xs">
+<div class="flex justify-between font-label-caps text-xs">
+<span>Tier 3 Resonance</span>
+<span class="text-primary">1 / 2 Slots</span>
+</div>
+<div class="flex gap-2">
+<div class="h-3 flex-1 bg-primary shadow-[0_0_10px_rgba(233,193,118,0.5)] rounded-full"></div>
+<div class="h-3 flex-1 bg-zinc-800 rounded-full border border-zinc-700/50"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Active Enchantments -->
+<section class="space-y-sm">
+<h3 class="font-title-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">magic_button</span>
+                            Active Enchantments
+                        </h3>
+<div class="flex flex-wrap gap-sm">
+<div class="glass-card brass-border px-sm py-2 flex items-center gap-3 shadow-lg">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-xs text-on-surface">Mage Armor</span>
+<span class="font-body-md text-[10px] text-on-surface-variant">4h 12m left</span>
+</div>
+</div>
+<div class="glass-card brass-border px-sm py-2 flex items-center gap-3 shadow-lg">
+<div class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">air</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-xs text-on-surface">Fly</span>
+<span class="font-body-md text-[10px] text-on-surface-variant">8m 45s left</span>
+</div>
+</div>
+<div class="glass-card brass-border px-sm py-2 flex items-center gap-3 shadow-lg">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">visibility</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-xs text-on-surface">True Sight</span>
+<span class="font-body-md text-[10px] text-on-surface-variant">52s left</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick-Cast Cantrips -->
+<section class="space-y-sm">
+<h3 class="font-title-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">flash_on</span>
+                            Quick-Cast Cantrips
+                        </h3>
+<div class="grid grid-cols-2 gap-sm">
+<button class="flex items-center justify-between glass-card brass-border p-sm hover:bg-zinc-800 transition-colors active:scale-95 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">local_fire_department</span>
+<span class="font-body-md">Fire Bolt</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward_ios</span>
+</button>
+<button class="flex items-center justify-between glass-card brass-border p-sm hover:bg-zinc-800 transition-colors active:scale-95 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">pan_tool_alt</span>
+<span class="font-body-md">Mage Hand</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward_ios</span>
+</button>
+<button class="flex items-center justify-between glass-card brass-border p-sm hover:bg-zinc-800 transition-colors active:scale-95 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">ac_unit</span>
+<span class="font-body-md">Ray of Frost</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward_ios</span>
+</button>
+<button class="flex items-center justify-between glass-card brass-border p-sm hover:bg-zinc-800 transition-colors active:scale-95 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+<span class="font-body-md">Light</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward_ios</span>
+</button>
+</div>
+</section>
+</div>
+<!-- Recent Chronicle (Asymmetric Layout) -->
+<section class="space-y-sm pb-xl">
+<h3 class="font-title-sm text-primary">Arcane Log</h3>
+<div class="glass-card brass-border p-md divide-y divide-amber-900/20 shadow-xl">
+<div class="py-sm flex items-start justify-between">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-amber-500 mt-1">history_edu</span>
+<div>
+<p class="font-body-md">Scribed 'Cloudkill' into the primary spellbook.</p>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase tracking-wider">2 hours ago</p>
+</div>
+</div>
+<span class="text-xs font-label-caps text-secondary">+150 XP</span>
+</div>
+<div class="py-sm flex items-start justify-between">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-error mt-1">skull</span>
+<div>
+<p class="font-body-md">Sought rest after intensive combat encounter near the Obsidian Spire.</p>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase tracking-wider">5 hours ago</p>
+</div>
+</div>
+<span class="text-xs font-label-caps text-on-surface-variant">Status Update</span>
+</div>
+<div class="py-sm flex items-start justify-between">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-tertiary mt-1">auto_awesome</span>
+<div>
+<p class="font-body-md">Transmuted 20 Lead bars into Alchemical Gold.</p>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase tracking-wider">Yesterday</p>
+</div>
+</div>
+<span class="text-xs font-label-caps text-primary">-40 Mana</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom NavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-amber-900/40 flex justify-around items-center h-16 z-50">
+<a class="flex flex-col items-center gap-1 text-amber-400" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome_motion</span>
+<span class="text-[10px] font-label-caps">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-zinc-500" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-[10px] font-label-caps">Spells</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-zinc-500" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span class="text-[10px] font-label-caps">Stats</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-zinc-500" href="#">
+<span class="material-symbols-outlined">backpack</span>
+<span class="text-[10px] font-label-caps">Items</span>
+</a>
+</nav>
+<!-- FAB (Contextual) -->
+<button class="fixed bottom-20 md:bottom-10 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-[0_0_20px_rgba(233,193,118,0.5)] flex items-center justify-center active:scale-90 transition-transform z-50">
+<span class="material-symbols-outlined text-3xl">auto_fix_high</span>
+</button>
+</body></html>

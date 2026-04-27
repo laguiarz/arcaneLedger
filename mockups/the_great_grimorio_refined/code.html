@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Arcanist's Ledger - Spellbook</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "surface": "#16130e",
+                    "primary-container": "#c5a059",
+                    "surface-variant": "#38342e",
+                    "secondary-fixed": "#dae2ff",
+                    "outline-variant": "#4e4639",
+                    "primary-fixed": "#ffdea5",
+                    "primary-fixed-dim": "#e9c176",
+                    "inverse-primary": "#775a19",
+                    "surface-container-high": "#2d2924",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#d8e2ff",
+                    "on-tertiary": "#173059",
+                    "on-secondary": "#23304e",
+                    "tertiary-container": "#8fa5d6",
+                    "on-tertiary-container": "#233a65",
+                    "inverse-on-surface": "#34302a",
+                    "inverse-surface": "#e9e1d8",
+                    "surface-dim": "#16130e",
+                    "tertiary-fixed-dim": "#b0c6f9",
+                    "on-secondary-fixed-variant": "#3a4666",
+                    "surface-container": "#231f1a",
+                    "surface-container-lowest": "#110e09",
+                    "on-surface": "#e9e1d8",
+                    "on-primary-fixed-variant": "#5d4201",
+                    "outline": "#9a8f80",
+                    "surface-tint": "#e9c176",
+                    "surface-bright": "#3d3933",
+                    "on-primary": "#412d00",
+                    "on-secondary-fixed": "#0d1a38",
+                    "on-secondary-container": "#a8b4da",
+                    "background": "#16130e",
+                    "on-primary-container": "#4e3700",
+                    "primary": "#e9c176",
+                    "secondary-fixed-dim": "#bac6ec",
+                    "on-tertiary-fixed": "#001a41",
+                    "tertiary": "#b0c6f9",
+                    "error": "#ffb4ab",
+                    "secondary": "#bac6ec",
+                    "on-surface-variant": "#d1c5b4",
+                    "secondary-container": "#3a4666",
+                    "on-primary-fixed": "#261900",
+                    "surface-container-low": "#1e1b16",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed-variant": "#304671",
+                    "surface-container-highest": "#38342e",
+                    "on-background": "#e9e1d8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "lg": "40px",
+                    "container-padding": "32px",
+                    "md": "24px",
+                    "xl": "64px",
+                    "sm": "16px",
+                    "unit": "4px",
+                    "xs": "8px"
+            },
+            "fontFamily": {
+                    "title-sm": ["Newsreader"],
+                    "label-caps": ["Manrope"],
+                    "headline-md": ["Newsreader"],
+                    "body-lg": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "display-lg": ["Newsreader"]
+            },
+            "fontSize": {
+                    "title-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "headline-md": ["32px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background: radial-gradient(circle at top right, #1a1a1a, #16130e);
+            min-height: 100vh;
+        }
+        .brass-edge {
+            box-shadow: 0 0 0 1px #775a19, inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .etched-border {
+            border-top: 2px solid #c5a059;
+            background-image: linear-gradient(180deg, rgba(197, 160, 89, 0.05) 0%, transparent 100%);
+        }
+        .mana-vial-fill {
+            background: linear-gradient(90deg, #2e3a59 0%, #b0c6f9 50%, #2e3a59 100%);
+            box-shadow: 0 0 15px rgba(46, 58, 89, 0.6);
+        }
+        .leather-texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="bg-zinc-900 dark:bg-zinc-900 font-serif text-sm antialiased docked left-0 h-full border-r-2 w-64 border-amber-900/40 shadow-[inset_-10px_0_20px_rgba(0,0,0,0.6)] flex flex-col h-screen py-8 z-30">
+<div class="px-6 mb-10">
+<h1 class="font-serif font-black text-amber-500 text-2xl tracking-widest uppercase">Arcanist</h1>
+<div class="mt-4 flex items-center gap-3">
+<img alt="Arcanist Portrait" class="w-12 h-12 rounded-full border border-primary-container object-cover" data-alt="Close-up portrait of an elderly wizard with a silver beard and glowing blue eyes in a dark library setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1S_M4XvvynV9TH7zwcFLjJODJgJNIiHjRBSoSYGVfJiS2L-C5BoU-PwYEuDp8938pQzvXgRGRIYWnw-Sgimt8CWGau53HiEuBVUaWZmM6kXhrbl7J5IRczGrQLVkmgB2tMDF_I7DCjt9iiu1I-uE5c2mTyg98P_pl6ypQm2cwLO3mXuMVlAy1BqXLS21MDKXXQTLARFwqbfmgSZd1ShuRm5M9E-encqzxABd-EE-FDkZ-55cPKFwUMsoaTHezOQ1AU2ENYJETlR4"/>
+<div>
+<p class="font-title-sm text-primary block">Master Arcanist</p>
+<p class="text-xs text-zinc-500 uppercase tracking-tighter">Level 42 Wizard</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200 cursor-pointer active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-zinc-800 text-amber-400 border-l-4 border-amber-500 shadow-[0_0_15px_rgba(46,58,89,0.4)] cursor-pointer active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span>Spellbook</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200 cursor-pointer active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="shield">shield</span>
+<span>Attributes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 hover:shadow-inner transition-all duration-200 cursor-pointer active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="backpack">backpack</span>
+<span>Inventory</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full py-3 bg-primary-container text-on-primary-container font-label-caps rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(197,160,89,0.3)]">
+                    Transmute
+                </button>
+<div class="mt-6 border-t border-amber-900/20 pt-4">
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-zinc-300 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-y-auto">
+<!-- TopAppBar -->
+<header class="bg-zinc-950 dark:bg-zinc-950 text-amber-500 font-serif tracking-tight docked full-width top-0 border-b-2 border-amber-700/30 shadow-[0_4px_20px_rgba(0,0,0,0.8)] shadow-inner shadow-black/50 flex justify-between items-center w-full px-6 py-4 h-16 sticky z-20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500" data-icon="auto_stories">auto_stories</span>
+<span class="text-xl font-bold font-serif tracking-widest text-amber-500 uppercase">Arcanist's Ledger</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:text-amber-300 transition-colors duration-300 active:scale-95" data-icon="favorite">favorite</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-amber-300 transition-colors duration-300 active:scale-95" data-icon="bolt">bolt</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-amber-300 transition-colors duration-300 active:scale-95" data-icon="savings">savings</span>
+</div>
+</div>
+</header>
+<div class="p-container-padding max-w-7xl mx-auto w-full space-y-lg">
+<!-- Spell Slot Management Section -->
+<section>
+<div class="flex items-center justify-between mb-sm">
+<h2 class="font-headline-md text-headline-md text-primary">Spell Slot Reservoirs</h2>
+<span class="font-label-caps text-outline text-xs">Aetheric Stability: 94%</span>
+</div>
+<div class="flex flex-wrap gap-md">
+<!-- Slot Group Lvl 1 -->
+<div class="bg-surface-container border border-amber-900/30 p-sm rounded-xl min-w-[180px] relative overflow-hidden">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex justify-between items-end mb-xs">
+<span class="font-label-caps text-primary text-xs">Level I</span>
+<span class="font-title-sm text-sm text-on-surface">3 / 4</span>
+</div>
+<div class="flex gap-2 mb-sm">
+<div class="w-4 h-8 brass-edge bg-amber-500 rounded-sm"></div>
+<div class="w-4 h-8 brass-edge bg-amber-500 rounded-sm shadow-[0_0_8px_#c5a059]"></div>
+<div class="w-4 h-8 brass-edge bg-amber-500 rounded-sm"></div>
+<div class="w-4 h-8 brass-edge bg-surface-container-highest border border-amber-900/50 rounded-sm"></div>
+</div>
+<div class="h-1 w-full bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full w-3/4 mana-vial-fill"></div>
+</div>
+</div>
+<!-- Slot Group Lvl 2 -->
+<div class="bg-surface-container border border-amber-900/30 p-sm rounded-xl min-w-[180px] relative overflow-hidden">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex justify-between items-end mb-xs">
+<span class="font-label-caps text-primary text-xs">Level II</span>
+<span class="font-title-sm text-sm text-on-surface">1 / 3</span>
+</div>
+<div class="flex gap-2 mb-sm">
+<div class="w-4 h-8 brass-edge bg-amber-500 rounded-sm shadow-[0_0_8px_#c5a059]"></div>
+<div class="w-4 h-8 brass-edge bg-surface-container-highest border border-amber-900/50 rounded-sm"></div>
+<div class="w-4 h-8 brass-edge bg-surface-container-highest border border-amber-900/50 rounded-sm"></div>
+</div>
+<div class="h-1 w-full bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full w-1/3 mana-vial-fill"></div>
+</div>
+</div>
+<!-- Slot Group Lvl 3 -->
+<div class="bg-surface-container border border-amber-900/30 p-sm rounded-xl min-w-[180px] relative overflow-hidden">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex justify-between items-end mb-xs">
+<span class="font-label-caps text-primary text-xs">Level III</span>
+<span class="font-title-sm text-sm text-on-surface">2 / 2</span>
+</div>
+<div class="flex gap-2 mb-sm">
+<div class="w-4 h-8 brass-edge bg-amber-500 rounded-sm shadow-[0_0_8px_#c5a059]"></div>
+<div class="w-4 h-8 brass-edge bg-amber-500 rounded-sm shadow-[0_0_8px_#c5a059]"></div>
+</div>
+<div class="h-1 w-full bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full w-full mana-vial-fill"></div>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
+<!-- Prepared Spells List -->
+<div class="lg:col-span-8 space-y-md">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="star">star</span>
+<h2 class="font-headline-md text-headline-md text-primary">Prepared Incantations</h2>
+</div>
+<div class="space-y-sm">
+<!-- Spell Card: Fireball -->
+<div class="group relative bg-surface-container-high border border-amber-900/20 rounded-xl overflow-hidden etched-border p-md hover:translate-x-1 transition-transform duration-300">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex justify-between items-start mb-sm">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container text-[10px] font-label-caps rounded-full">Evocation</span>
+<span class="font-label-caps text-outline text-[10px]">Level 3</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-primary group-hover:text-amber-300 transition-colors">Fireball</h3>
+</div>
+<button class="p-2 brass-edge bg-primary-container text-on-primary-container rounded-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-sm mb-md">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Casting Time</span>
+<span class="text-xs text-on-surface">1 Action</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Range</span>
+<span class="text-xs text-on-surface">150 Feet</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Damage</span>
+<span class="text-xs text-tertiary">8d6 Fire</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-2 italic">A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame.</p>
+</div>
+<!-- Spell Card: Misty Step -->
+<div class="group relative bg-surface-container-high border border-amber-900/20 rounded-xl overflow-hidden etched-border p-md hover:translate-x-1 transition-transform duration-300">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex justify-between items-start mb-sm">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-[10px] font-label-caps rounded-full">Conjuration</span>
+<span class="font-label-caps text-outline text-[10px]">Level 2</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-primary group-hover:text-amber-300 transition-colors">Misty Step</h3>
+</div>
+<button class="p-2 brass-edge bg-primary-container text-on-primary-container rounded-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="auto_fix_high">auto_fix_high</span>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-sm mb-md">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Casting Time</span>
+<span class="text-xs text-on-surface">Bonus Action</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Range</span>
+<span class="text-xs text-on-surface">Self</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Teleport</span>
+<span class="text-xs text-tertiary">30 Feet</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant italic">Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see.</p>
+</div>
+<!-- Spell Card: Shield -->
+<div class="group relative bg-surface-container-high border border-amber-900/20 rounded-xl overflow-hidden etched-border p-md hover:translate-x-1 transition-transform duration-300">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex justify-between items-start mb-sm">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-label-caps rounded-full">Abjuration</span>
+<span class="font-label-caps text-outline text-[10px]">Level 1</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-primary group-hover:text-amber-300 transition-colors">Shield</h3>
+</div>
+<button class="p-2 brass-edge bg-primary-container text-on-primary-container rounded-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="shield_with_heart">shield_with_heart</span>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-sm mb-md">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Casting Time</span>
+<span class="text-xs text-on-surface">Reaction</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Range</span>
+<span class="text-xs text-on-surface">Self</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps text-outline uppercase">Defense</span>
+<span class="text-xs text-tertiary">+5 AC</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant italic">An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC.</p>
+</div>
+</div>
+</div>
+<!-- Rituals Side Panel -->
+<aside class="lg:col-span-4 bg-surface-container-lowest border border-amber-900/40 rounded-xl p-md shadow-2xl relative">
+<div class="leather-texture absolute inset-0"></div>
+<div class="flex items-center gap-3 mb-md pb-xs border-b border-amber-900/20">
+<span class="material-symbols-outlined text-amber-500" data-icon="history_edu">history_edu</span>
+<h2 class="font-title-sm text-primary uppercase tracking-widest text-sm">Ritual Archive</h2>
+</div>
+<div class="space-y-sm">
+<div class="p-sm bg-surface-container rounded-lg border-l-2 border-amber-500 group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-label-caps text-primary">Identify</span>
+<span class="text-[10px] text-outline italic">11 min</span>
+</div>
+<p class="text-[11px] text-zinc-500 leading-tight">Discern the properties of a magical object or creature through intense focus.</p>
+</div>
+<div class="p-sm bg-surface-container rounded-lg border-l-2 border-zinc-700 group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-label-caps text-on-surface-variant">Detect Magic</span>
+<span class="text-[10px] text-outline italic">10 min</span>
+</div>
+<p class="text-[11px] text-zinc-600 leading-tight">Sense the presence of magic within 30 feet of you.</p>
+</div>
+<div class="p-sm bg-surface-container rounded-lg border-l-2 border-zinc-700 group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-label-caps text-on-surface-variant">Comprehend Lang.</span>
+<span class="text-[10px] text-outline italic">10 min</span>
+</div>
+<p class="text-[11px] text-zinc-600 leading-tight">Understand the literal meaning of any spoken or written language.</p>
+</div>
+</div>
+<div class="mt-xl">
+<img alt="Grimoire Detail" class="w-full rounded-lg brass-edge opacity-60 mb-sm" data-alt="An ancient open spellbook with weathered parchment pages and complex arcane diagrams drawn in shimmering gold ink" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRnnhg2B-Q-0B4rY46OAu47Qtgt_nLeeKrHsUVPeBVOzUTQMg-yJepI10KtqIUdWjjOQcrzN6izpFkzF7GI_1DblOpWtagpC5c1rANIMsUFISMRuaACioGBJtqZKgbb6MufqQ-8IZzzMS8BmoRDOGUQ3ZX5XLHoC55u3YMCd_0Hw949j4Ml7jrLPv3WOkbN6DHTW6ogx13CC6txsMGQHCJFCwYcwQtKwJ3thb9L_xe7cXefhS-lvaurRC6UvC4hMeJ4TnrTNSDPsY"/>
+<div class="text-center">
+<span class="font-label-caps text-[10px] text-amber-900/60 block mb-2 uppercase">Arcane Transcription In Progress</span>
+<div class="flex justify-center gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-amber-900/40"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_5px_#c5a059]"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-amber-900/40"></div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Button: Contextual for adding spells -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-[0_4px_25px_rgba(0,0,0,0.5)] flex items-center justify-center hover:scale-110 active:scale-90 transition-all border-2 border-amber-400/50 z-50">
+<span class="material-symbols-outlined text-3xl" data-icon="add_circle">add_circle</span>
+</button>
+</body></html>
