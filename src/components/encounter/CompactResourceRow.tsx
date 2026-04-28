@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useCharacter } from "@/store/character";
 import type { RechargeType, Resource } from "@/types/character";
 import Icon from "../ui/Icon";
+import { useInspire } from "../InspireModal";
 
 const RECHARGE_LABEL: Record<RechargeType, string> = {
   long: "LR",
@@ -14,6 +15,7 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
   const useResource = useCharacter((s) => s.useResource);
   const refund = useCharacter((s) => s.refundResource);
   const [open, setOpen] = useState(false);
+  const inspire = useInspire(resource.inspirePhraseDeck);
 
   const remaining = resource.max - resource.used;
   const isCounter = resource.max > 0;
@@ -33,6 +35,17 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
         >
           <span className="font-serif text-sm text-on-surface truncate block">{resource.name}</span>
         </button>
+
+        {inspire.enabled && (
+          <button
+            onClick={inspire.draw}
+            className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-md border bg-tertiary/10 border-tertiary/40 text-tertiary hover:bg-tertiary/25 transition"
+            aria-label="Inspirar — frase para tu compañero"
+            title="Inspirar — frase para tu compañero"
+          >
+            <Icon name="auto_awesome" size={16} filled />
+          </button>
+        )}
 
         {isCounter ? (
           <>
@@ -88,6 +101,8 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
           )}
         </div>
       )}
+
+      {inspire.modal}
     </div>
   );
 }

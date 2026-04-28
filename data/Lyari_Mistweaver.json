@@ -1,0 +1,404 @@
+{
+  "name": "Lyari Mistweaver",
+  "className": "Wizard",
+  "subclass": "Illusionist",
+  "level": 5,
+  "proficiencyBonus": 3,
+  "abilities": {
+    "str": 6,
+    "dex": 15,
+    "con": 10,
+    "int": 16,
+    "wis": 10,
+    "cha": 10
+  },
+  "savingThrowProficiencies": [
+    "int",
+    "wis"
+  ],
+  "hp": {
+    "max": 26,
+    "current": 26,
+    "temp": 0
+  },
+  "hitDice": {
+    "die": 6,
+    "max": 5,
+    "spent": 0
+  },
+  "speed": 30,
+  "spellcastingAbility": "int",
+  "spellSlotsMax": {
+    "1": 4,
+    "2": 3,
+    "3": 2
+  },
+  "spellSlots": {
+    "1": 2,
+    "2": 3,
+    "3": 2
+  },
+  "cantrips": [
+    {
+      "name": "Dancing Lights",
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "120 + 60 feet",
+      "components": "V, S, M (a bit of phosphorus)",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "You create up to four torch-size lights within range, making them appear as torches, lanterns, or glowing orbs that hover for the duration. Alternatively, you combine the four lights into one glowing Medium form that is vaguely humanlike. Whichever form you choose, each light sheds Dim Light in a 10-foot radius.\n\tAs a Bonus Action, you can move the lights up to 60 feet to a space within range. A light must be within 20 feet of another light created by this spell, and a light vanishes if it exceeds the spell's range.\n\nSource: Player's Handbook 2024 p. 259",
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Elementalism",
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "desc": "You exert control over the elements, creating one of the following effects within range.\n\tBeckon Air. You create a breeze strong enough to ripple cloth, stir dust, rustle leaves, and close open doors and shutters, all in a 5-foot Cube. Doors and shutters being held open by someone or something aren't affected.\n\tBeckon Earth. You create a thin shroud of dust or sand that covers surfaces in a 5-foot-square area, or you cause a single word to appear in your handwriting in a patch of dirt or sand.\n\tBeckon Fire. You create a thin cloud of harmless embers and colored, scented smoke in a 5-foot Cube. You choose the color and scent, and the embers can light candles, torches, or lamps in that area. The smoke's scent lingers for 1 minute.\n\tBeckon Water. You create a spray of cool mist that lightly dampens creatures and objects in a 5-foot Cube. Alternatively, you create 1 cup of clean water either in an open container or on a surface, and the water evaporates in 1 minute.\n\tSculpt Element. You cause dirt, sand, fire, smoke, mist, or water that can fit in a 1-foot Cube to assume a crude shape (such as that of a creature) for 1 hour.\n\nSource: Player's Handbook 2024 p. 267",
+      "source": "class"
+    },
+    {
+      "name": "Mage Hand",
+      "school": "Conjuration",
+      "source": "feat",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "(none — Telekinetic)",
+      "duration": "1 minute",
+      "desc": "A spectral, floating hand appears at a point you choose within range. The hand can manipulate objects, open unlocked doors/containers, retrieve or stow items (≤10 lb), or pour contents out of a vial. As a Bonus Action, you move the hand up to 30 ft. The hand vanishes if it's ever more than its max distance from you or after 1 minute.\n\nTelekinetic feat enhancements: cast without Verbal or Somatic components; you can make the hand Invisible; range and the max distance from you are both increased by 30 ft (60 ft each). Spellcasting ability: Intelligence."
+    },
+    {
+      "name": "Mending",
+      "school": "Transmutation",
+      "castingTime": "1 minute",
+      "range": "Touch",
+      "components": "V, S, M (two lodestones)",
+      "duration": "Instantaneous",
+      "desc": "This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage.\n\tThis spell can physically repair a magic item, but it can't restore magic to such an object.\n\nSource: Player's Handbook 2024 p. 297",
+      "source": "class"
+    },
+    {
+      "name": "Message",
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "S, M (a copper wire)",
+      "duration": "1 round",
+      "desc": "You point toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear.\n\tYou can cast this spell through solid objects if you are familiar with the target and know it is beyond the barrier. Magical silence; 1 foot of stone, metal, or wood; or a thin sheet of lead blocks the spell.\n\nSource: Player's Handbook 2024 p. 298",
+      "source": "class"
+    },
+    {
+      "name": "Minor Illusion",
+      "school": "Illusion",
+      "castingTime": "Bonus Action",
+      "range": "30 + 60 feet",
+      "components": "S, M (a bit of fleece)",
+      "duration": "1 minute",
+      "desc": "You create a sound or an image of an object within range that lasts for the duration. See the descriptions below for the effects of each. The illusion ends if you cast this spell again.\n\tIf a creature takes a Study action to examine the sound or image, the creature can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the illusion becomes faint to the creature.\n\tSound. If you create a sound, its volume can range from a whisper to a scream. It can be your voice, someone else's voice, a lion's roar, a beating of drums, or any other sound you choose. The sound continues unabated throughout the duration, or you can make discrete sounds at different times before the spell ends.\n\tImage. If you create an image of an object—such as a chair, muddy footprints, or a small chest—it must be no larger than a 5-foot Cube. The image can't create sound, light, smell, or any other sensory effect. Physical interaction with the image reveals it to be an illusion, since things can pass through it.\n\nSource: Player's Handbook 2024 p. 298\n\nImproved Illusions (Illusionist L3): a single casting creates both a sound AND an image; cast as a Bonus Action.",
+      "source": "subclass"
+    },
+    {
+      "name": "Prestidigitation",
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "10 feet",
+      "components": "V, S",
+      "duration": "1 hour",
+      "desc": "You create a magical effect within range. Choose the effect from the options below. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time.\n\tSensory Effect. You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.\n\tFire Play. You instantaneously light or snuff out a candle, a torch, or a small campfire.\n\tClean or Soil. You instantaneously clean or soil an object no larger than 1 cubic foot.\n\tMinor Sensation. You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.\n\tMagic Mark. You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.\n\tMinor Creation. You create a nonmagical trinket or an illusory image that can fit in your hand. It lasts until the end of your next turn. A trinket can deal no damage and has no monetary worth.\n\nSource: Player's Handbook 2024 p. 307",
+      "source": "race"
+    }
+  ],
+  "spellbook": [
+    {
+      "name": "Color Spray",
+      "level": 1,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "15 + 60 feet",
+      "components": "V, S, M (a pinch of colorful sand)",
+      "duration": "Instantaneous",
+      "desc": "You launch a dazzling array of flashing, colorful light. Each creature in a 15-foot Cone originating from you must succeed on a Constitution saving throw or have the Blinded condition until the end of your next turn.\n\nSource: Player's Handbook 2024 p. 251",
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Disguise Self",
+      "level": 1,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "1 hour",
+      "desc": "You make yourself—including your clothing, armor, weapons, and other belongings on your person—look different until the spell ends. You can seem 1 foot shorter or taller and can appear heavier or lighter. You must adopt a form that has the same basic arrangement of limbs as you have. Otherwise, the extent of the illusion is up to you.\n\tThe changes wrought by this spell fail to hold up to physical inspection. For example, if you use this spell to add a hat to your outfit, objects pass through the hat, and anyone who touches it would feel nothing.\n\tTo discern that you are disguised, a creature must take the Study action to inspect your appearance and succeed on an Intelligence (Investigation) check against your spell save DC.\n\nSource: Player's Handbook 2024 p. 262",
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Expeditious Retreat",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minute",
+      "desc": "You take the Dash action, and until the spell ends, you can take that action again as a Bonus Action.\n\nSource: Player's Handbook 2024 p. 270",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Feather Fall",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "1 reaction, which you take when you or a creature you can see within 60 feet of you falls",
+      "range": "60 feet",
+      "components": "V, M (a small feather or piece of down)",
+      "duration": "1 minute",
+      "desc": "Choose up to five falling creatures within range. A falling creature's rate of descent slows to 60 feet per round until the spell ends. If a creature lands before the spell ends, the creature takes no damage from the fall, and the spell ends for that creature.\n\nSource: Player's Handbook 2024 p. 271",
+      "source": "class"
+    },
+    {
+      "name": "Illusory Script",
+      "level": 1,
+      "school": "Illusion",
+      "castingTime": "1 minute",
+      "range": "Touch",
+      "components": "S, M (ink worth 10+ GP, which the spell consumes)",
+      "duration": "10 day",
+      "desc": "You write on parchment, paper, or another suitable material and imbue it with an illusion that lasts for the duration. To you and any creatures you designate when you cast the spell, the writing appears normal, seems to be written in your hand, and conveys whatever meaning you intended when you wrote the text. To all others, the writing appears as if it were written in an unknown or magical script that is unintelligible. Alternatively, the illusion can alter the meaning, handwriting, and language of the text, though the language must be one you know.\n\tIf the spell is dispelled, the original script and the illusion both disappear.\n\tA creature that has Truesight can read the hidden message.\n\nSource: Player's Handbook 2024 p. 288",
+      "ritual": true,
+      "source": "class"
+    },
+    {
+      "name": "Jump",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "Bonus Action",
+      "range": "Touch",
+      "components": "V, S, M (a grasshopper's hind leg)",
+      "duration": "1 minute",
+      "desc": "You touch a willing creature. Once on each of its turns until the spell ends, that creature can jump up to 30 feet by spending 10 feet of movement.\n\tUsing a Higher-Level Spell Slot. You can target one additional creature for each spell slot level above 1.\n\nSource: Player's Handbook 2024 p. 290",
+      "source": "class"
+    },
+    {
+      "name": "Silent Image",
+      "level": 1,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "60 + 60 feet",
+      "components": "V, S, M (a bit of fleece)",
+      "duration": "Concentration, up to 10 minute",
+      "desc": "You create the image of an object, a creature, or some other visible phenomenon that is no larger than a 15-foot Cube. The image appears at a spot within range and lasts for the duration. The image is purely visual; it isn't accompanied by sound, smell, or other sensory effects.\n\tAs a Magic action, you can cause the image to move to any spot within range. As the image changes location, you can alter its appearance so that its movements appear natural for the image. For example, if you create an image of a creature and move it, you can alter the image so that it appears to be walking.\n\tPhysical interaction with the image reveals it to be an illusion, since things can pass through it. A creature that takes a Study action to examine the image can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the creature can see through the image.\n\nSource: Player's Handbook 2024 p. 317",
+      "concentration": true,
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Alter Self",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "desc": "You alter your physical form. Choose one of the following options. Its effects last for the duration, during which you can take a Magic action to replace the option you chose with a different one.\n\tAquatic Adaptation. You sprout gills and grow webs between your fingers. You can breathe underwater and gain a Swim Speed equal to your Speed.\n\tChange Appearance. You alter your appearance. You decide what you look like, including your height, weight, facial features, sound of your voice, hair length, coloration, and other distinguishing characteristics. You can make yourself appear as a member of another species, though none of your statistics change. You can't appear as a creature of a different size, and your basic shape stays the same; if you're bipedal, you can't use this spell to become quadrupedal, for instance. For the duration, you can take a Magic action to change your appearance in this way again.\n\tNatural Weapons. You grow claws (Slashing), fangs (Piercing), horns (Piercing), or hooves (Bludgeoning). When you use your Unarmed Strike to deal damage with that new growth, it deals 1d6 damage of the type in parentheses instead of dealing the normal damage for your Unarmed Strike, and you use your spellcasting ability modifier for the attack and damage rolls rather than using Strength.\n\nSource: Player's Handbook 2024 p. 239",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Enlarge/Reduce",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a pinch of powdered iron)",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "For the duration, the spell enlarges or reduces a creature or an object you can see within range (see the chosen effect below). A targeted object must be neither worn nor carried. If the target is an unwilling creature, it can make a Constitution saving throw. On a successful save, the spell has no effect.\n\tEverything that a targeted creature is wearing and carrying changes size with it. Any item it drops returns to normal size at once. A thrown weapon or piece of ammunition returns to normal size immediately after it hits or misses a target.\n\tEnlarge. The target's size increases by one category—from Medium to Large, for example. The target also has Advantage on Strength checks and Strength saving throws. The target's attacks with its enlarged weapons or Unarmed Strikes deal an extra 1d4 damage on a hit.\n\tReduce. The target's size decreases by one category—from Medium to Small, for example. The target also has Disadvantage on Strength checks and Strength saving throws. The target's attacks with its reduced weapons or Unarmed Strikes deal 1d4 less damage on a hit (this can't reduce the damage below 1).\n\nSource: Player's Handbook 2024 p. 268",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Invisibility",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (an eyelash in gum arabic)",
+      "duration": "Concentration, up to 1 hour",
+      "desc": "A creature you touch has the Invisible condition until the spell ends. The spell ends early immediately after the target makes an attack roll, deals damage, or casts a spell.\n\tUsing a Higher-Level Spell Slot. You can target one additional creature for each spell slot level above 2.\n\nSource: Player's Handbook 2024 p. 289",
+      "concentration": true,
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Mirror Image",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "1 minute",
+      "desc": "Three illusory duplicates of yourself appear in your space. Until the spell ends, the duplicates move with you and mimic your actions, shifting position so it's impossible to track which image is real.\n\tEach time a creature hits you with an attack roll during the spell's duration, roll a d6 for each of your remaining duplicates. If any of the d6s rolls a 3 or higher, one of the duplicates is hit instead of you, and the duplicate is destroyed. The duplicates otherwise ignore all other damage and effects. The spell ends when all three duplicates are destroyed.\n\tA creature is unaffected by this spell if it has the Blinded condition, Blindsight, or Truesight.\n\nSource: Player's Handbook 2024 p. 299",
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Phantasmal Force",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "60 + 60 feet",
+      "components": "V, S, M (a bit of fleece)",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "You attempt to craft an illusion in the mind of a creature you can see within range. The target makes an Intelligence saving throw. On a failed save, you create a phantasmal object, creature, or other phenomenon that is no larger than a 10-foot Cube and that is perceivable only to the target for the duration. The phantasm includes sound, temperature, and other stimuli.\n\tThe target can take a Study action to examine the phantasm with an Intelligence (Investigation) check against your spell save DC. If the check succeeds, the target realizes that the phantasm is an illusion, and the spell ends.\n\tWhile affected by the spell, the target treats the phantasm as if it were real and rationalizes any illogical outcomes from interacting with it. For example, if the target steps through a phantasmal bridge and survives the fall, it believes the bridge exists and something else caused it to fall.\n\tAn affected target can even take damage from the illusion if the phantasm represents a dangerous creature or hazard. On each of your turns, such a phantasm can deal 2d8 Psychic damage to the target if it is in the phantasm's area or within 5 feet of the phantasm. The target perceives the damage as a type appropriate to the illusion.\n\nSource: Player's Handbook 2024 p. 304",
+      "concentration": true,
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    },
+    {
+      "name": "Rope Trick",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a segment of rope)",
+      "duration": "1 hour",
+      "desc": "You touch a rope. One end of it hovers upward until the rope hangs perpendicular to the ground or the rope reaches a ceiling. At the rope's upper end, an Invisible 3-foot-by-5-foot portal opens to an extradimensional space that lasts until the spell ends. That space can be reached by climbing the rope, which can be pulled into or dropped out of it.\n\tThe space can hold up to eight Medium or smaller creatures. Attacks, spells, and other effects can't pass into or out of the space, but creatures inside it can see through the portal. Anything inside the space drops out when the spell ends.\n\nSource: Player's Handbook 2024 p. 312",
+      "source": "class"
+    },
+    {
+      "name": "Haste",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a shaving of licorice root)",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "Choose a willing creature that you can see within range. Until the spell ends, the target's Speed is doubled, it gains a +2 bonus to Armor Class, it has Advantage on Dexterity saving throws, and it gains an additional action on each of its turns. That action can be used to take only the Attack (one attack only), Dash, Disengage, Hide, or Utilize action.\n\tWhen the spell ends, the target is Incapacitated and has a Speed of 0 until the end of its next turn, as a wave of lethargy washes over it.\n\nSource: Player's Handbook 2024 p. 284",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Hypnotic Pattern",
+      "level": 3,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "120 + 60 feet",
+      "components": "S, M (a pinch of confetti)",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "You create a twisting pattern of colors in a 30-foot Cube within range. The pattern appears for a moment and vanishes. Each creature in the area who can see the pattern must succeed on a Wisdom saving throw or have the Charmed condition for the duration. While Charmed, the creature has the Incapacitated condition and a Speed of 0.\n\tThe spell ends for an affected creature if it takes any damage or if someone else uses an action to shake the creature out of its stupor.\n\nSource: Player's Handbook 2024 p. 287",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Phantom Steed",
+      "level": 3,
+      "school": "Illusion",
+      "castingTime": "1 minute",
+      "range": "30 + 60 feet",
+      "components": "V, S",
+      "duration": "1 hour",
+      "desc": "A Large, quasi-real, horselike creature appears on the ground in an unoccupied space of your choice within range. You decide the creature's appearance, and it is equipped with a saddle, bit, and bridle. Any of the equipment created by the spell vanishes in a puff of smoke if it is carried more than 10 feet away from the steed.\n\tFor the duration, you or a creature you choose can ride the steed. The steed uses the Riding Horse stat block, except it has a Speed of 100 feet and can travel 13 miles in an hour. When the spell ends, the steed gradually fades, giving the rider 1 minute to dismount. The spell ends early if the steed takes any damage.\n\nSource: Player's Handbook 2024 p. 304",
+      "ritual": true,
+      "source": "class",
+      "componentsStripped": [
+        "V"
+      ]
+    }
+  ],
+  "innateSpells": [
+    {
+      "name": "Detect Magic",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minute",
+      "desc": "For the duration, you sense the presence of magical effects within 30 feet of yourself. If you sense such effects, you can take the Magic action to see a faint aura around any visible creature or object in the area that bears the magic, and if an effect was created by a spell, you learn the spell's the Player's Handbook 2024.\n\tThe spell is blocked by 1 foot of stone, dirt, or wood; 1 inch of metal; or a thin sheet of lead.\n\nSource: Player's Handbook 2024 p. 262",
+      "ritual": true,
+      "concentration": true,
+      "source": "race",
+      "freeCastsPerLongRest": 1
+    },
+    {
+      "name": "Misty Step",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see.\n\nSource: Player's Handbook 2024 p. 299",
+      "source": "race",
+      "freeCastsPerLongRest": 1
+    }
+  ],
+  "preparedSpells": [
+    "Alter Self",
+    "Color Spray",
+    "Disguise Self",
+    "Feather Fall",
+    "Haste",
+    "Hypnotic Pattern",
+    "Phantasmal Force",
+    "Rope Trick",
+    "Silent Image"
+  ],
+  "racialFreeCastsUsed": {},
+  "resources": [
+    {
+      "name": "Arcane Recovery",
+      "source": "Class feature",
+      "max": 1,
+      "used": 0,
+      "recharge": "long"
+    },
+    {
+      "name": "Telekinetic Shove",
+      "source": "Feat: Telekinetic",
+      "desc": "Bonus Action. Telekinetically shove one creature you can see within 30 ft. Target makes a Strength saving throw (DC 14 = 8 + Intelligence mod + PB); on a fail, it's moved 5 ft toward or away from you. At-will, no daily limit.",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual"
+    },
+    {
+      "name": "Improved Illusions",
+      "source": "Subclass: Illusionist",
+      "desc": "Passive (Illusionist L3): Illusion spells lose their Verbal component and gain +60 ft of range when their range is 10 ft or more. You always know Minor Illusion (doesn't count against cantrips known); a single casting of Minor Illusion creates both sound AND an image, and it's cast as a Bonus Action.",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual"
+    },
+    {
+      "name": "Bardic Inspiration (DM variant)",
+      "source": "Special: Adventure (DM)",
+      "desc": "Bonus Action. Choose another creature within 60 ft that can see or hear you; they gain a Bardic Inspiration die (d6). Once within the next hour, when the target fails a D20 Test (ability check, attack roll, or saving throw), they can roll the die and add the number rolled to the d20 — potentially turning the failure into a success.\n\nUses per Long Rest = Intelligence modifier (min 1) — DM variant. RAW (PHB 2024 Bard L1) uses Charisma modifier instead.\n\nDie size scales with bard level (d6 / d8 at L5 / d10 at L10 / d12 at L15). Lyari has no bard levels, so the base d6 applies unless the DM rules otherwise.\n\nSource: Player's Handbook 2024 — Bard L1 (DM-modified to scale off Intelligence per adventure ruling).",
+      "max": 3,
+      "used": 0,
+      "recharge": "long",
+      "inspirePhraseDeck": "lyari"
+    }
+  ],
+  "conditions": {
+    "active": [],
+    "exhaustion": 0
+  },
+  "concentration": null
+}

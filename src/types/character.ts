@@ -67,6 +67,12 @@ export interface Resource {
   max: number;
   used: number;
   recharge: RechargeType;
+  /**
+   * If set, the resource shows a sparkle button that draws from the named
+   * inspire-phrase deck (see src/data/inspirePhrases.ts). Phrases rotate
+   * without repeating until the deck is exhausted.
+   */
+  inspirePhraseDeck?: string;
 }
 
 export type ConditionId =

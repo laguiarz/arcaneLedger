@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useCharacter } from "@/store/character";
 import type { RechargeType, Resource } from "@/types/character";
 import Icon from "../ui/Icon";
+import { useInspire } from "../InspireModal";
 
 const RECHARGE_LABEL: Record<RechargeType, string> = {
   long: "Long Rest",
@@ -40,6 +41,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
   const refund = useCharacter((s) => s.refundResource);
   const setUsed = useCharacter((s) => s.setResource);
   const [open, setOpen] = useState(false);
+  const inspire = useInspire(resource.inspirePhraseDeck);
 
   const remaining = resource.max - resource.used;
   const isCounter = resource.max > 0;
@@ -61,6 +63,17 @@ function ResourceCard({ resource }: { resource: Resource }) {
                 <Icon name="schedule" size={11} className="mr-1" />
                 {RECHARGE_LABEL[resource.recharge]}
               </span>
+              {inspire.enabled && (
+                <button
+                  onClick={inspire.draw}
+                  className="chip border border-tertiary/40 bg-tertiary/10 text-tertiary hover:bg-tertiary/20 transition cursor-pointer"
+                  aria-label="Inspirar — frase para tu compañero"
+                  title="Inspirar — frase para tu compañero"
+                >
+                  <Icon name="auto_awesome" size={11} className="mr-1" filled />
+                  Inspirar
+                </button>
+              )}
             </div>
             {resource.desc && (
               <button
@@ -127,6 +140,8 @@ function ResourceCard({ resource }: { resource: Resource }) {
           </p>
         )}
       </div>
+
+      {inspire.modal}
     </div>
   );
 }
