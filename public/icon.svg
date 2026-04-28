@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e9c176"/>
+      <stop offset="55%" stop-color="#c5a059"/>
+      <stop offset="100%" stop-color="#7a5618"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="0%" r="90%">
+      <stop offset="0%" stop-color="#2e3a59" stop-opacity="0.45"/>
+      <stop offset="55%" stop-color="#2e3a59" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#110e09"/>
+  <rect width="512" height="512" rx="96" fill="url(#glow)"/>
+  <polygon points="256,84 408,172 408,340 256,428 104,340 104,172"
+           fill="none" stroke="url(#brass)" stroke-width="6" opacity="0.55"/>
+  <g fill="none" stroke="url(#brass)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 152 376 L 256 136 L 360 376"/>
+    <path d="M 196 286 L 316 286"/>
+  </g>
+</svg>
