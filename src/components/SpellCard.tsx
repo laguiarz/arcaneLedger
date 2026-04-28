@@ -138,17 +138,33 @@ export default function SpellCard({ spell, ritualMode = false, showPrepareToggle
         <SpellMeta spell={spell} />
 
         {spell.desc && (
-          <p
-            className={`text-sm text-on-surface-variant italic mt-2 ${
-              open ? "" : "line-clamp-2"
-            }`}
-          >
-            {spell.desc}
-          </p>
+          <>
+            <p
+              className={`text-sm text-on-surface-variant italic mt-2 whitespace-pre-line ${
+                open ? "" : "line-clamp-3"
+              }`}
+            >
+              {spell.desc}
+            </p>
+            {isLongDesc(spell.desc) && (
+              <button
+                type="button"
+                onClick={() => setOpen((o) => !o)}
+                className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:text-primary-fixed transition"
+              >
+                <Icon name={open ? "expand_less" : "expand_more"} size={14} />
+                {open ? "Ver menos" : "Ver más"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
   );
+}
+
+function isLongDesc(desc: string): boolean {
+  return desc.length > 120 || desc.includes("\n");
 }
 
 function CastButton({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
