@@ -12,6 +12,14 @@ import { sampleWizard } from "@/data/sampleWizard";
 
 interface CharacterState {
   character: Character;
+  /**
+   * Identifies where the active character came from. `null` means the user has
+   * never picked from the library or imported anything in this profile — used
+   * to trigger the first-run picker. `"sample"` = sample wizard fallback.
+   * `"custom"` = imported via Settings (JSON/XML, no library origin).
+   * Otherwise = `id` from the library manifest.
+   */
+  activeCharacterId: string | null;
 
   // HP
   takeDamage: (amount: number) => void;
@@ -53,7 +61,10 @@ interface CharacterState {
   arcaneRecovery: (slotsByLevel: Partial<Record<SpellLevel, number>>) => void;
 
   // Persistence
-  loadCharacter: (c: Character) => void;
+  loadCharacter: (
+    c: Character,
+    opts?: { sourceId?: string | null },
+  ) => void;
   resetToSample: () => void;
   exportJson: () => string;
 }
@@ -64,6 +75,7 @@ export const useCharacter = create<CharacterState>()(
   persist(
     (set, get) => ({
       character: sampleWizard,
+      activeCharacterId: null,
 
       takeDamage: (amount) =>
         set((s) => {
@@ -340,7 +352,7 @@ export const useCharacter = create<CharacterState>()(
           };
         }),
 
-      loadCharacter: (c) =>
+      loadCharacter: (c, opts) =>
         set({
           character: {
             ...c,
@@ -349,14 +361,20 @@ export const useCharacter = create<CharacterState>()(
             racialFreeCastsUsed: c.racialFreeCastsUsed ?? {},
             hitDice: c.hitDice ?? { die: 8, max: c.level, spent: 0 },
           },
+          // Default to "custom" when the caller didn't tell us where the
+          // character came from (e.g. Settings file import).
+          activeCharacterId:
+            opts && "sourceId" in opts ? opts.sourceId ?? null : "custom",
         }),
-      resetToSample: () => set({ character: sampleWizard }),
+      resetToSample: () =>
+        set({ character: sampleWizard, activeCharacterId: "sample" }),
       exportJson: () => JSON.stringify(get().character, null, 2),
     }),
     {
       name: "arcanist-ledger:character",
-      // v3: added hitDice. Old saves are dropped to force a re-import.
-      version: 3,
+      // v4: added activeCharacterId for the cloud character library.
+      // Old saves are dropped so users see the first-run picker.
+      version: 4,
     },
   ),
 );

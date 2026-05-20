@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useCharacter } from "@/store/character";
 import Icon from "./ui/Icon";
 import RestMenu from "./RestMenu";
+import FirstRunPicker from "./library/FirstRunPicker";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: "auto_awesome_motion" },
@@ -15,6 +16,7 @@ const SIDEBAR_PREF_KEY = "al.sidebar.expanded";
 
 export default function AppShell() {
   const c = useCharacter((s) => s.character);
+  const activeCharacterId = useCharacter((s) => s.activeCharacterId);
   const [restOpen, setRestOpen] = useState(false);
   const [expanded, setExpanded] = useState<boolean>(() => {
     const stored = typeof window !== "undefined" ? window.localStorage.getItem(SIDEBAR_PREF_KEY) : null;
@@ -203,6 +205,7 @@ export default function AppShell() {
       </div>
 
       <RestMenu open={restOpen} onClose={() => setRestOpen(false)} />
+      {activeCharacterId === null && <FirstRunPicker />}
     </div>
   );
 }

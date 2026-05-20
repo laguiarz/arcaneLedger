@@ -3,6 +3,7 @@ import { useCharacter } from "@/store/character";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Icon from "@/components/ui/Icon";
 import { parseFightClubXml } from "@/lib/importFightClubXml";
+import LibraryPicker from "@/components/library/LibraryPicker";
 
 export default function Settings() {
   const character = useCharacter((s) => s.character);
@@ -65,8 +66,20 @@ export default function Settings() {
       <SectionHeader
         icon="settings"
         title="Settings"
-        subtitle="Import, export, or reset the character"
+        subtitle="Switch characters, import, export, or reset"
       />
+
+      <section className="bg-surface-container border border-amber-900/30 rounded-xl p-md relative overflow-hidden">
+        <div className="leather-noise absolute inset-0" />
+        <div className="relative">
+          <h3 className="font-serif text-title-sm text-primary mb-sm">Library</h3>
+          <p className="text-sm text-on-surface-variant mb-sm">
+            Switch to any character published to the cloud library.
+            Loading replaces the current session state.
+          </p>
+          <LibraryPicker variant="compact" />
+        </div>
+      </section>
 
       <section className="bg-surface-container border border-amber-900/30 rounded-xl p-md relative overflow-hidden">
         <div className="leather-noise absolute inset-0" />
