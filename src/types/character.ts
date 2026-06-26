@@ -123,6 +123,32 @@ export interface HitDice {
 
 export type AbilityScores = Record<Ability, number>;
 
+export type SkillName =
+  | "athletics" // STR
+  | "acrobatics"
+  | "sleightOfHand"
+  | "stealth" // DEX
+  | "arcana"
+  | "history"
+  | "investigation"
+  | "nature"
+  | "religion" // INT
+  | "animalHandling"
+  | "insight"
+  | "medicine"
+  | "perception"
+  | "survival" // WIS
+  | "deception"
+  | "intimidation"
+  | "performance"
+  | "persuasion"; // CHA
+
+export interface SkillProficiency {
+  proficient?: boolean;
+  /** Expertise implies proficient and adds 2× proficiency bonus. */
+  expertise?: boolean;
+}
+
 export interface Character {
   name: string;
   className: string; // "Wizard"
@@ -158,6 +184,13 @@ export interface Character {
   resources: Resource[];
   conditions: ConditionsState;
   concentration?: ConcentrationState | null;
+
+  /**
+   * Per-skill proficiency/expertise. Optional and additive — missing entries
+   * are treated as not proficient (base ability modifier only). Authored in
+   * curated library JSON; not parsed from Fight Club XML imports.
+   */
+  skills?: Partial<Record<SkillName, SkillProficiency>>;
 
   notes?: string;
 }

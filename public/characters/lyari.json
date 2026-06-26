@@ -400,5 +400,12 @@
     "active": [],
     "exhaustion": 0
   },
-  "concentration": null
+  "concentration": null,
+  "skills": {
+    "investigation": { "proficient": true },
+    "persuasion": { "proficient": true },
+    "arcana": { "proficient": true, "expertise": true },
+    "history": { "proficient": true },
+    "perception": { "proficient": true }
+  }
 }

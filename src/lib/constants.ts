@@ -1,4 +1,4 @@
-import type { ConditionId, SpellLevel, SpellSchool } from "@/types/character";
+import type { Ability, ConditionId, SkillName, SpellLevel, SpellSchool } from "@/types/character";
 
 export const CONDITIONS: { id: ConditionId; label: string; icon: string; desc: string }[] = [
   { id: "blinded", label: "Blinded", icon: "visibility_off", desc: "Auto-fail sight checks. Disadvantage on attacks; advantage against." },
@@ -52,3 +52,29 @@ export function abilityLabel(a: string): string {
 export function abilityShort(a: string): string {
   return a.toUpperCase();
 }
+
+/**
+ * The 18 D&D 2024 skills in official PHB order — grouped by governing ability
+ * (STR → DEX → INT → WIS → CHA), alphabetical within each ability. This array
+ * is the single source of truth for the skill→ability map and display order.
+ */
+export const SKILLS_IN_ORDER: { name: SkillName; ability: Ability; label: string }[] = [
+  { name: "athletics", ability: "str", label: "Athletics" },
+  { name: "acrobatics", ability: "dex", label: "Acrobatics" },
+  { name: "sleightOfHand", ability: "dex", label: "Sleight of Hand" },
+  { name: "stealth", ability: "dex", label: "Stealth" },
+  { name: "arcana", ability: "int", label: "Arcana" },
+  { name: "history", ability: "int", label: "History" },
+  { name: "investigation", ability: "int", label: "Investigation" },
+  { name: "nature", ability: "int", label: "Nature" },
+  { name: "religion", ability: "int", label: "Religion" },
+  { name: "animalHandling", ability: "wis", label: "Animal Handling" },
+  { name: "insight", ability: "wis", label: "Insight" },
+  { name: "medicine", ability: "wis", label: "Medicine" },
+  { name: "perception", ability: "wis", label: "Perception" },
+  { name: "survival", ability: "wis", label: "Survival" },
+  { name: "deception", ability: "cha", label: "Deception" },
+  { name: "intimidation", ability: "cha", label: "Intimidation" },
+  { name: "performance", ability: "cha", label: "Performance" },
+  { name: "persuasion", ability: "cha", label: "Persuasion" },
+];
