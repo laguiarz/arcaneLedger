@@ -80,9 +80,20 @@ export default {
           "0%": { opacity: "0", transform: "translateY(4px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "die-tumble": {
+          "0%": { transform: "rotate(0deg) scale(0.92)" },
+          "100%": { transform: "rotate(360deg) scale(1)" },
+        },
+        "die-settle": {
+          "0%": { transform: "scale(1.25)" },
+          "60%": { transform: "scale(0.92)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 180ms ease-out",
+        "die-tumble": "die-tumble 250ms linear infinite",
+        "die-settle": "die-settle 320ms ease-out",
       },
     },
   },
