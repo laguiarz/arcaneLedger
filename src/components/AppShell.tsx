@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: "auto_awesome_motion" },
   { to: "/encounter", label: "Encounter", icon: "swords" },
   { to: "/spellbook", label: "Spellbook", icon: "menu_book" },
+  { to: "/skills", label: "Skills", icon: "checklist" },
   { to: "/settings", label: "Settings", icon: "settings" },
 ];
 
