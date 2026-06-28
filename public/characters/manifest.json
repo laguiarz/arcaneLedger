@@ -6,6 +6,12 @@
       "name": "Lyari Mistweaver",
       "className": "Wizard (Illusionist)",
       "level": 5
+    },
+    {
+      "id": "brunella",
+      "name": "Brunella",
+      "className": "Bard (Lore)",
+      "level": 5
     }
   ]
 }
