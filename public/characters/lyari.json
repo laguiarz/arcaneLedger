@@ -403,6 +403,7 @@
     "exhaustion": 0
   },
   "concentration": null,
+  "party": ["Dunkelzan", "Lynala", "Kael", "Valeris", "Armathor"],
   "skills": {
     "investigation": { "proficient": true },
     "persuasion": { "proficient": true },

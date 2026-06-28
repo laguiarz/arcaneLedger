@@ -196,6 +196,14 @@ export interface Character {
   concentration?: ConcentrationState | null;
 
   /**
+   * Names of the other party members this character adventures with. Stored on
+   * the sheet (the simple option for now) so the Combat tracker can preload the
+   * whole group's initiative rows. Just names today; some day this becomes a
+   * proper party assembled from a character roster.
+   */
+  party?: string[];
+
+  /**
    * Per-skill proficiency/expertise. Optional and additive — missing entries
    * are treated as not proficient (base ability modifier only). Authored in
    * curated library JSON; not parsed from Fight Club XML imports.
