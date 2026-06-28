@@ -54,7 +54,9 @@ export default function NarrationModal({
     setApiKeyDraft(getApiKey());
     setModelDraft(getModel());
     setPromptDraft(getPrompt());
-    setShowSettings(!getApiKey());
+    // Settings stay collapsed by default — production needs no client key
+    // (the /api/narrate proxy holds it). Open them on demand for model/prompt.
+    setShowSettings(false);
   }, [open]);
 
   // Abort any in-flight request if the modal closes.
@@ -73,13 +75,6 @@ export default function NarrationModal({
 
   const generate = async () => {
     persistSettings();
-    const apiKey = apiKeyDraft.trim();
-    if (!apiKey) {
-      setShowSettings(true);
-      setError("Add your Gemini API key first.");
-      setPhase("error");
-      return;
-    }
     setPhase("loading");
     setError(null);
     const controller = new AbortController();
@@ -91,7 +86,8 @@ export default function NarrationModal({
         activeName,
       );
       const result = await generateNarration({
-        apiKey,
+        // Optional: only used if the proxy is absent (local dev fallback).
+        apiKey: apiKeyDraft.trim() || undefined,
         model: modelDraft.trim() || DEFAULT_MODEL,
         systemPrompt: promptDraft.trim() || getPrompt(),
         userContent,
@@ -139,13 +135,13 @@ export default function NarrationModal({
             <div className="flex flex-wrap gap-sm">
               <label className="flex flex-col gap-1 flex-1 min-w-[14rem]">
                 <span className="label-caps text-outline text-[10px]">
-                  Gemini API key
+                  Gemini API key (local dev only)
                 </span>
                 <input
                   type="password"
                   value={apiKeyDraft}
                   onChange={(e) => setApiKeyDraft(e.target.value)}
-                  placeholder="sk-..."
+                  placeholder="AIza… — not needed in production (server proxy)"
                   className="input-inset w-full font-mono text-xs"
                 />
               </label>
@@ -183,7 +179,7 @@ export default function NarrationModal({
                 <Icon name="refresh" /> Reset prompt
               </button>
               <span className="text-[10px] text-outline italic ml-auto">
-                Key stored locally in this browser.
+                In production the key stays server-side; this field is for local dev.
               </span>
             </div>
           </div>
