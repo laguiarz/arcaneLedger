@@ -217,6 +217,7 @@ export const sampleWizard: Character = {
       max: 7,
       used: 0,
       recharge: "dawn",
+      actionType: "action",
     },
     {
       name: "Lucky",
