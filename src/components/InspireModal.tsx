@@ -3,7 +3,7 @@ import Modal from "./ui/Modal";
 import Icon from "./ui/Icon";
 import { useCharacter } from "@/store/character";
 import { nextInspirePhrases } from "@/lib/inspirePhraseRotation";
-import type { InspireTag } from "@/data/inspirePhrases";
+import type { InspirePhrase, InspireTag } from "@/data/inspirePhrases";
 
 type Count = 1 | 5;
 
@@ -16,7 +16,7 @@ export function useInspire(deckName: string | undefined) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<InspireTag>("combat");
   const [count, setCount] = useState<Count>(1);
-  const [phrases, setPhrases] = useState<string[]>([]);
+  const [phrases, setPhrases] = useState<InspirePhrase[]>([]);
   const speakerName = useCharacter((s) => s.character.name.split(" ")[0]);
 
   const drawWith = (nextTag: InspireTag, nextCount: Count) => {
@@ -49,7 +49,7 @@ export function useInspire(deckName: string | undefined) {
           <div className={count === 1 ? "" : "space-y-2.5 max-h-[50vh] overflow-y-auto pr-1"}>
             {phrases.map((p, i) => (
               <blockquote
-                key={`${p}-${i}`}
+                key={`${p.text}-${i}`}
                 className={
                   count === 1
                     ? "font-serif text-on-surface text-lg leading-relaxed italic text-balance"
@@ -61,8 +61,13 @@ export function useInspire(deckName: string | undefined) {
                 )}
                 <span>
                   <span className="text-tertiary mr-1">“</span>
-                  {p}
+                  {p.text}
                   <span className="text-tertiary ml-1">”</span>
+                  {p.lore && (
+                    <span className="block mt-1 not-italic text-outline text-xs leading-snug">
+                      ({p.lore})
+                    </span>
+                  )}
                 </span>
               </blockquote>
             ))}

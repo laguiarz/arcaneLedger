@@ -19,6 +19,9 @@ export type InspireTag = "combat" | "task";
 export interface InspirePhrase {
   text: string;
   tags: InspireTag[];
+  /** Optional Forgotten Realms lore that inspired the phrase. Shown small,
+   *  in parentheses, so a curious player can ask Brunella "contame más". */
+  lore?: string;
 }
 
 const BOTH: InspireTag[] = ["combat", "task"];
@@ -136,59 +139,314 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
     { text: "Al que intenta enredarte / lo desarmás sin despeinarte.", tags: TASK },
     { text: "El que dijo que no podías / se come todas sus teorías.", tags: BOTH },
   ],
-  // Brunella — High Elf erudita, acólita y calígrafa. Habla en aforismos sobre
-  // crónicas, tinta, archivos, historia y fe; ingeniosa y cálida, con la
-  // serenidad de quien ya leyó cómo terminan mil leyendas.
+  // Brunella — High Elf bardo del Colegio del Saber. Canta a Myth Drannor, la
+  // "Ciudad del Canto", y a la historia élfica de Cormanthyr: aforismos y versos
+  // (la barra / marca el verso) con la serenidad de quien ya cantó mil gestas.
   brunella: [
-    { text: "Cada gesta empieza siendo una nota al margen. Escribí la tuya.", tags: BOTH },
-    { text: "He leído mil crónicas de héroes; ninguno se sentía héroe el día que lo fue.", tags: BOTH },
-    { text: "La historia no recuerda a los que dudaron. Avanzá.", tags: BOTH },
-    { text: "Hay una palabra exacta para este instante, y es: ahora.", tags: BOTH },
-    { text: "Los archivos están llenos de imposibles que alguien, terco, volvió ciertos.", tags: BOTH },
-    { text: "El miedo es apenas una nota al pie. El texto principal lo escribís vos.", tags: BOTH },
-    { text: "Conozco el final de muchas leyendas. La tuya todavía la estás dictando.", tags: BOTH },
-    { text: "Un buen golpe vale por tres tratados.", tags: COMBAT },
-    { text: "Que la crónica de hoy se escriba con la tinta del enemigo.", tags: COMBAT },
-    { text: "Respirá: hasta los santos firmaban con el pulso temblando.", tags: BOTH },
-    { text: "El conocimiento pesa, pero también sostiene. Apoyate en lo que sabés.", tags: TASK },
-    { text: "Detalle por detalle se desarma cualquier cerradura del mundo.", tags: TASK },
-    { text: "Que no te tiemble la mano: la posteridad copia con prolijidad lo que hoy hagas bien.", tags: TASK },
-    { text: "Ningún manuscrito que valga la pena se escribió sin mancharse los dedos.", tags: BOTH },
-    { text: "Acordate: el dragón también figura en la crónica… del lado de los vencidos.", tags: COMBAT },
-    { text: "Sé de bibliotecas enteras dedicadas a un solo instante de coraje. Dame el tuyo.", tags: BOTH },
-    { text: "Lo que no sabés lo improvisás con elegancia. Es casi lo mismo, y a veces mejor.", tags: TASK },
-    { text: "Las grandes verdades se dijeron en voz baja y firme. Así, justo así.", tags: BOTH },
-    { text: "Toda nota al pie sueña con ser título. Hoy te toca el título.", tags: BOTH },
-    { text: "He catalogado peores augurios que éste, y siguen sin cumplirse. Adelante.", tags: COMBAT },
     // Lote musical / élfico — la "Ciudad del Canto", Myth Drannor: rimas y
     // referencias a la historia élfica (el mythal, los Cantaespadas, el Coronal
     // Eltargrim y la Apertura, la Guerra de las Lágrimas, el capitán Fflar, la
     // Srinshee, Cormanthyr, el Retiro a Evermeet). La barra (/) marca el verso.
-    { text: "En la Ciudad del Canto la guerra se libraba en clave: / cada estocada una nota, cada nota algo grave.", tags: COMBAT },
-    { text: "Como Cantaespadas de Cormanthyr: / la hoja es el verso y el verso, el porvenir.", tags: COMBAT },
-    { text: "Fflar sostuvo la línea hasta el último compás. / Sostené la tuya: la balada hace el resto, y más.", tags: COMBAT },
-    { text: "Que tu defensa sea un mythal: trama de luz que ningún mal traspasa.", tags: COMBAT },
-    { text: "En la Guerra de las Lágrimas no triunfó el temor, / sino quien cantó con la espada en alto. Cantá, jugador.", tags: COMBAT },
-    { text: "Caé, si hay que caer, como cayó Myth Drannor: / tan alto que aún hoy se la nombra con honor.", tags: COMBAT },
-    { text: "Bladesinger no separa la danza de la batalla. / Que tu acto sea las dos, y que nada te falla.", tags: COMBAT },
-    { text: "Canta-espada, paso liviano: / la fortuna sigue a quien va ufano.", tags: COMBAT },
-    { text: "La Srinshee esperó el momento sin perder la calma. / Esperá el tuyo: la paciencia también es un arma.", tags: TASK },
-    { text: "El mythal se tejió hilo por hilo, sin apuro. / Tejé tu obra igual: paso firme, pulso seguro.", tags: TASK },
-    { text: "En la Corte Élfica pesaba cada palabra dicha. / Elegí bien la tuya y se abre cualquier rendija.", tags: TASK },
-    { text: "Los N'Vaelahr cuidaban la ciudad desde la sombra. / Sé esa vigilia fina que protege y no se nombra.", tags: TASK },
-    { text: "Afiná el alma como afinaban el mythal: / un solo tono falso y se cae el portal. No falles.", tags: TASK },
-    { text: "Un verso bien puesto desarma más que un ejército entero. Probalo.", tags: TASK },
-    { text: "Eltargrim abrió la ciudad y nació una era. / Abrí vos esta puerta; el mundo entero espera.", tags: BOTH },
-    { text: "Myth Drannor ardió, pero su canción no: / lo que de veras se canta nunca se apagó.", tags: BOTH },
-    { text: "Los elfos zarparon a Evermeet y el bosque siguió en flor. / Aun en la pérdida hay música. Seguí, cantor.", tags: BOTH },
-    { text: "Toda gesta élfica empezó con un verso a media voz. / Decí el tuyo, y que retumbe veloz.", tags: BOTH },
-    { text: "Si el mythal te abriga el corazón, / no hay sombra que silencie tu canción.", tags: BOTH },
-    { text: "De Cormanthyr al alba que vendrá, / tu nombre en la balada quedará.", tags: BOTH },
-    { text: "Hubo lágrimas, y aun así floreció. / Florecé vos también: la larga noche pasó.", tags: BOTH },
-    { text: "Cada coronal pasó, y la corona siguió cantando sola. / Lo que importa sobrevive a quien lo porta. Va la ola.", tags: BOTH },
-    { text: "La belleza de Myth Drannor no estaba en sus torres / sino en que se atrevió. Atrevete y no te borres.", tags: BOTH },
-    { text: "Lo que Netheril derribó, la memoria lo volvió a levantar. Levantate igual.", tags: BOTH },
-    { text: "Donde hubo una Ciudad del Canto puede haber otra. Empezá a cantar.", tags: BOTH },
+    {
+      text: "En la Ciudad del Canto la guerra se libraba en clave: / cada estocada una nota, cada nota algo grave.",
+      tags: COMBAT,
+      lore: "Myth Drannor era llamada la Ciudad del Canto; sus Cantaespadas fundían música, magia y esgrima.",
+    },
+    {
+      text: "Como Cantaespadas de Cormanthyr: / la hoja es el verso y el verso, el porvenir.",
+      tags: COMBAT,
+      lore: "Los Cantaespadas (bladesingers) élficos unían danza, hechicería y espada en un solo arte marcial.",
+    },
+    {
+      text: "Fflar sostuvo la línea hasta el último compás. / Sostené la tuya: la balada hace el resto, y más.",
+      tags: COMBAT,
+      lore: "El capitán Fflar Starbrow Melruth lideró la defensa de Myth Drannor en la Guerra de las Lágrimas.",
+    },
+    {
+      text: "Que tu defensa sea un mythal: trama de luz que ningún mal traspasa.",
+      tags: COMBAT,
+      lore: "El mythal era el escudo mágico que envolvía Myth Drannor, tejido por sus archimagos.",
+    },
+    {
+      text: "En la Guerra de las Lágrimas no triunfó el temor, / sino quien cantó con la espada en alto. Cantá, jugador.",
+      tags: COMBAT,
+      lore: "La Guerra de las Lágrimas (711–714 DR) fue la caída de Myth Drannor ante el Ejército de la Oscuridad.",
+    },
+    {
+      text: "Caé, si hay que caer, como cayó Myth Drannor: / tan alto que aún hoy se la nombra con honor.",
+      tags: COMBAT,
+      lore: "Myth Drannor cayó en 714 DR, pero su esplendor la volvió legendaria por milenios.",
+    },
+    {
+      text: "Bladesinger no separa la danza de la batalla. / Que tu acto sea las dos, y que nada te falla.",
+      tags: COMBAT,
+      lore: "El Canto de Espadas élfico no distingue al bailarín del guerrero: son una misma cosa.",
+    },
+    {
+      text: "Canta-espada, paso liviano: / la fortuna sigue a quien va ufano.",
+      tags: COMBAT,
+      lore: "El estilo de los Cantaespadas se apoyaba en el movimiento ágil tanto como en el acero.",
+    },
+    {
+      text: "La Srinshee esperó el momento sin perder la calma. / Esperá el tuyo: la paciencia también es un arma.",
+      tags: TASK,
+      lore: "La Srinshee fue una legendaria maga élfica de Cormanthyr, guardiana de la Corona del Coronal.",
+    },
+    {
+      text: "El mythal se tejió hilo por hilo, sin apuro. / Tejé tu obra igual: paso firme, pulso seguro.",
+      tags: TASK,
+      lore: "Tejer un mythal llevaba años de trabajo mágico coordinado entre muchos archimagos.",
+    },
+    {
+      text: "En la Corte Élfica pesaba cada palabra dicha. / Elegí bien la tuya y se abre cualquier rendija.",
+      tags: TASK,
+      lore: "La corte del Coronal de Cormanthyr regía con ceremonia y diplomacia milenaria.",
+    },
+    {
+      text: "Los N'Vaelahr cuidaban la ciudad desde la sombra. / Sé esa vigilia fina que protege y no se nombra.",
+      tags: TASK,
+      lore: "Los N'Vaelahr eran los agentes secretos de Cormanthyr: espías y guardianes en las sombras.",
+    },
+    {
+      text: "Afiná el alma como afinaban el mythal: / un solo tono falso y se cae el portal. No falles.",
+      tags: TASK,
+      lore: "Sostener un mythal exigía precisión absoluta: un error podía colapsar toda su trama.",
+    },
+    {
+      text: "Un verso bien puesto desarma más que un ejército entero. Probalo.",
+      tags: TASK,
+      lore: "En la Ciudad del Canto la palabra y la música tenían tanto poder como la espada.",
+    },
+    {
+      text: "Eltargrim abrió la ciudad y nació una era. / Abrí vos esta puerta; el mundo entero espera.",
+      tags: BOTH,
+      lore: "El Coronal Eltargrim decretó la Apertura (~261 DR), admitiendo a otras razas en Myth Drannor.",
+    },
+    {
+      text: "Myth Drannor ardió, pero su canción no: / lo que de veras se canta nunca se apagó.",
+      tags: BOTH,
+      lore: "Aun tras su destrucción, el recuerdo y las canciones de Myth Drannor perduraron en Faerûn.",
+    },
+    {
+      text: "Los elfos zarparon a Evermeet y el bosque siguió en flor. / Aun en la pérdida hay música. Seguí, cantor.",
+      tags: BOTH,
+      lore: "En El Retiro, muchos elfos de Faerûn navegaron a la isla de Evermeet, su refugio ancestral.",
+    },
+    {
+      text: "Toda gesta élfica empezó con un verso a media voz. / Decí el tuyo, y que retumbe veloz.",
+      tags: BOTH,
+      lore: "La tradición élfica preservaba sus gestas en canto antes que en piedra o tinta.",
+    },
+    {
+      text: "Si el mythal te abriga el corazón, / no hay sombra que silencie tu canción.",
+      tags: BOTH,
+      lore: "El mythal de Myth Drannor no solo defendía: era símbolo del alma misma de la ciudad.",
+    },
+    {
+      text: "De Cormanthyr al alba que vendrá, / tu nombre en la balada quedará.",
+      tags: BOTH,
+      lore: "Cormanthyr fue el gran imperio élfico del bosque de Cormanthor, con Myth Drannor por joya.",
+    },
+    {
+      text: "Hubo lágrimas, y aun así floreció. / Florecé vos también: la larga noche pasó.",
+      tags: BOTH,
+      lore: "Pese a la devastación de la Guerra de las Lágrimas, la vida élfica del bosque resurgió con el tiempo.",
+    },
+    {
+      text: "Cada coronal pasó, y la corona siguió cantando sola. / Lo que importa sobrevive a quien lo porta. Va la ola.",
+      tags: BOTH,
+      lore: "Cormanthyr fue regido por una sucesión de Coronales, elegidos por la Espada-Corona.",
+    },
+    {
+      text: "La belleza de Myth Drannor no estaba en sus torres / sino en que se atrevió. Atrevete y no te borres.",
+      tags: BOTH,
+      lore: "La grandeza de Myth Drannor nació de atreverse a unir razas y artes nunca antes reunidas.",
+    },
+    {
+      text: "Lo que Netheril derribó, la memoria lo volvió a levantar. Levantate igual.",
+      tags: BOTH,
+      lore: "Netheril fue el legendario imperio de magos humanos; su caída es emblema de toda gloria perdida y recordada.",
+    },
+    {
+      text: "Donde hubo una Ciudad del Canto puede haber otra. Empezá a cantar.",
+      tags: BOTH,
+      lore: "Siglos después de su caída, Myth Drannor fue refundada por los elfos retornados a Cormanthor.",
+    },
+    // Personajes y eventos de la Guerra de las Lágrimas y la caída.
+    {
+      text: "Fflar cruzó el acero con Aulmpiter sin pestañear. / Cruzá vos el tuyo: el miedo no sabe rimar.",
+      tags: COMBAT,
+      lore: "El capitán Fflar cayó en duelo contra Aulmpiter, general nycaloth, en la batalla final por la ciudad.",
+    },
+    {
+      text: "Tres generales de sombra sitiaron la Ciudad del Canto. / La canción no se rindió, y eso pudo tanto.",
+      tags: COMBAT,
+      lore: "Tres generales nycaloth —Aulmpiter, Gaulguth y Malimshaer— comandaron el Ejército de la Oscuridad.",
+    },
+    {
+      text: "Contra el Ejército de la Oscuridad cada elfo valió por cien. / Valé vos por mil: la balada lo escribe bien.",
+      tags: COMBAT,
+      lore: "El Ejército de la Oscuridad fue la horda de demonios y monstruos que asoló Cormanthyr en la Guerra de las Lágrimas.",
+    },
+    {
+      text: "El nigromante alado tardó una guerra entera en caer. / Lo imposible también cae: empujá, que está por ceder.",
+      tags: COMBAT,
+      lore: "Los nycaloth eran demonios alados; vencerlos le costó a Cormanthyr toda la Guerra de las Lágrimas.",
+    },
+    {
+      text: "La Srinshee guardó la corona hasta hallar mano leal. / Esperá tu momento: la paciencia no tiene rival.",
+      tags: TASK,
+      lore: "Al caer la ciudad, la Srinshee reclamó la Espada-Corona y desapareció, hecha leyenda.",
+    },
+    {
+      text: "Aquí Elminster aprendió que la magia es paciencia con chispa. / Respirá, observá, y que la idea justa no se disipa.",
+      tags: TASK,
+      lore: "Elminster Aumar pasó su juventud entre los elfos de Cormanthyr, formándose como mago.",
+    },
+    {
+      text: "Siglos después unos pocos volvieron a las ruinas a soñar. / Donde otros vieron escombros, ellos vieron lugar.",
+      tags: BOTH,
+      lore: "Tras siglos en ruinas, aventureros como los Caballeros de Myth Drannor volvieron a explorarla y liberarla.",
+    },
+    {
+      text: "Cormanthor sigue verde sobre la ciudad dormida. / Lo bello echa raíz aun bajo la herida.",
+      tags: BOTH,
+      lore: "Cormanthor es el vasto bosque que rodeaba Myth Drannor; sobrevivió a la caída de la ciudad.",
+    },
+    // Crónicas de las hojas legendarias — las tres Espadas Élficas de Cormanthyr.
+    {
+      text: "La Espada-Corona no eligió al más fuerte sino al más digno. / Pelea como quien ya fue elegido: sé tu propio signo.",
+      tags: COMBAT,
+      lore: "La Espada-Corona (Crownblade), una de las tres Espadas Élficas, elegía y probaba al Coronal.",
+    },
+    {
+      text: "La Hoja de Guerra cantaba al desenvainar. / Que la tuya también: dale al filo algo que contar.",
+      tags: COMBAT,
+      lore: "La Hoja de Guerra (Warblade) era una de las tres Espadas Élficas de Cormanthyr, ligada a la defensa.",
+    },
+    {
+      text: "La Hoja del Arte no cortaba: revelaba lo bello escondido. / Mirá distinto el problema y verás por dónde ha cedido.",
+      tags: TASK,
+      lore: "La Hoja del Arte (Artblade), tercera de las Espadas Élficas, encarnaba la creación más que la destrucción.",
+    },
+    // Versos de gesta — fragmentos de la balada de la Ciudad del Canto.
+    {
+      text: "Dice la balada: 'cantó el elfo al filo del final, / y el final, por respeto, se hizo menos mortal'. Cantá igual.",
+      tags: BOTH,
+      lore: "Las baladas élficas sobre Myth Drannor cantan tanto su gloria como su caída.",
+    },
+    {
+      text: "La gesta no la hace el que nunca temió, / sino el que tembló, cantó, y aun así no aflojó.",
+      tags: BOTH,
+      lore: "Los héroes de la Ciudad del Canto no eran intrépidos: eran quienes vencían su miedo cantando.",
+    },
+    {
+      text: "Un mythal no se alza en un día ni con una sola voz. / Sumá la tuya al coro: lo demás lo hace el reloj.",
+      tags: BOTH,
+      lore: "Levantar el mythal de Myth Drannor fue obra colectiva de muchos magos a lo largo de años.",
+    },
+    // Ronda con lore — referencias a Cormanthyr y Myth Drannor, con la nota
+    // histórica (entre paréntesis, en letra chica) para el que quiera saber más.
+    {
+      text: "En la Torre del Canto del Viento la magia se estudiaba como música. / Estudiá tu jugada igual: cada gesto, una rúbrica.",
+      tags: TASK,
+      lore: "La Torre del Canto del Viento (Windsong Tower) fue la gran academia de magia de Myth Drannor.",
+    },
+    {
+      text: "Los Akh'Faer entraban en batalla cantando sus conjuros. / Que tu hechizo rime con tu voluntad y no habrá muros.",
+      tags: COMBAT,
+      lore: "Los Akh'Faer eran la hueste de magos de guerra de Cormanthyr; los Akh'Velahr, su ejército regular.",
+    },
+    {
+      text: "En la Piedra Erecta elfos y humanos sellaron su pacto. / Buscá vos también la alianza: la palabra justa es flecha de acto.",
+      tags: TASK,
+      lore: "La Piedra Erecta (Standing Stone) marcó en el Año 1 DR el pacto entre los elfos de Cormanthor y los Dalesmen.",
+    },
+    {
+      text: "Los baelnorn aún velan las tumbas que el mundo olvidó. / Velá tu carga con esa misma fe: lealtad que no expiró.",
+      tags: TASK,
+      lore: "Los baelnorn son liches élficos benévolos que custodian las criptas de Cormanthyr durante siglos.",
+    },
+    {
+      text: "Tras la caída, en el Lugar de la Danza nacieron Los que Tañen el Arpa. / De toda ruina brota un arpa: tañé la tuya, que no se te escapa.",
+      tags: BOTH,
+      lore: "Los Arpistas (Harpers) se fundaron en 720 DR, en el Dancing Place cerca de Myth Drannor, para preservar el saber.",
+    },
+    {
+      text: "Josidiah Starym buscó la Hoja del Arte y halló su propio valor. / Buscá vos el tuyo: el arma despierta al que ya es valedor.",
+      tags: COMBAT,
+      lore: "Josidiah Starym, héroe Cormanthyrano, recuperó la Hoja del Arte (Artblade) en la era fundacional de la ciudad.",
+    },
+    {
+      text: "Los demonios alados volvieron por venganza tras siglos de cadena. / Que el rencor del enemigo sea su grieta, no tu condena.",
+      tags: COMBAT,
+      lore: "Los nycaloth que arrasaron Myth Drannor habían sido encadenados siglos antes y regresaron por venganza.",
+    },
+    {
+      text: "Aquí el enano forjaba junto al elfo cantor. / Lo mejor nace cuando se suman manos de distinto don y color.",
+      tags: BOTH,
+      lore: "Tras la Apertura, enanos, gnomos, humanos y medianos llevaron sus artes a Myth Drannor; su orfebrería fue legendaria.",
+    },
+    {
+      text: "La Espada-Corona probaba el corazón, no el linaje, del que la alzaba. / Mostrá el tuyo sin miedo: lo que sos pesa más que de dónde llegabas.",
+      tags: TASK,
+      lore: "La Espada-Corona (Crownblade) elegía al Coronal probando su alma; el linaje por sí solo no bastaba.",
+    },
+    {
+      text: "Cuando murió Eltargrim, la corona quedó sin frente que ceñir. / Un vacío también es una oportunidad: andá vos a cubrir.",
+      tags: BOTH,
+      lore: "Tras la muerte de Eltargrim (661 DR) la Espada-Corona no eligió sucesor y Cormanthyr quedó debilitado.",
+    },
+    {
+      text: "El mythal dejaba volar al digno y cegaba al que venía a hacer mal. / Aprendé las reglas del lugar y jugalas: el saber es tu mythal.",
+      tags: TASK,
+      lore: "El mythal de Myth Drannor imponía reglas mágicas: permitía volar a algunos y vedaba ciertos conjuros y razas hostiles.",
+    },
+    {
+      text: "Dicen que sus torres crecían como cantadas, no construidas. / Hacé tu obra así: que parezca nacida, no sufrida.",
+      tags: BOTH,
+      lore: "Las torres de Myth Drannor, alzadas con magia élfica, parecían más crecidas que edificadas.",
+    },
+    {
+      text: "Cuando cayó, sellaron la ciudad con su música adentro. / Pelea para que ninguna voz tuya quede presa en el encierro.",
+      tags: COMBAT,
+      lore: "Tras la caída de 714 DR, Myth Drannor quedó sellada y plagada de demonios durante siglos.",
+    },
+    {
+      text: "Toda gran magia de aquí llevaba la bendición de la Dama de los Misterios. / Confiá: hay una mano mayor sosteniendo tus tanteos serios.",
+      tags: TASK,
+      lore: "Los mythals se tejían con la gracia de Mystra (Mystryl), diosa de la magia y patrona de Elminster.",
+    },
+    {
+      text: "La llamaron Guerra de las Lágrimas porque hasta los fuertes lloraron. / Llorá si hay que llorar, pero cantando: así los bravos pelearon.",
+      tags: BOTH,
+      lore: "La Guerra de las Lágrimas (711–714 DR) se llamó así por el duelo inmenso que dejó la caída de la ciudad.",
+    },
+    {
+      text: "No todos zarparon a Evermeet: algunos eligieron quedarse a recordar. / Sé memoria viva: hay un coraje quieto en no olvidar.",
+      tags: BOTH,
+      lore: "Durante El Retiro a Evermeet muchos elfos partieron, pero algunos permanecieron como guardianes del recuerdo.",
+    },
+    {
+      text: "Gaulguth sembró ruina y aun así no quebró el canto de la ciudad. / Que ningún golpe te calle: cantá más fuerte, por verdad.",
+      tags: COMBAT,
+      lore: "Gaulguth fue uno de los tres generales nycaloth del Ejército de la Oscuridad en la Guerra de las Lágrimas.",
+    },
+    {
+      text: "Cada hoja forjada en Myth Drannor guardaba una nota afinada. / Empuñá la tuya como un instrumento: filo y melodía aliada.",
+      tags: COMBAT,
+      lore: "La metalurgia mágica de Myth Drannor, obra de elfos y enanos, producía armas afamadas en todo Faerûn.",
+    },
+    {
+      text: "Mil años después, su nombre todavía hace bajar la voz. / Hacé hoy algo digno de que mañana lo nombren así: veloz y feroz.",
+      tags: BOTH,
+      lore: "Myth Drannor cayó en 714 DR; mil años después su nombre sigue evocando asombro y duelo en Faerûn.",
+    },
+    {
+      text: "El último gran sabio salió de aquí con una sola certeza: seguir aprendiendo. / Salí vos igual de cada golpe: más sabio, no más temiendo.",
+      tags: TASK,
+      lore: "Elminster Aumar vivió entre los elfos de Cormanthyr y consideró a Myth Drannor el hogar de su juventud.",
+    },
   ],
 };
 
