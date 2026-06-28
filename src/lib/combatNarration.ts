@@ -3,16 +3,17 @@
  *
  * Combat state itself is ephemeral, but the narration *configuration* (API key,
  * model, editable prompt) is a setting the user shouldn't have to re-enter each
- * fight, so it lives in localStorage. The key can also come from a build-time
- * env var (`VITE_OPENAI_API_KEY`) for users who prefer a `.env.local`.
+ * fight, so it lives in localStorage. The key can also come from the build-time
+ * `GEMINI_KEY` env var (injected via `vite.config.ts`) so it never has to be
+ * pasted by hand on this machine.
  */
 
-const KEY_API = "al.openai.key";
-const KEY_MODEL = "al.openai.model";
+const KEY_API = "al.gemini.key";
+const KEY_MODEL = "al.gemini.model";
 const KEY_PROMPT = "al.combat.narrationPrompt";
 
-/** Cheapest broadly-available chat model — the "branch barato". */
-export const DEFAULT_MODEL = "gpt-4o-mini";
+/** Cheap, fast, broadly-available Gemini model — the "branch barato". */
+export const DEFAULT_MODEL = "gemini-2.0-flash";
 
 /**
  * Default, fully editable system prompt. Written in Spanish to match Brunella's
@@ -50,8 +51,8 @@ function write(key: string, value: string): void {
 export function getApiKey(): string {
   const stored = read(KEY_API);
   if (stored && stored.trim()) return stored.trim();
-  const env = (import.meta.env as Record<string, string | undefined>)
-    .VITE_OPENAI_API_KEY;
+  // Injected from process.env.GEMINI_KEY at build time (see vite.config.ts).
+  const env = (import.meta.env as ImportMetaEnv).GEMINI_KEY;
   return env?.trim() ?? "";
 }
 

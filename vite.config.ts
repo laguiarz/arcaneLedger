@@ -4,6 +4,11 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 
 export default defineConfig({
+  // Expose the Gemini API key (an OS env var, not VITE_-prefixed) to the client.
+  // Read from process.env at config time so it works in both dev and build.
+  define: {
+    "import.meta.env.GEMINI_KEY": JSON.stringify(process.env.GEMINI_KEY ?? ""),
+  },
   plugins: [
     react(),
     VitePWA({

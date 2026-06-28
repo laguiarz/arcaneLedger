@@ -4,7 +4,7 @@ import type { ConditionId } from "./character";
  * Ephemeral combat-tracker types.
  *
  * Nothing here is persisted — a combat lives only for the duration of the
- * encounter and is wiped on reset. The single exception (the OpenAI narration
+ * encounter and is wiped on reset. The single exception (the Gemini narration
  * config) lives separately in {@link "@/lib/combatNarration"}.
  */
 

@@ -3,7 +3,7 @@ import Modal from "@/components/ui/Modal";
 import Icon from "@/components/ui/Icon";
 import type { Combatant } from "@/types/combat";
 import { buildNarrationPayload } from "@/lib/combatLog";
-import { generateChatCompletion } from "@/lib/openai";
+import { generateNarration } from "@/lib/gemini";
 import {
   DEFAULT_MODEL,
   getApiKey,
@@ -19,7 +19,7 @@ type Phase = "idle" | "loading" | "result" | "error";
 
 /**
  * End-of-combat bardic narration. Builds a transcript from the recorded actions
- * and asks OpenAI (the configured cheap model) to retell it in Brunella's voice.
+ * and asks Gemini (the configured cheap model) to retell it in Brunella's voice.
  * Exposes an editable prompt + key/model settings inline so the player can tune
  * the style without leaving the fight.
  */
@@ -76,7 +76,7 @@ export default function NarrationModal({
     const apiKey = apiKeyDraft.trim();
     if (!apiKey) {
       setShowSettings(true);
-      setError("Add your OpenAI API key first.");
+      setError("Add your Gemini API key first.");
       setPhase("error");
       return;
     }
@@ -90,7 +90,7 @@ export default function NarrationModal({
         totalRounds,
         activeName,
       );
-      const result = await generateChatCompletion({
+      const result = await generateNarration({
         apiKey,
         model: modelDraft.trim() || DEFAULT_MODEL,
         systemPrompt: promptDraft.trim() || getPrompt(),
@@ -139,7 +139,7 @@ export default function NarrationModal({
             <div className="flex flex-wrap gap-sm">
               <label className="flex flex-col gap-1 flex-1 min-w-[14rem]">
                 <span className="label-caps text-outline text-[10px]">
-                  OpenAI API key
+                  Gemini API key
                 </span>
                 <input
                   type="password"
