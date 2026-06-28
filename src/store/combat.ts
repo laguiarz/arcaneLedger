@@ -5,12 +5,7 @@ import type {
   CombatantCondition,
 } from "@/types/combat";
 import type { ConditionId } from "@/types/character";
-import {
-  moveItem,
-  newCombatantId,
-  sortByInitiative,
-  tickConditions,
-} from "@/lib/combat";
+import { moveItem, newCombatantId, sortByInitiative } from "@/lib/combat";
 
 /**
  * Ephemeral combat state. Deliberately NOT wrapped in `persist` — a combat is
@@ -34,6 +29,8 @@ interface CombatState {
 
   addCombatant: (input: NewCombatantInput) => void;
   addCombatants: (inputs: NewCombatantInput[]) => void;
+  /** Populate the table from a roster, but only when it's currently empty. */
+  seed: (inputs: NewCombatantInput[]) => void;
   removeCombatant: (id: string) => void;
   setInitiative: (id: string, value: number | null) => void;
   setHp: (id: string, current: number) => void;
@@ -41,7 +38,11 @@ interface CombatState {
   sort: () => void;
   move: (id: string, dir: -1 | 1) => void;
 
-  toggleCondition: (id: string, condition: ConditionId) => void;
+  toggleCondition: (
+    id: string,
+    condition: ConditionId,
+    fromRound: number,
+  ) => void;
   setConditionRounds: (
     id: string,
     condition: ConditionId,
@@ -91,6 +92,13 @@ export const useCombat = create<CombatState>()((set) => ({
       combatants: [...s.combatants, ...inputs.map(makeCombatant)],
     })),
 
+  seed: (inputs) =>
+    set((s) =>
+      s.combatants.length === 0
+        ? { combatants: inputs.map(makeCombatant) }
+        : {},
+    ),
+
   removeCombatant: (id) =>
     set((s) => ({ combatants: s.combatants.filter((c) => c.id !== id) })),
 
@@ -120,13 +128,13 @@ export const useCombat = create<CombatState>()((set) => ({
       return { combatants: moveItem(s.combatants, idx, dir) };
     }),
 
-  toggleCondition: (id, condition) =>
+  toggleCondition: (id, condition, fromRound) =>
     set((s) => ({
       combatants: patch(s.combatants, id, (c) => {
         const has = c.conditions.some((x) => x.id === condition);
         const conditions: CombatantCondition[] = has
           ? c.conditions.filter((x) => x.id !== condition)
-          : [...c.conditions, { id: condition }];
+          : [...c.conditions, { id: condition, fromRound }];
         return { ...c, conditions };
       }),
     })),
@@ -172,14 +180,9 @@ export const useCombat = create<CombatState>()((set) => ({
       }),
     })),
 
-  nextRound: () =>
-    set((s) => ({
-      round: s.round + 1,
-      combatants: s.combatants.map((c) => ({
-        ...c,
-        conditions: tickConditions(c.conditions),
-      })),
-    })),
+  // Conditions use absolute [fromRound, +rounds) windows, so advancing the round
+  // needs no mutation — they expire by round number on their own.
+  nextRound: () => set((s) => ({ round: s.round + 1 })),
 
   reset: () => set({ combatants: [], round: 1 }),
 }));

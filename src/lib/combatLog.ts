@@ -1,6 +1,10 @@
 import type { Combatant } from "@/types/combat";
 import { CONDITIONS } from "@/lib/constants";
-import { sortByInitiative } from "@/lib/combat";
+import {
+  activeConditionsInRound,
+  isInactive,
+  sortByInitiative,
+} from "@/lib/combat";
 
 const condLabel = (id: string) =>
   CONDITIONS.find((c) => c.id === id)?.label ?? id;
@@ -19,7 +23,8 @@ export function buildNarrationPayload(
   totalRounds: number,
   activeName?: string,
 ): string {
-  const ordered = sortByInitiative(combatants);
+  // Inactive combatants (initiative 0) sat the fight out — leave them out.
+  const ordered = sortByInitiative(combatants).filter((c) => !isInactive(c));
   const lines: string[] = [];
 
   lines.push(`Total rounds: ${Math.max(totalRounds, 1)}`);
@@ -40,23 +45,18 @@ export function buildNarrationPayload(
         return `  - ${c.name}: ${what}`;
       })
       .filter((x): x is string => x !== null);
-    if (entries.length === 0) continue;
-    lines.push("", `Round ${round}:`, ...entries);
-  }
 
-  const withConditions = ordered.filter((c) => c.conditions.length > 0);
-  if (withConditions.length > 0) {
-    lines.push("", "Lingering conditions at the end:");
-    for (const c of withConditions) {
-      const conds = c.conditions
-        .map((cc) =>
-          cc.rounds != null
-            ? `${condLabel(cc.id)} (${cc.rounds}r left)`
-            : condLabel(cc.id),
-        )
-        .join(", ");
-      lines.push(`  - ${c.name}: ${conds}`);
-    }
+    const conds = ordered
+      .map((c) => {
+        const active = activeConditionsInRound(c, round);
+        if (active.length === 0) return null;
+        return `${c.name} is ${active.map((x) => condLabel(x.id)).join(", ")}`;
+      })
+      .filter((x): x is string => x !== null);
+
+    if (entries.length === 0 && conds.length === 0) continue;
+    lines.push("", `Round ${round}:`, ...entries);
+    if (conds.length > 0) lines.push(`  Conditions: ${conds.join("; ")}`);
   }
 
   return lines.join("\n");

@@ -12,9 +12,12 @@ export type CombatantKind = "pc" | "monster";
 
 export interface CombatantCondition {
   id: ConditionId;
+  /** First round (1-based) the condition applies — usually the active round. */
+  fromRound: number;
   /**
-   * Remaining duration in rounds. `undefined` means indefinite — it persists
-   * until removed by hand and is never auto-expired on round advance.
+   * Duration in rounds from `fromRound`. `undefined` means ongoing/indefinite
+   * (applies from `fromRound` onward). A condition is active in round `r` when
+   * `r >= fromRound && (rounds == null || r < fromRound + rounds)`.
    */
   rounds?: number;
 }

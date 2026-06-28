@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import type { Combatant } from "@/types/combat";
 import {
+  activeConditionsInRound,
+  conditionActiveInRound,
+  isInactive,
   moveItem,
   rollInitiative,
   sortByInitiative,
-  tickConditions,
 } from "@/lib/combat";
 
 function c(
@@ -39,6 +41,13 @@ describe("sortByInitiative", () => {
     expect(order.slice(1).sort()).toEqual(["a", "c"]);
   });
 
+  it("sinks inactive combatants (initiative 0) to the bottom", () => {
+    const order = sortByInitiative([c("a", 0), c("b", 12), c("c", 3)]).map(
+      (x) => x.name,
+    );
+    expect(order).toEqual(["b", "c", "a"]);
+  });
+
   it("breaks ties by initiative bonus then name", () => {
     const order = sortByInitiative([
       c("zed", 15, 1),
@@ -55,18 +64,49 @@ describe("sortByInitiative", () => {
   });
 });
 
-describe("tickConditions", () => {
-  it("decrements timed conditions and drops expired ones", () => {
-    const result = tickConditions([
-      { id: "prone", rounds: 2 },
-      { id: "stunned", rounds: 1 },
-    ]);
-    expect(result).toEqual([{ id: "prone", rounds: 1 }]);
+describe("isInactive", () => {
+  it("is true only for initiative 0", () => {
+    expect(isInactive(c("a", 0))).toBe(true);
+    expect(isInactive(c("b", 5))).toBe(false);
+    expect(isInactive(c("c", null))).toBe(false);
+  });
+});
+
+describe("conditionActiveInRound", () => {
+  it("is inactive before fromRound", () => {
+    expect(conditionActiveInRound({ id: "prone", fromRound: 3 }, 2)).toBe(false);
   });
 
-  it("keeps indefinite conditions untouched", () => {
-    const result = tickConditions([{ id: "blinded" }]);
-    expect(result).toEqual([{ id: "blinded" }]);
+  it("covers [fromRound, fromRound + rounds)", () => {
+    const cond = { id: "prone" as const, fromRound: 2, rounds: 2 };
+    expect(conditionActiveInRound(cond, 1)).toBe(false);
+    expect(conditionActiveInRound(cond, 2)).toBe(true);
+    expect(conditionActiveInRound(cond, 3)).toBe(true);
+    expect(conditionActiveInRound(cond, 4)).toBe(false);
+  });
+
+  it("is ongoing from fromRound when rounds is undefined", () => {
+    const cond = { id: "blinded" as const, fromRound: 2 };
+    expect(conditionActiveInRound(cond, 1)).toBe(false);
+    expect(conditionActiveInRound(cond, 99)).toBe(true);
+  });
+});
+
+describe("activeConditionsInRound", () => {
+  it("returns only the conditions live in that round", () => {
+    const combatant = {
+      ...c("Brunella", 18),
+      conditions: [
+        { id: "prone" as const, fromRound: 1, rounds: 1 },
+        { id: "blinded" as const, fromRound: 2 },
+      ],
+    };
+    expect(activeConditionsInRound(combatant, 1).map((x) => x.id)).toEqual([
+      "prone",
+    ]);
+    expect(activeConditionsInRound(combatant, 2).map((x) => x.id)).toEqual([
+      "blinded",
+    ]);
   });
 });
 

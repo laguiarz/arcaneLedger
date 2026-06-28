@@ -2,19 +2,26 @@ import type { Combatant, CombatantCondition } from "@/types/combat";
 
 /**
  * Pure helpers for the combat tracker. Kept side-effect free so the store can
- * compose them and the test-suite can exercise the ordering / duration rules
+ * compose them and the test-suite can exercise the ordering / condition rules
  * without spinning up the React store.
  */
 
+/** Initiative 0 is the convention for "sitting this fight out" / disabled. */
+export function isInactive(c: Combatant): boolean {
+  return c.initiative === 0;
+}
+
 /**
- * Initiative order: highest initiative first. Combatants without an entered
- * initiative (`null`) sink to the bottom. Ties break by initiative bonus
- * (higher dex acts first — RAW-ish) and then alphabetically for stability.
+ * Initiative order: highest initiative first. Inactive combatants (initiative 0)
+ * and those without an entered initiative (`null`) sink to the bottom. Ties
+ * break by initiative bonus (higher dex acts first — RAW-ish) then name.
  */
 export function sortByInitiative(list: Combatant[]): Combatant[] {
+  const eff = (c: Combatant) =>
+    c.initiative == null || c.initiative === 0 ? -Infinity : c.initiative;
   return [...list].sort((a, b) => {
-    const ai = a.initiative ?? -Infinity;
-    const bi = b.initiative ?? -Infinity;
+    const ai = eff(a);
+    const bi = eff(b);
     if (ai !== bi) return bi - ai;
     const ab = a.initiativeBonus ?? 0;
     const bb = b.initiativeBonus ?? 0;
@@ -23,18 +30,22 @@ export function sortByInitiative(list: Combatant[]): Combatant[] {
   });
 }
 
-/**
- * Advance condition durations by one round: decrement every timed condition and
- * drop the ones that hit zero. Indefinite conditions (no `rounds`) are kept.
- */
-export function tickConditions(
-  conditions: CombatantCondition[],
+/** Is a condition active in the given round, per its [fromRound, +rounds) window? */
+export function conditionActiveInRound(
+  c: CombatantCondition,
+  round: number,
+): boolean {
+  if (round < c.fromRound) return false;
+  if (c.rounds == null) return true;
+  return round < c.fromRound + c.rounds;
+}
+
+/** The conditions on a combatant that are active in the given round. */
+export function activeConditionsInRound(
+  combatant: Combatant,
+  round: number,
 ): CombatantCondition[] {
-  return conditions
-    .map((c) =>
-      c.rounds == null ? c : { ...c, rounds: c.rounds - 1 },
-    )
-    .filter((c) => c.rounds == null || c.rounds > 0);
+  return combatant.conditions.filter((c) => conditionActiveInRound(c, round));
 }
 
 /** Move the item at `index` by `dir` (-1 up / +1 down), returning a new array. */

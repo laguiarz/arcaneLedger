@@ -10,10 +10,12 @@ import { useCombat } from "@/store/combat";
  */
 export default function ConditionsModal({
   combatantId,
+  currentRound,
   open,
   onClose,
 }: {
   combatantId: string | null;
+  currentRound: number;
   open: boolean;
   onClose: () => void;
 }) {
@@ -29,7 +31,7 @@ export default function ConditionsModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Conditions — ${combatant.name}`}
+      title={`Conditions — ${combatant.name} (round ${currentRound})`}
       width="max-w-lg"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -45,7 +47,7 @@ export default function ConditionsModal({
               }`}
             >
               <button
-                onClick={() => toggle(combatant.id, cond.id)}
+                onClick={() => toggle(combatant.id, cond.id, currentRound)}
                 title={cond.desc}
                 className={`flex items-center gap-2 flex-1 text-left ${
                   active ? "text-error" : "text-on-surface-variant hover:text-on-surface"
@@ -56,7 +58,9 @@ export default function ConditionsModal({
               </button>
               {active && (
                 <label className="flex items-center gap-1 text-[10px] text-outline shrink-0">
-                  <span className="uppercase tracking-wider">rounds</span>
+                  <span className="uppercase tracking-wider">
+                    R{active.fromRound}+
+                  </span>
                   <input
                     type="number"
                     min={0}
@@ -78,8 +82,9 @@ export default function ConditionsModal({
         })}
       </div>
       <p className="mt-sm text-[11px] text-outline italic">
-        Leave rounds empty for an indefinite condition. Timed conditions count
-        down each time you advance the round.
+        Conditions apply from the current round. Set a duration in rounds, or
+        leave it empty to keep it ongoing. Active rounds are highlighted in the
+        combatant&apos;s row.
       </p>
     </Modal>
   );

@@ -39,7 +39,7 @@ describe("buildNarrationPayload", () => {
     kind: "monster",
     initiative: 9,
     actions: { 1: { acted: true, text: "engulf Lyari" } },
-    conditions: [{ id: "prone", rounds: 2 }],
+    conditions: [{ id: "prone", fromRound: 1, rounds: 2 }],
   });
 
   it("lists combatants in initiative order", () => {
@@ -69,9 +69,21 @@ describe("buildNarrationPayload", () => {
     expect(text).not.toContain("Round 2:");
   });
 
-  it("summarises lingering conditions with remaining duration", () => {
-    const text = buildNarrationPayload([cube], 1);
-    expect(text).toContain("Gelatinous Cube: Prone (2r left)");
+  it("reports conditions active in each round", () => {
+    const text = buildNarrationPayload([cube], 2);
+    // prone applies in rounds 1-2 (fromRound 1, rounds 2)
+    expect(text).toContain("Conditions: Gelatinous Cube is Prone");
+  });
+
+  it("excludes inactive combatants (initiative 0)", () => {
+    const benched = make({
+      name: "Armathor",
+      initiative: 0,
+      actions: { 1: { acted: true, text: "should not appear" } },
+    });
+    const text = buildNarrationPayload([brunella, benched], 1);
+    expect(text).not.toContain("Armathor");
+    expect(text).not.toContain("should not appear");
   });
 
   it("includes the point-of-view character when provided", () => {

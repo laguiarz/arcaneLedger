@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { useCharacter } from "@/store/character";
-import { useCombat } from "@/store/combat";
-import { rollInitiative } from "@/lib/combat";
+import { useEffect, useState } from "react";
+import { abilityMod, useCharacter } from "@/store/character";
+import { useCombat, type NewCombatantInput } from "@/store/combat";
+import {
+  activeConditionsInRound,
+  isInactive,
+  rollInitiative,
+} from "@/lib/combat";
 import { hasNarratableActions } from "@/lib/combatLog";
 import { CONDITIONS } from "@/lib/constants";
-import type { Combatant } from "@/types/combat";
+import type { Combatant, CombatantCondition } from "@/types/combat";
 import Icon from "@/components/ui/Icon";
 import SectionHeader from "@/components/ui/SectionHeader";
 import HpStrip from "@/components/encounter/HpStrip";
@@ -13,8 +17,12 @@ import ConditionsModal from "@/components/combat/ConditionsModal";
 import ActionCellModal from "@/components/combat/ActionCellModal";
 import NarrationModal from "@/components/combat/NarrationModal";
 
+/** How many empty rounds to show ahead of the active one, for condition look-ahead. */
+const ROUNDS_AHEAD = 3;
+
 export default function Combat() {
-  const activeName = useCharacter((s) => s.character.name);
+  const character = useCharacter((s) => s.character);
+  const activeCharacterId = useCharacter((s) => s.activeCharacterId);
   const takeDamage = useCharacter((s) => s.takeDamage);
   const heal = useCharacter((s) => s.heal);
   const setTempHp = useCharacter((s) => s.setTempHp);
@@ -24,6 +32,7 @@ export default function Combat() {
   const sort = useCombat((s) => s.sort);
   const nextRound = useCombat((s) => s.nextRound);
   const reset = useCombat((s) => s.reset);
+  const seed = useCombat((s) => s.seed);
 
   const [conditionsFor, setConditionsFor] = useState<string | null>(null);
   const [actionTarget, setActionTarget] = useState<{
@@ -32,15 +41,34 @@ export default function Combat() {
   } | null>(null);
   const [narrateOpen, setNarrateOpen] = useState(false);
 
-  const rounds = Array.from({ length: round }, (_, i) => i + 1);
-  const canNarrate = hasNarratableActions(combatants);
+  // Preload the party (active character + saved roster) whenever the table is
+  // empty — on first open and after a reset. `seed` is a no-op once populated.
+  const combatantCount = combatants.length;
+  useEffect(() => {
+    if (combatantCount > 0) return;
+    const roster = [character.name, ...(character.party ?? [])];
+    const inputs: NewCombatantInput[] = roster
+      .filter((n) => n.trim())
+      .map((n) => {
+        const isActive = n === character.name;
+        return {
+          name: n,
+          kind: "pc",
+          initiative: null,
+          initiativeBonus: isActive
+            ? character.initiativeBonus ?? abilityMod(character.abilities.dex)
+            : undefined,
+          sourceId: isActive ? activeCharacterId ?? undefined : undefined,
+        };
+      });
+    seed(inputs);
+  }, [combatantCount, character, activeCharacterId, seed]);
 
-  const endCombat = () => {
-    if (combatants.length === 0) return;
-    if (confirm("Reset the combat? All combatants, rounds and actions are wiped.")) {
-      reset();
-    }
-  };
+  const displayRounds = Array.from(
+    { length: round + ROUNDS_AHEAD },
+    (_, i) => i + 1,
+  );
+  const canNarrate = hasNarratableActions(combatants);
 
   return (
     <div className="max-w-7xl mx-auto p-sm md:p-md space-y-sm">
@@ -63,7 +91,7 @@ export default function Combat() {
           <div className="flex items-center gap-2">
             <Icon name="hourglass_top" className="text-primary" filled />
             <span className="font-serif text-title-sm text-primary">Round {round}</span>
-            <span className="text-xs text-outline">· {activeName} active</span>
+            <span className="text-xs text-outline">· {character.name} active</span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <button className="btn-ghost !py-1" onClick={sort} title="Sort by initiative">
@@ -76,11 +104,9 @@ export default function Combat() {
         </div>
       </section>
 
-      <AddCombatantForm />
-
       {combatants.length === 0 ? (
         <p className="text-sm text-outline italic px-2 py-8 text-center">
-          No combatants yet. Load the party or add a monster to begin.
+          Preloading the party…
         </p>
       ) : (
         <div className="bg-surface-container border border-amber-900/30 rounded-lg p-sm overflow-x-auto">
@@ -91,14 +117,19 @@ export default function Combat() {
                 <th className="min-w-[12rem] px-2 py-1 label-caps text-outline text-[10px]">
                   Combatant
                 </th>
-                {rounds.map((r) => (
+                {displayRounds.map((r) => (
                   <th
                     key={r}
                     className={`w-28 px-1 py-1 label-caps text-[10px] text-center ${
-                      r === round ? "text-primary" : "text-outline"
+                      r === round
+                        ? "text-primary"
+                        : r > round
+                          ? "text-outline/50"
+                          : "text-outline"
                     }`}
                   >
                     R{r}
+                    {r > round && <span className="ml-0.5 opacity-60">·</span>}
                   </th>
                 ))}
                 <th className="w-10" />
@@ -111,7 +142,7 @@ export default function Combat() {
                   combatant={c}
                   index={i}
                   count={combatants.length}
-                  rounds={rounds}
+                  rounds={displayRounds}
                   currentRound={round}
                   onEditConditions={() => setConditionsFor(c.id)}
                   onEditAction={(r) => setActionTarget({ combatantId: c.id, round: r })}
@@ -119,11 +150,15 @@ export default function Combat() {
               ))}
             </tbody>
           </table>
+          <p className="text-[11px] text-outline italic mt-2 px-1">
+            Set a combatant&apos;s initiative to <span className="font-mono">0</span> to
+            bench them. Rounds after the active one are shown for condition look-ahead.
+          </p>
         </div>
       )}
 
       {combatants.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pt-sm">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             className="btn-brass"
             onClick={() => setNarrateOpen(true)}
@@ -138,15 +173,27 @@ export default function Combat() {
           </button>
           <button
             className="btn-ghost !text-error !border-error/40 ml-auto"
-            onClick={endCombat}
+            onClick={() => {
+              if (
+                confirm(
+                  "Reset the combat? Rounds and actions are wiped and the party is reloaded.",
+                )
+              ) {
+                reset();
+              }
+            }}
           >
             <Icon name="restart_alt" /> Reset combat
           </button>
         </div>
       )}
 
+      {/* Setup lives at the bottom — touched rarely; the focus is round control. */}
+      <AddCombatantForm />
+
       <ConditionsModal
         combatantId={conditionsFor}
+        currentRound={round}
         open={conditionsFor !== null}
         onClose={() => setConditionsFor(null)}
       />
@@ -156,8 +203,29 @@ export default function Combat() {
         onClose={() => setNarrateOpen(false)}
         combatants={combatants}
         totalRounds={round}
-        activeName={activeName}
+        activeName={character.name}
       />
+    </div>
+  );
+}
+
+/** Small colored markers for the conditions active in a given round cell. */
+function ConditionMarks({ conditions }: { conditions: CombatantCondition[] }) {
+  if (conditions.length === 0) return null;
+  return (
+    <div className="flex flex-wrap justify-center gap-0.5">
+      {conditions.map((cond) => {
+        const meta = CONDITIONS.find((x) => x.id === cond.id);
+        return (
+          <span
+            key={cond.id}
+            title={meta?.label ?? cond.id}
+            className="inline-flex items-center text-tertiary"
+          >
+            <Icon name={meta?.icon ?? "warning"} size={13} filled />
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -184,9 +252,12 @@ function InitiativeRow({
   const move = useCombat((s) => s.move);
   const remove = useCombat((s) => s.removeCombatant);
 
+  const inactive = isInactive(c);
+  const nowConditions = activeConditionsInRound(c, currentRound);
+
   return (
-    <tr className="border-t border-outline-variant/20 align-top">
-      {/* Initiative + roll */}
+    <tr className={`border-t border-outline-variant/20 align-top ${inactive ? "opacity-50" : ""}`}>
+      {/* Initiative + roll (stays interactive even when benched) */}
       <td className="px-1 py-1.5">
         <div className="flex items-center gap-1">
           <input
@@ -198,6 +269,7 @@ function InitiativeRow({
             }
             className="input-inset !py-0.5 !px-1 w-12 text-center font-mono text-sm"
             aria-label={`${c.name} initiative`}
+            title="Set to 0 to bench this combatant"
           />
           <button
             className="text-outline hover:text-primary transition"
@@ -209,7 +281,7 @@ function InitiativeRow({
         </div>
       </td>
 
-      {/* Name + kind + HP + conditions */}
+      {/* Name + kind + HP + current conditions */}
       <td className="px-2 py-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <Icon
@@ -219,9 +291,12 @@ function InitiativeRow({
             filled
           />
           <span className="font-serif text-on-surface">{c.name}</span>
-          {c.ac != null && (
-            <span className="text-[10px] text-outline">AC {c.ac}</span>
+          {inactive && (
+            <span className="text-[10px] uppercase tracking-wider text-outline border border-outline-variant/40 rounded px-1">
+              benched
+            </span>
           )}
+          {c.ac != null && <span className="text-[10px] text-outline">AC {c.ac}</span>}
           {c.hp && (
             <span className="inline-flex items-center gap-0.5 text-[11px] text-outline">
               <Icon name="favorite" size={12} className="text-error" filled />
@@ -238,18 +313,20 @@ function InitiativeRow({
         </div>
 
         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-          {c.conditions.map((cond) => {
+          {nowConditions.map((cond) => {
             const meta = CONDITIONS.find((x) => x.id === cond.id);
+            const remaining =
+              cond.rounds != null ? cond.fromRound + cond.rounds - currentRound : null;
             return (
               <span
                 key={cond.id}
-                className="inline-flex items-center gap-0.5 text-[10px] text-error bg-error/10 border border-error/30 rounded px-1 py-0.5"
+                className="inline-flex items-center gap-0.5 text-[10px] text-tertiary bg-tertiary/10 border border-tertiary/30 rounded px-1 py-0.5"
                 title={meta?.desc}
               >
                 <Icon name={meta?.icon ?? "warning"} size={12} filled />
                 {meta?.label ?? cond.id}
-                {cond.rounds != null && (
-                  <span className="font-mono text-error/80">·{cond.rounds}</span>
+                {remaining != null && (
+                  <span className="font-mono text-tertiary/80">·{remaining}</span>
                 )}
               </span>
             );
@@ -263,31 +340,46 @@ function InitiativeRow({
         </div>
       </td>
 
-      {/* Round action cells */}
+      {/* Round cells: conditions (any displayed round) + actions (active/past only) */}
       {rounds.map((r) => {
         const a = c.actions[r];
         const acted = a?.acted ?? false;
+        const conds = activeConditionsInRound(c, r);
+        const isFuture = r > currentRound;
+        const editable = !inactive && !isFuture;
         return (
-          <td key={r} className="px-1 py-1.5 text-center">
-            <button
-              onClick={() => onEditAction(r)}
-              title={a?.text || (acted ? "Acted" : "Record action")}
-              className={`w-full min-h-[2rem] rounded-md border px-1 py-1 text-[11px] leading-tight transition ${
-                acted
-                  ? "bg-secondary/10 border-secondary/40 text-on-surface"
-                  : r === currentRound
-                    ? "border-primary/40 text-outline hover:bg-primary/5"
-                    : "border-outline-variant/30 text-outline/60 hover:bg-surface-container-high"
-              }`}
-            >
-              {a?.text ? (
-                <span className="line-clamp-2">{a.text}</span>
-              ) : acted ? (
-                <Icon name="check" size={16} className="text-secondary" />
+          <td
+            key={r}
+            className={`px-1 py-1.5 align-top ${r === currentRound ? "bg-primary/5" : ""}`}
+          >
+            <div className="flex flex-col gap-0.5">
+              <ConditionMarks conditions={conds} />
+              {editable ? (
+                <button
+                  onClick={() => onEditAction(r)}
+                  title={a?.text || (acted ? "Acted" : "Record action")}
+                  className={`w-full min-h-[1.75rem] rounded-md border px-1 py-1 text-[11px] leading-tight transition ${
+                    acted
+                      ? "bg-secondary/10 border-secondary/40 text-on-surface"
+                      : "border-outline-variant/30 text-outline/60 hover:bg-surface-container-high"
+                  }`}
+                >
+                  {a?.text ? (
+                    <span className="line-clamp-2">{a.text}</span>
+                  ) : acted ? (
+                    <Icon name="check" size={16} className="text-secondary" />
+                  ) : (
+                    <Icon name="add" size={14} className="opacity-40" />
+                  )}
+                </button>
               ) : (
-                <Icon name="add" size={14} className="opacity-40" />
+                <div className="w-full min-h-[1.75rem] flex items-center justify-center text-outline/30">
+                  {!isFuture && conds.length === 0 && (
+                    <Icon name="remove" size={12} />
+                  )}
+                </div>
               )}
-            </button>
+            </div>
           </td>
         );
       })}

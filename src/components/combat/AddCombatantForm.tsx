@@ -1,28 +1,24 @@
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
-import { useCombat, type NewCombatantInput } from "@/store/combat";
-import { abilityMod, useCharacter } from "@/store/character";
+import { useCombat } from "@/store/combat";
+import { useCharacter } from "@/store/character";
 
 /**
- * Combat setup. The party is stored on the active character's sheet (a list of
- * member names) so it persists between sessions; "Add party to combat" drops the
- * active character plus every saved member into the initiative table. Monsters
- * are added ad-hoc with optional initiative / HP / AC.
+ * Secondary combat setup, kept below the round table since it's touched rarely.
+ * The party roster lives on the character sheet (persisted); editing it here
+ * also adds/removes the matching combatant live. Monsters are added ad-hoc.
  */
 export default function AddCombatantForm() {
   const character = useCharacter((s) => s.character);
-  const activeCharacterId = useCharacter((s) => s.activeCharacterId);
   const setParty = useCharacter((s) => s.setParty);
 
   const combatants = useCombat((s) => s.combatants);
-  const addCombatants = useCombat((s) => s.addCombatants);
   const addCombatant = useCombat((s) => s.addCombatant);
+  const removeCombatant = useCombat((s) => s.removeCombatant);
 
   const party = character.party ?? [];
 
   const [newMember, setNewMember] = useState("");
-  const [partyMsg, setPartyMsg] = useState<string | null>(null);
-
   const [name, setName] = useState("");
   const [init, setInit] = useState("");
   const [hp, setHp] = useState("");
@@ -31,43 +27,20 @@ export default function AddCombatantForm() {
   const addMember = () => {
     const n = newMember.trim();
     if (!n) return;
-    if (party.some((m) => m.toLowerCase() === n.toLowerCase())) {
-      setPartyMsg(`${n} is already in the party.`);
-      return;
+    if (!party.some((m) => m.toLowerCase() === n.toLowerCase())) {
+      setParty([...party, n]);
     }
-    setParty([...party, n]);
+    // Drop them into the live fight too, unless already there.
+    if (!combatants.some((c) => c.name.toLowerCase() === n.toLowerCase())) {
+      addCombatant({ name: n, kind: "pc", initiative: null });
+    }
     setNewMember("");
-    setPartyMsg(null);
   };
 
   const removeMember = (member: string) => {
     setParty(party.filter((m) => m !== member));
-  };
-
-  const addPartyToCombat = () => {
-    setPartyMsg(null);
-    const present = new Set(combatants.map((c) => c.name.toLowerCase()));
-    // The active character leads the line; the saved members follow.
-    const roster = [character.name, ...party];
-    const inputs: NewCombatantInput[] = roster
-      .filter((n) => n.trim() && !present.has(n.toLowerCase()))
-      .map((n) => {
-        const isActive = n === character.name;
-        return {
-          name: n,
-          kind: "pc",
-          initiative: null,
-          initiativeBonus: isActive
-            ? character.initiativeBonus ?? abilityMod(character.abilities.dex)
-            : undefined,
-          sourceId: isActive ? activeCharacterId ?? undefined : undefined,
-        };
-      });
-    if (inputs.length === 0) {
-      setPartyMsg("Everyone is already in the fight.");
-      return;
-    }
-    addCombatants(inputs);
+    const inFight = combatants.find((c) => c.name === member);
+    if (inFight) removeCombatant(inFight.id);
   };
 
   const addMonster = () => {
@@ -87,18 +60,66 @@ export default function AddCombatantForm() {
   };
 
   return (
-    <div className="bg-surface-container border border-amber-900/30 rounded-lg p-sm space-y-md">
-      {/* Party (persisted on the character sheet) */}
+    <div className="bg-surface-container-low border border-amber-900/30 rounded-lg p-sm space-y-md">
+      {/* Add monster — the most common setup action, so it goes first here. */}
       <div className="space-y-sm">
-        <div className="flex items-center justify-between gap-sm flex-wrap">
-          <span className="label-caps text-primary">Party — {character.name}</span>
-          <button className="btn-ghost !py-1" onClick={addPartyToCombat}>
-            <Icon name="groups" filled /> Add party to combat
+        <span className="label-caps text-primary">Add monster / villain</span>
+        <form
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            addMonster();
+          }}
+        >
+          <Field label="Name" className="flex-1 min-w-[10rem]">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Gelatinous Cube"
+              className="input-inset w-full text-sm"
+            />
+          </Field>
+          <Field label="Init">
+            <input
+              type="number"
+              value={init}
+              onChange={(e) => setInit(e.target.value)}
+              placeholder="—"
+              className="input-inset w-16 text-center font-mono text-sm"
+            />
+          </Field>
+          <Field label="HP">
+            <input
+              type="number"
+              value={hp}
+              onChange={(e) => setHp(e.target.value)}
+              placeholder="—"
+              className="input-inset w-16 text-center font-mono text-sm"
+            />
+          </Field>
+          <Field label="AC">
+            <input
+              type="number"
+              value={ac}
+              onChange={(e) => setAc(e.target.value)}
+              placeholder="—"
+              className="input-inset w-16 text-center font-mono text-sm"
+            />
+          </Field>
+          <button type="submit" className="btn-brass" disabled={!name.trim()}>
+            <Icon name="add" /> Add
           </button>
-        </div>
+        </form>
+      </div>
 
+      <div className="h-px bg-outline-variant/30" />
+
+      {/* Party roster — persisted on the sheet, rarely edited mid-session. */}
+      <div className="space-y-sm">
+        <span className="label-caps text-outline">
+          Party roster — saved on {character.name}&apos;s sheet
+        </span>
         <div className="flex items-center gap-1.5 flex-wrap">
-          {/* The active character is always part of the line-up. */}
           <span className="inline-flex items-center gap-1 text-xs bg-secondary/10 border border-secondary/40 text-secondary rounded-full px-2 py-1">
             <Icon name="person" size={14} filled />
             {character.name}
@@ -107,7 +128,7 @@ export default function AddCombatantForm() {
           {party.map((member) => (
             <span
               key={member}
-              className="inline-flex items-center gap-1 text-xs bg-surface-container-low border border-outline-variant/40 text-on-surface rounded-full px-2 py-1"
+              className="inline-flex items-center gap-1 text-xs bg-surface-container border border-outline-variant/40 text-on-surface rounded-full px-2 py-1"
             >
               <Icon name="person" size={14} />
               {member}
@@ -120,13 +141,7 @@ export default function AddCombatantForm() {
               </button>
             </span>
           ))}
-          {party.length === 0 && (
-            <span className="text-xs text-outline italic">
-              No party members yet — add the names below.
-            </span>
-          )}
         </div>
-
         <form
           className="flex items-center gap-2"
           onSubmit={(e) => {
@@ -144,60 +159,7 @@ export default function AddCombatantForm() {
             <Icon name="person_add" /> Add member
           </button>
         </form>
-        {partyMsg && (
-          <p className="text-xs text-outline italic">{partyMsg}</p>
-        )}
       </div>
-
-      <div className="h-px bg-outline-variant/30" />
-
-      {/* Monsters / villains (ad-hoc, not persisted) */}
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          addMonster();
-        }}
-      >
-        <Field label="Monster / villain" className="flex-1 min-w-[10rem]">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Gelatinous Cube"
-            className="input-inset w-full text-sm"
-          />
-        </Field>
-        <Field label="Init">
-          <input
-            type="number"
-            value={init}
-            onChange={(e) => setInit(e.target.value)}
-            placeholder="—"
-            className="input-inset w-16 text-center font-mono text-sm"
-          />
-        </Field>
-        <Field label="HP">
-          <input
-            type="number"
-            value={hp}
-            onChange={(e) => setHp(e.target.value)}
-            placeholder="—"
-            className="input-inset w-16 text-center font-mono text-sm"
-          />
-        </Field>
-        <Field label="AC">
-          <input
-            type="number"
-            value={ac}
-            onChange={(e) => setAc(e.target.value)}
-            placeholder="—"
-            className="input-inset w-16 text-center font-mono text-sm"
-          />
-        </Field>
-        <button type="submit" className="btn-brass" disabled={!name.trim()}>
-          <Icon name="add" /> Add
-        </button>
-      </form>
     </div>
   );
 }
