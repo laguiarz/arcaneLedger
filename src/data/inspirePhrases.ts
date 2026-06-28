@@ -160,6 +160,35 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
     { text: "Las grandes verdades se dijeron en voz baja y firme. Así, justo así.", tags: BOTH },
     { text: "Toda nota al pie sueña con ser título. Hoy te toca el título.", tags: BOTH },
     { text: "He catalogado peores augurios que éste, y siguen sin cumplirse. Adelante.", tags: COMBAT },
+    // Lote musical / élfico — la "Ciudad del Canto", Myth Drannor: rimas y
+    // referencias a la historia élfica (el mythal, los Cantaespadas, el Coronal
+    // Eltargrim y la Apertura, la Guerra de las Lágrimas, el capitán Fflar, la
+    // Srinshee, Cormanthyr, el Retiro a Evermeet). La barra (/) marca el verso.
+    { text: "En la Ciudad del Canto la guerra se libraba en clave: / cada estocada una nota, cada nota algo grave.", tags: COMBAT },
+    { text: "Como Cantaespadas de Cormanthyr: / la hoja es el verso y el verso, el porvenir.", tags: COMBAT },
+    { text: "Fflar sostuvo la línea hasta el último compás. / Sostené la tuya: la balada hace el resto, y más.", tags: COMBAT },
+    { text: "Que tu defensa sea un mythal: trama de luz que ningún mal traspasa.", tags: COMBAT },
+    { text: "En la Guerra de las Lágrimas no triunfó el temor, / sino quien cantó con la espada en alto. Cantá, jugador.", tags: COMBAT },
+    { text: "Caé, si hay que caer, como cayó Myth Drannor: / tan alto que aún hoy se la nombra con honor.", tags: COMBAT },
+    { text: "Bladesinger no separa la danza de la batalla. / Que tu acto sea las dos, y que nada te falla.", tags: COMBAT },
+    { text: "Canta-espada, paso liviano: / la fortuna sigue a quien va ufano.", tags: COMBAT },
+    { text: "La Srinshee esperó el momento sin perder la calma. / Esperá el tuyo: la paciencia también es un arma.", tags: TASK },
+    { text: "El mythal se tejió hilo por hilo, sin apuro. / Tejé tu obra igual: paso firme, pulso seguro.", tags: TASK },
+    { text: "En la Corte Élfica pesaba cada palabra dicha. / Elegí bien la tuya y se abre cualquier rendija.", tags: TASK },
+    { text: "Los N'Vaelahr cuidaban la ciudad desde la sombra. / Sé esa vigilia fina que protege y no se nombra.", tags: TASK },
+    { text: "Afiná el alma como afinaban el mythal: / un solo tono falso y se cae el portal. No falles.", tags: TASK },
+    { text: "Un verso bien puesto desarma más que un ejército entero. Probalo.", tags: TASK },
+    { text: "Eltargrim abrió la ciudad y nació una era. / Abrí vos esta puerta; el mundo entero espera.", tags: BOTH },
+    { text: "Myth Drannor ardió, pero su canción no: / lo que de veras se canta nunca se apagó.", tags: BOTH },
+    { text: "Los elfos zarparon a Evermeet y el bosque siguió en flor. / Aun en la pérdida hay música. Seguí, cantor.", tags: BOTH },
+    { text: "Toda gesta élfica empezó con un verso a media voz. / Decí el tuyo, y que retumbe veloz.", tags: BOTH },
+    { text: "Si el mythal te abriga el corazón, / no hay sombra que silencie tu canción.", tags: BOTH },
+    { text: "De Cormanthyr al alba que vendrá, / tu nombre en la balada quedará.", tags: BOTH },
+    { text: "Hubo lágrimas, y aun así floreció. / Florecé vos también: la larga noche pasó.", tags: BOTH },
+    { text: "Cada coronal pasó, y la corona siguió cantando sola. / Lo que importa sobrevive a quien lo porta. Va la ola.", tags: BOTH },
+    { text: "La belleza de Myth Drannor no estaba en sus torres / sino en que se atrevió. Atrevete y no te borres.", tags: BOTH },
+    { text: "Lo que Netheril derribó, la memoria lo volvió a levantar. Levantate igual.", tags: BOTH },
+    { text: "Donde hubo una Ciudad del Canto puede haber otra. Empezá a cantar.", tags: BOTH },
   ],
 };
 
