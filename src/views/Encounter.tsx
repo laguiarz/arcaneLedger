@@ -1,7 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useCharacter, preparedNonRituals, preparedRituals } from "@/store/character";
 import type { Spell } from "@/types/character";
 import { SPELL_LEVELS } from "@/lib/constants";
+import {
+  ACTION_FILTERS,
+  type ActionFilter,
+  castingTimeMatchesFilter,
+  actionTypeMatchesFilter,
+} from "@/lib/actionType";
 import Icon from "@/components/ui/Icon";
 import ConcentrationBar from "@/components/panels/ConcentrationBar";
 import CompactSpellRow from "@/components/encounter/CompactSpellRow";
@@ -15,11 +21,36 @@ export default function Encounter() {
   const cast = useCharacter((s) => s.castSpell);
   const refund = useCharacter((s) => s.refundSlot);
 
+  const [filter, setFilter] = useState<ActionFilter>("all");
+
   const prepared = useMemo(() => {
     const a = preparedNonRituals(c);
     const b = preparedRituals(c);
     return [...a, ...b].sort((x, y) => x.level - y.level || x.name.localeCompare(y.name));
   }, [c]);
+
+  // Apply the active action-economy filter to each list. Spells/cantrips match
+  // by castingTime; resources by their actionType tag. "all" passes everything.
+  const resources = c.resources.filter((r) => actionTypeMatchesFilter(filter, r.actionType));
+  const cantrips = c.cantrips.filter((s) => castingTimeMatchesFilter(filter, s.castingTime));
+  const innate = c.innateSpells.filter((s) => castingTimeMatchesFilter(filter, s.castingTime));
+  const preparedFiltered = prepared.filter((s) =>
+    castingTimeMatchesFilter(filter, s.castingTime),
+  );
+
+  // Under a specific filter, hide a section entirely when it has no matches.
+  // Under "All", keep sections visible (with their empty hints) as before.
+  const filtering = filter !== "all";
+  const showResources = !filtering || resources.length > 0;
+  const showCantrips = !filtering || cantrips.length > 0;
+  const showInnate = innate.length > 0;
+  const showPrepared = !filtering || preparedFiltered.length > 0;
+  const nothingMatches =
+    filtering &&
+    resources.length === 0 &&
+    cantrips.length === 0 &&
+    innate.length === 0 &&
+    preparedFiltered.length === 0;
 
   const usableLevels = SPELL_LEVELS.filter((lvl) => (c.spellSlotsMax[lvl] ?? 0) > 0);
 
@@ -70,41 +101,102 @@ export default function Encounter() {
 
       <ConcentrationBar />
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-sm">
-        {/* Abilities & Items + Cantrips */}
-        <div className="space-y-2">
-          <SubHeader icon="inventory_2" label="Abilities & Items" count={c.resources.length} />
-          {c.resources.length === 0 && (
-            <EmptyHint text="No tracked features." />
-          )}
-          {c.resources.map((r, i) => (
-            <CompactResourceRow key={r.id ?? r.name + i} resource={r} />
-          ))}
+      <ActionFilterBar active={filter} onChange={setFilter} />
 
-          <SubHeader icon="flash_on" label="Cantrips" count={c.cantrips.length} />
-          {c.cantrips.map((s) => (
-            <CompactCantripRow key={s.name} spell={s} />
-          ))}
-        </div>
+      {nothingMatches ? (
+        <p className="text-xs text-outline italic px-2 py-6 text-center">
+          No {FILTER_NOUN[filter]} options right now.
+        </p>
+      ) : (
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-sm">
+          {/* Abilities & Items + Cantrips */}
+          <div className="space-y-2">
+            {showResources && (
+              <>
+                <SubHeader icon="inventory_2" label="Abilities & Items" count={resources.length} />
+                {resources.length === 0 && <EmptyHint text="No tracked features." />}
+                {resources.map((r, i) => (
+                  <CompactResourceRow key={r.id ?? r.name + i} resource={r} />
+                ))}
+              </>
+            )}
 
-        {/* Innate + Prepared Spells */}
-        <div className="space-y-2">
-          {c.innateSpells.length > 0 && (
-            <>
-              <SubHeader
-                icon="diamond"
-                label="Innate Casting"
-                count={c.innateSpells.length}
-              />
-              {c.innateSpells.map((s) => (
-                <CompactSpellRow key={`innate-${s.name}`} spell={s} />
-              ))}
-            </>
-          )}
-          <SubHeader icon="auto_fix_high" label="Prepared Spells" count={prepared.length} />
-          <PreparedGrouped spells={prepared} />
-        </div>
-      </section>
+            {showCantrips && (
+              <>
+                <SubHeader icon="flash_on" label="Cantrips" count={cantrips.length} />
+                {cantrips.map((s) => (
+                  <CompactCantripRow key={s.name} spell={s} />
+                ))}
+              </>
+            )}
+          </div>
+
+          {/* Innate + Prepared Spells */}
+          <div className="space-y-2">
+            {showInnate && (
+              <>
+                <SubHeader icon="diamond" label="Innate Casting" count={innate.length} />
+                {innate.map((s) => (
+                  <CompactSpellRow key={`innate-${s.name}`} spell={s} />
+                ))}
+              </>
+            )}
+            {showPrepared && (
+              <>
+                <SubHeader
+                  icon="auto_fix_high"
+                  label="Prepared Spells"
+                  count={preparedFiltered.length}
+                />
+                <PreparedGrouped spells={preparedFiltered} />
+              </>
+            )}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+const FILTER_NOUN: Record<ActionFilter, string> = {
+  all: "",
+  action: "action",
+  bonus: "bonus-action",
+  reaction: "reaction",
+};
+
+function ActionFilterBar({
+  active,
+  onChange,
+}: {
+  active: ActionFilter;
+  onChange: (f: ActionFilter) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Filter by action type"
+      className="flex flex-wrap items-center gap-1.5"
+    >
+      {ACTION_FILTERS.map(({ value, label, icon }) => {
+        const isActive = active === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onChange(value)}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold transition active:scale-95 ${
+              isActive
+                ? "bg-primary/20 border-primary/60 text-primary shadow-[0_0_6px_rgba(233,193,118,0.25)]"
+                : "bg-surface-container-low border-outline-variant/40 text-outline hover:border-primary/40 hover:text-on-surface"
+            }`}
+          >
+            <Icon name={icon} size={14} filled={isActive} />
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -58,6 +58,9 @@ export interface Spell extends SpellBase {
 
 export type RechargeType = "long" | "short" | "dawn" | "manual";
 
+/** Combat action economy used by the Encounter quick filters. */
+export type ActionType = "action" | "bonus" | "reaction";
+
 export interface Resource {
   /** Stable id; defaults to name when authored */
   id?: string;
@@ -67,6 +70,13 @@ export interface Resource {
   max: number;
   used: number;
   recharge: RechargeType;
+  /**
+   * Optional action economy for activated abilities/items, used by the
+   * Encounter action filters. Omit for passive features (they only appear
+   * under the "All" filter). Spells/cantrips are classified from castingTime
+   * instead — see {@link "@/lib/actionType".classifyCastingTime}.
+   */
+  actionType?: ActionType;
   /**
    * If set, the resource shows a sparkle button that draws from the named
    * inspire-phrase deck (see src/data/inspirePhrases.ts). Phrases rotate

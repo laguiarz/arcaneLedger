@@ -376,7 +376,8 @@
       "desc": "Bonus Action. Telekinetically shove one creature you can see within 30 ft. Target makes a Strength saving throw (DC 14 = 8 + Intelligence mod + PB); on a fail, it's moved 5 ft toward or away from you. At-will, no daily limit.",
       "max": 0,
       "used": 0,
-      "recharge": "manual"
+      "recharge": "manual",
+      "actionType": "bonus"
     },
     {
       "name": "Improved Illusions",
@@ -393,6 +394,7 @@
       "max": 3,
       "used": 0,
       "recharge": "long",
+      "actionType": "bonus",
       "inspirePhraseDeck": "lyari"
     }
   ],
