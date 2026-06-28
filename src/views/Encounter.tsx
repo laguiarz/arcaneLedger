@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { useCharacter, preparedNonRituals, preparedRituals } from "@/store/character";
+import {
+  useCharacter,
+  preparedNonRituals,
+  preparedRituals,
+  spellSaveDc,
+  spellAttackBonus,
+} from "@/store/character";
 import type { Spell } from "@/types/character";
 import { SPELL_LEVELS } from "@/lib/constants";
 import {
@@ -54,6 +60,13 @@ export default function Encounter() {
 
   const usableLevels = SPELL_LEVELS.filter((lvl) => (c.spellSlotsMax[lvl] ?? 0) > 0);
 
+  // Only meaningful for actual casters; hide for non-casting imported characters.
+  const isCaster =
+    usableLevels.length > 0 || c.cantrips.length > 0 || c.innateSpells.length > 0;
+  const saveDc = spellSaveDc(c);
+  const atkBonus = spellAttackBonus(c);
+  const atkLabel = atkBonus >= 0 ? `+${atkBonus}` : `${atkBonus}`;
+
   return (
     <div className="max-w-7xl mx-auto p-sm md:p-md space-y-sm">
       {/* Combat Strip: HP + Slots + Concentration */}
@@ -96,6 +109,17 @@ export default function Encounter() {
               );
             })}
           </div>
+
+          {isCaster && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-sm pt-sm border-t border-outline-variant/30 text-[11px] text-outline">
+              <span aria-label={`Spell save DC ${saveDc}`}>
+                Save DC <span className="text-primary font-bold">{saveDc}</span>
+              </span>
+              <span aria-label={`Spell attack ${atkLabel}`}>
+                Spell Atk <span className="text-primary font-bold">{atkLabel}</span>
+              </span>
+            </div>
+          )}
         </div>
       </section>
 
