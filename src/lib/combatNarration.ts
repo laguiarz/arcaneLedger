@@ -12,8 +12,16 @@ const KEY_API = "al.gemini.key";
 const KEY_MODEL = "al.gemini.model";
 const KEY_PROMPT = "al.combat.narrationPrompt";
 
-/** Cheap, fast, broadly-available Gemini model — the "branch barato". */
-export const DEFAULT_MODEL = "gemini-2.0-flash";
+/** Cheap, fast, current Gemini model — the "branch barato". */
+export const DEFAULT_MODEL = "gemini-2.5-flash";
+
+/**
+ * Models that used to be the default but no longer serve `generateContent`
+ * (they 404 even though ListModels still reports them). A stored value matching
+ * one of these is treated as stale and auto-healed back to {@link DEFAULT_MODEL}
+ * so an early tester isn't stuck with a dead model saved in localStorage.
+ */
+const RETIRED_MODELS = new Set(["gemini-2.0-flash", "gemini-2.0-flash-001"]);
 
 /**
  * Default, fully editable system prompt. Written in Spanish to match Brunella's
@@ -61,7 +69,9 @@ export function setApiKey(value: string): void {
 }
 
 export function getModel(): string {
-  return read(KEY_MODEL)?.trim() || DEFAULT_MODEL;
+  const stored = read(KEY_MODEL)?.trim();
+  if (!stored || RETIRED_MODELS.has(stored)) return DEFAULT_MODEL;
+  return stored;
 }
 
 export function setModel(value: string): void {
