@@ -1,14 +1,17 @@
 /**
- * Thin Google Gemini (Generative Language API) client for the combat narration.
+ * Client for the Gemini combat narration.
  *
- * SECURITY NOTE: this calls the Gemini API directly from the browser, which
- * means the API key travels with the request and is readable in client code /
- * network logs. That is an accepted trade-off for this personal, local-first
- * tool (there is no backend). Do NOT ship this pattern to a multi-tenant or
- * public deployment — proxy through a server that holds the key instead.
+ * Primary path is the server proxy at `/api/narrate`, which holds the API key
+ * server-side so it never reaches the browser (see api/narrate.ts). When the
+ * proxy isn't available — e.g. `npm run dev` serves only the Vite app and
+ * `/api/*` 404s — it falls back to calling Gemini directly from the browser,
+ * which requires a local key (dev convenience only). Production should always
+ * use the proxy.
  */
 
-const endpoint = (model: string) =>
+const PROXY_URL = "/api/narrate";
+
+const directEndpoint = (model: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
     model,
   )}:generateContent`;
@@ -20,7 +23,7 @@ export interface ChatRequestParams {
   temperature?: number;
 }
 
-/** Build the JSON request body. Pure, so the shape stays unit-testable. */
+/** Build the JSON request body for a direct Gemini call. Pure / unit-testable. */
 export function buildGeminiRequest(p: ChatRequestParams) {
   return {
     systemInstruction: { parts: [{ text: p.systemPrompt }] },
@@ -30,24 +33,69 @@ export function buildGeminiRequest(p: ChatRequestParams) {
 }
 
 export interface GenerateParams extends ChatRequestParams {
-  apiKey: string;
   model: string;
+  /** Only used for the direct dev fallback; the proxy needs no client key. */
+  apiKey?: string;
   signal?: AbortSignal;
 }
 
-/** Call Gemini and return the generated text. Throws on any failure. */
+/** Generate the narration, preferring the server proxy. Throws on failure. */
 export async function generateNarration(p: GenerateParams): Promise<string> {
-  if (!p.apiKey.trim()) {
-    throw new Error("Missing Gemini API key.");
+  let proxyRes: Response | null = null;
+  try {
+    proxyRes = await fetch(PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: p.model,
+        systemPrompt: p.systemPrompt,
+        userContent: p.userContent,
+        temperature: p.temperature,
+      }),
+      signal: p.signal,
+    });
+  } catch (e) {
+    if (p.signal?.aborted) throw e;
+    proxyRes = null; // proxy unreachable — try the direct fallback below
   }
 
+  if (proxyRes && proxyRes.ok) {
+    const data = (await proxyRes.json().catch(() => ({}))) as { text?: string };
+    const text = data.text?.trim();
+    if (text) return text;
+    throw new Error("Narration proxy returned an empty response.");
+  }
+
+  // Proxy is deployed but errored (not a 404): surface its real message.
+  if (proxyRes && proxyRes.status !== 404) {
+    let detail = `${proxyRes.status} ${proxyRes.statusText}`;
+    try {
+      const e = (await proxyRes.json()) as { error?: string };
+      if (e?.error) detail = e.error;
+    } catch {
+      /* keep status-line detail */
+    }
+    throw new Error(detail);
+  }
+
+  // No proxy here (404 or unreachable) → direct browser call (dev only).
+  if (!p.apiKey?.trim()) {
+    throw new Error(
+      "Narration unavailable: deploy the /api/narrate proxy, or set a Gemini API key for local use.",
+    );
+  }
+  return directGeminiCall(p);
+}
+
+async function directGeminiCall(p: GenerateParams): Promise<string> {
+  const apiKey = p.apiKey!.trim();
   let res: Response;
   try {
-    res = await fetch(endpoint(p.model), {
+    res = await fetch(directEndpoint(p.model), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": p.apiKey.trim(),
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify(buildGeminiRequest(p)),
       signal: p.signal,
@@ -66,7 +114,7 @@ export async function generateNarration(p: GenerateParams): Promise<string> {
       const body = await res.json();
       if (body?.error?.message) detail = body.error.message;
     } catch {
-      /* keep the status-line detail */
+      /* keep status-line detail */
     }
     throw new Error(`Gemini request failed: ${detail}`);
   }

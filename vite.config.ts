@@ -3,12 +3,19 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 
-export default defineConfig({
-  // Expose the Gemini API key (an OS env var, not VITE_-prefixed) to the client.
-  // Read from process.env at config time so it works in both dev and build.
-  define: {
-    "import.meta.env.GEMINI_KEY": JSON.stringify(process.env.GEMINI_KEY ?? ""),
-  },
+export default defineConfig(({ command }) => ({
+  // Dev only: expose the OS GEMINI_KEY to the client as VITE_GEMINI_KEY so the
+  // direct fallback works under `npm run dev`. In production builds we inject
+  // NOTHING — the key stays server-side in the /api/narrate function and is
+  // never baked into the client bundle.
+  define:
+    command === "serve"
+      ? {
+          "import.meta.env.VITE_GEMINI_KEY": JSON.stringify(
+            process.env.GEMINI_KEY ?? "",
+          ),
+        }
+      : {},
   plugins: [
     react(),
     VitePWA({
@@ -57,4 +64,4 @@ export default defineConfig({
   server: {
     port: 5173,
   },
-});
+}));

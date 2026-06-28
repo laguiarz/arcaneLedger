@@ -56,11 +56,15 @@ function write(key: string, value: string): void {
   }
 }
 
+/**
+ * Local key for the DIRECT dev fallback only. In production the key lives
+ * server-side in /api/narrate and this returns "" — narration goes through the
+ * proxy and needs no client key.
+ */
 export function getApiKey(): string {
   const stored = read(KEY_API);
   if (stored && stored.trim()) return stored.trim();
-  // Injected from process.env.GEMINI_KEY at build time (see vite.config.ts).
-  const env = (import.meta.env as ImportMetaEnv).GEMINI_KEY;
+  const env = (import.meta.env as ImportMetaEnv).VITE_GEMINI_KEY;
   return env?.trim() ?? "";
 }
 
