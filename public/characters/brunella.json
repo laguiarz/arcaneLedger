@@ -1,0 +1,315 @@
+{
+  "name": "Brunella",
+  "className": "Bard",
+  "subclass": "Lore",
+  "level": 5,
+  "proficiencyBonus": 3,
+  "abilities": {
+    "str": 10,
+    "dex": 14,
+    "con": 13,
+    "int": 13,
+    "wis": 11,
+    "cha": 18
+  },
+  "savingThrowProficiencies": [
+    "dex",
+    "cha"
+  ],
+  "hp": {
+    "max": 33,
+    "current": 33,
+    "temp": 0
+  },
+  "hitDice": {
+    "die": 8,
+    "max": 5,
+    "spent": 0
+  },
+  "ac": 14,
+  "initiativeBonus": 3,
+  "speed": 30,
+  "spellcastingAbility": "cha",
+  "spellSlotsMax": {
+    "1": 4,
+    "2": 3,
+    "3": 2
+  },
+  "spellSlots": {
+    "1": 4,
+    "2": 3,
+    "3": 2
+  },
+  "cantrips": [
+    {
+      "name": "Vicious Mockery",
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "You unleash a string of insults laced with subtle enchantments at one creature you can see within range. If the target can hear you (it doesn't need to understand you), it must succeed on a Wisdom saving throw or take 2d6 Psychic damage (cantrip scales: 1d6 at L1, 2d6 at L5, 3d6 at L11, 4d6 at L17) and have Disadvantage on the next attack roll it makes before the end of its next turn.\n\nSource: Player's Handbook 2024 p. 340",
+      "source": "class"
+    },
+    {
+      "name": "Minor Illusion",
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "S, M (a bit of fleece)",
+      "duration": "1 minute",
+      "desc": "You create a sound or an image of an object within range that lasts for the duration. The illusion ends if you cast this spell again.\n\tIf a creature takes a Study action to examine the sound or image, it can determine that the effect is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the illusion becomes faint.\n\tSound. If you create a sound, its volume can range from a whisper to a scream.\n\tImage. If you create an image of an object, it must be no larger than a 5-foot Cube. The image can't create sound, light, smell, or any other sensory effect.\n\nSource: Player's Handbook 2024 p. 298",
+      "source": "class"
+    },
+    {
+      "name": "Message",
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "S, M (a copper wire)",
+      "duration": "1 round",
+      "desc": "You point toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear.\n\tYou can cast this spell through solid objects if you are familiar with the target and know it is beyond the barrier. Magical silence; 1 foot of stone, metal, or wood; or a thin sheet of lead blocks the spell.\n\nSource: Player's Handbook 2024 p. 298",
+      "source": "class"
+    },
+    {
+      "name": "Prestidigitation",
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "10 feet",
+      "components": "V, S",
+      "duration": "1 hour",
+      "desc": "You create a magical effect within range. Choose the effect from the options below. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time.\n\tSensory Effect. You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.\n\tFire Play. You instantaneously light or snuff out a candle, a torch, or a small campfire.\n\tClean or Soil. You instantaneously clean or soil an object no larger than 1 cubic foot.\n\tMinor Sensation. You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.\n\tMagic Mark. You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.\n\tMinor Creation. You create a nonmagical trinket or an illusory image that can fit in your hand. It lasts until the end of your next turn.\n\nSource: Player's Handbook 2024 p. 307",
+      "source": "race"
+    },
+    {
+      "name": "Guidance",
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "You touch a willing creature and choose a skill. Until the spell ends, the creature adds 1d4 to any ability check it makes using the chosen skill. The creature can wait until immediately after it rolls the d20 of the ability check before deciding to use the Guidance die, but must decide before the DM says whether the check succeeds or fails.\n\nGranted by the Magic Initiate (Cleric) feat; spellcasting ability: Charisma.\n\nSource: Player's Handbook 2024 p. 282",
+      "concentration": true,
+      "source": "feat"
+    },
+    {
+      "name": "Sacred Flame",
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "desc": "Flame-like radiance descends on a creature you can see within range. The target must succeed on a Dexterity saving throw or take 2d8 Radiant damage (cantrip scales: 1d8 at L1, 2d8 at L5, 3d8 at L11, 4d8 at L17). The target gains no benefit from Half Cover or Three-Quarters Cover for this save.\n\nGranted by the Magic Initiate (Cleric) feat; spellcasting ability: Charisma.\n\nSource: Player's Handbook 2024 p. 311",
+      "source": "feat"
+    }
+  ],
+  "spellbook": [
+    {
+      "name": "Faerie Fire",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "Each object in a 20-foot Cube within range is outlined in blue, green, or violet light (your choice). Each creature in the Cube is also outlined if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed Dim Light in a 10-foot radius.\n\tAttack rolls against an affected creature or object have Advantage if the attacker can see it, and the affected creature or object can't benefit from the Invisible condition.\n\nSource: Player's Handbook 2024 p. 270",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Dissonant Whispers",
+      "level": 1,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "You whisper a discordant melody that only one creature of your choice within range can hear, wracking it with terrible pain. The target makes a Wisdom saving throw. On a failed save, it takes 3d6 Psychic damage and must immediately use its Reaction, if available, to move as far as its Speed allows away from you. The creature moves into the safest available space unless there isn't one, in which case it doesn't move. On a successful save, the target takes half as much damage only.\n\tUsing a Higher-Level Spell Slot. The damage increases by 1d6 for each spell slot level above 1.\n\nSource: Player's Handbook 2024 p. 265",
+      "source": "class"
+    },
+    {
+      "name": "Heroism",
+      "level": 1,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to the Frightened condition and gains Temporary Hit Points equal to your spellcasting ability modifier at the start of each of its turns.\n\tUsing a Higher-Level Spell Slot. You can target one additional creature for each spell slot level above 1.\n\nSource: Player's Handbook 2024 p. 285",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Invisibility",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (an eyelash in gum arabic)",
+      "duration": "Concentration, up to 1 hour",
+      "desc": "A creature you touch has the Invisible condition until the spell ends. The spell ends early immediately after the target makes an attack roll, deals damage, or casts a spell.\n\tUsing a Higher-Level Spell Slot. You can target one additional creature for each spell slot level above 2.\n\nSource: Player's Handbook 2024 p. 289",
+      "concentration": true,
+      "source": "class"
+    },
+    {
+      "name": "Knock",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "Choose an object that you can see within range and that is closed, such as a door, box, chest, set of manacles, padlock, or other object that contains a mundane or magical means that prevents access.\n\tA target that is held shut by a mundane lock or that is stuck or barred becomes unlocked, unstuck, or unbarred. If the object has multiple locks, only one of them is unlocked. If you choose a target that is held shut with Arcane Lock, that spell is suppressed for 10 minutes, during which time the target can be opened and shut normally.\n\tWhen you cast the spell, a loud knock audible from as far away as 300 feet emanates from the target.\n\nSource: Player's Handbook 2024 p. 290",
+      "source": "class"
+    },
+    {
+      "name": "Lesser Restoration",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "desc": "You touch a creature and end one condition on it: Blinded, Deafened, Paralyzed, or Poisoned.\n\nSource: Player's Handbook 2024 p. 291",
+      "source": "class"
+    },
+    {
+      "name": "Dispel Magic",
+      "level": 3,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "desc": "Choose one creature, object, or magical effect within range. Any ongoing spell of level 3 or lower on the target ends. For each ongoing spell of level 4 or higher on the target, make an ability check using your spellcasting ability (DC 10 plus that spell's level). On a successful check, the spell ends.\n\tUsing a Higher-Level Spell Slot. You automatically end a spell on the target if the spell's level is equal to or less than the level of the slot you use.\n\nSource: Player's Handbook 2024 p. 265",
+      "source": "class"
+    },
+    {
+      "name": "Mass Healing Word",
+      "level": 3,
+      "school": "Abjuration",
+      "castingTime": "Bonus Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "Up to six creatures of your choice that you can see within range regain Hit Points equal to 2d4 plus your spellcasting ability modifier. This spell has no effect on Undead or Constructs.\n\tUsing a Higher-Level Spell Slot. The healing increases by 1d4 for each spell slot level above 3.\n\nSource: Player's Handbook 2024 p. 296",
+      "source": "class"
+    },
+    {
+      "name": "Slow",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S, M (a drop of molasses)",
+      "duration": "Concentration, up to 1 minute",
+      "desc": "You alter time around up to six creatures of your choice in a 40-foot Cube within range. Each target must succeed on a Wisdom saving throw or be affected by this spell for the duration.\n\tAn affected target's Speed is halved, it takes a -2 penalty to AC and Dexterity saving throws, and it can't take Reactions. On its turn, it can use either an action or a Bonus Action, not both, and it can't make more than one attack on its turn. If it casts a spell with a Somatic component, there is a 25 percent chance the spell fails as a result of the target making the necessary gestures too slowly.\n\tAn affected target repeats the save at the end of each of its turns, ending the spell on itself on a success.\n\nSource: Player's Handbook 2024 p. 316",
+      "concentration": true,
+      "source": "class"
+    }
+  ],
+  "innateSpells": [
+    {
+      "name": "Detect Magic",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minute",
+      "desc": "For the duration, you sense the presence of magical effects within 30 feet of yourself. If you sense such effects, you can take the Magic action to see a faint aura around any visible creature or object in the area that bears the magic, and if an effect was created by a spell, you learn the spell's school of magic.\n\tThe spell is blocked by 1 foot of stone, dirt, or wood; 1 inch of metal; or a thin sheet of lead.\n\nGranted by the High Elf lineage (Elven Lineage); spellcasting ability: Charisma.\n\nSource: Player's Handbook 2024 p. 262",
+      "ritual": true,
+      "concentration": true,
+      "source": "race",
+      "freeCastsPerLongRest": 1
+    },
+    {
+      "name": "Misty Step",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see.\n\nGranted by the High Elf lineage (Elven Lineage), available from level 5; spellcasting ability: Charisma.\n\nSource: Player's Handbook 2024 p. 299",
+      "source": "race",
+      "freeCastsPerLongRest": 1
+    },
+    {
+      "name": "Healing Word",
+      "level": 1,
+      "school": "Abjuration",
+      "castingTime": "Bonus Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "desc": "A creature of your choice that you can see within range regains Hit Points equal to 2d4 plus your spellcasting ability modifier. This spell has no effect on Undead or Constructs.\n\tUsing a Higher-Level Spell Slot. The healing increases by 1d4 for each spell slot level above 1.\n\nGranted by the Magic Initiate (Cleric) feat: castable once per long rest without a slot (or with a Bard spell slot); spellcasting ability: Charisma.\n\nSource: Player's Handbook 2024 p. 285",
+      "source": "feat",
+      "freeCastsPerLongRest": 1
+    }
+  ],
+  "preparedSpells": [
+    "Faerie Fire",
+    "Dissonant Whispers",
+    "Heroism",
+    "Invisibility",
+    "Knock",
+    "Lesser Restoration",
+    "Dispel Magic",
+    "Mass Healing Word",
+    "Slow"
+  ],
+  "racialFreeCastsUsed": {},
+  "resources": [
+    {
+      "name": "Bardic Inspiration",
+      "source": "Class feature",
+      "desc": "Bonus Action. Choose a creature other than yourself within 60 ft that can hear you; it gains a Bardic Inspiration die (d8 at L5). Within the next hour, once before the die is lost, the creature can roll the die and add it to one D20 Test it makes (it can decide after seeing the d20 roll but before the outcome is known), or use it for a feature that consumes it (e.g. Cutting Words).\n\nDie scales with bard level: d6 (L1) / d8 (L5) / d10 (L10) / d12 (L15).\n\nUses per rest = Charisma modifier (4).\n\nFont of Inspiration (Bard L5): you regain all expended uses on a Short or Long Rest. In addition, once per turn you can expend a spell slot (no action) to regain one expended use.\n\nSource: Player's Handbook 2024 — Bard L1 / Font of Inspiration L5.",
+      "max": 4,
+      "used": 0,
+      "recharge": "short",
+      "inspirePhraseDeck": "brunella"
+    },
+    {
+      "name": "Cutting Words",
+      "source": "Subclass: College of Lore",
+      "desc": "Reaction (Lore L3): when a creature you can see within 60 feet makes a damage roll or succeeds on a D20 Test, expend one use of Bardic Inspiration, roll the die, and subtract the number rolled from the creature's roll — reducing the damage or potentially turning the success into a failure.\n\nDraws from the Bardic Inspiration pool above.",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual"
+    },
+    {
+      "name": "Bonus Proficiencies",
+      "source": "Subclass: College of Lore",
+      "desc": "Lore L3: you gain proficiency in three skills of your choice (already reflected in this character's skill list: History, Investigation, Performance).",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual"
+    },
+    {
+      "name": "Magic Initiate (Cleric)",
+      "source": "Feat",
+      "desc": "Origin feat from the Acolyte background. Grants the cleric cantrips Guidance and Sacred Flame, and the level 1 cleric spell Healing Word (castable once per long rest without a slot, or with a Bard spell slot). Spellcasting ability: Charisma. The free Healing Word cast is tracked on the Healing Word spell itself.",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual"
+    }
+  ],
+  "conditions": {
+    "active": [],
+    "exhaustion": 0
+  },
+  "concentration": null,
+  "skills": {
+    "persuasion": { "proficient": true },
+    "arcana": { "proficient": true, "expertise": true },
+    "insight": { "proficient": true },
+    "religion": { "proficient": true },
+    "perception": { "proficient": true },
+    "deception": { "proficient": true },
+    "history": { "proficient": true, "expertise": true },
+    "investigation": { "proficient": true },
+    "performance": { "proficient": true }
+  },
+  "notes": "High Elf · Bard 5 (College of Lore) · Acolyte background. Spellcasting ability: Charisma (DC 15, attack +7). Saving throw proficiencies: Dexterity, Charisma. High Elf traits: Darkvision 60 ft, Fey Ancestry (Advantage vs. Charmed, immune to magical sleep), Trance (4-hour long rest), Keen Senses (Perception). Tool proficiency: Calligrapher's Supplies. Jack of All Trades (+1) already baked into initiative (+3)."
+}

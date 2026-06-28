@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { useCharacter, preparedNonRituals } from "@/store/character";
+import {
+  useCharacter,
+  preparedNonRituals,
+  availableRituals,
+  spellSaveDc,
+  spellAttackBonus,
+} from "@/store/character";
 import SectionHeader from "@/components/ui/SectionHeader";
 import SlotsPanel from "@/components/panels/SlotsPanel";
 import SpellCard, { CantripCard } from "@/components/SpellCard";
@@ -30,11 +36,7 @@ export default function Spellbook() {
     });
 
   const prepared = useMemo(() => preparedNonRituals(c), [c]);
-  const ritualsAvail = useMemo(() => {
-    // Wizards can cast any ritual from their spellbook even unprepared.
-    // Prepared rituals are also castable as rituals (additional option).
-    return c.spellbook.filter((s) => s.ritual);
-  }, [c]);
+  const ritualsAvail = useMemo(() => availableRituals(c), [c]);
 
   const allSorted = useMemo(
     () =>
@@ -74,7 +76,7 @@ export default function Spellbook() {
       <SectionHeader
         icon="bolt"
         title="Spell Slot Reservoirs"
-        subtitle={`${c.name} · DC ${(8 + c.proficiencyBonus + Math.floor((c.abilities.int - 10) / 2))} · Atk +${c.proficiencyBonus + Math.floor((c.abilities.int - 10) / 2)}`}
+        subtitle={`${c.name} · DC ${spellSaveDc(c)} · Atk +${spellAttackBonus(c)}`}
       />
       <SlotsPanel />
 
@@ -192,7 +194,11 @@ export default function Spellbook() {
           <SectionHeader
             icon="auto_stories"
             title="Ritual Archive"
-            subtitle="Wizards can cast any ritual from the spellbook (+10 min, no slot)"
+            subtitle={
+              c.className.trim().toLowerCase() === "wizard"
+                ? "Wizards can cast any ritual from the spellbook (+10 min, no slot)"
+                : "Cast only prepared rituals (+10 min, no slot)"
+            }
           />
           {ritualsAvail.length === 0 && <EmptyState text="No rituals in spellbook." />}
           {groupByLevel(ritualsAvail.filter(spellFilter)).map(([lvl, spells]) => (

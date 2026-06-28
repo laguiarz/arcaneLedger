@@ -136,6 +136,31 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
     { text: "Al que intenta enredarte / lo desarmás sin despeinarte.", tags: TASK },
     { text: "El que dijo que no podías / se come todas sus teorías.", tags: BOTH },
   ],
+  // Brunella — High Elf erudita, acólita y calígrafa. Habla en aforismos sobre
+  // crónicas, tinta, archivos, historia y fe; ingeniosa y cálida, con la
+  // serenidad de quien ya leyó cómo terminan mil leyendas.
+  brunella: [
+    { text: "Cada gesta empieza siendo una nota al margen. Escribí la tuya.", tags: BOTH },
+    { text: "He leído mil crónicas de héroes; ninguno se sentía héroe el día que lo fue.", tags: BOTH },
+    { text: "La historia no recuerda a los que dudaron. Avanzá.", tags: BOTH },
+    { text: "Hay una palabra exacta para este instante, y es: ahora.", tags: BOTH },
+    { text: "Los archivos están llenos de imposibles que alguien, terco, volvió ciertos.", tags: BOTH },
+    { text: "El miedo es apenas una nota al pie. El texto principal lo escribís vos.", tags: BOTH },
+    { text: "Conozco el final de muchas leyendas. La tuya todavía la estás dictando.", tags: BOTH },
+    { text: "Un buen golpe vale por tres tratados.", tags: COMBAT },
+    { text: "Que la crónica de hoy se escriba con la tinta del enemigo.", tags: COMBAT },
+    { text: "Respirá: hasta los santos firmaban con el pulso temblando.", tags: BOTH },
+    { text: "El conocimiento pesa, pero también sostiene. Apoyate en lo que sabés.", tags: TASK },
+    { text: "Detalle por detalle se desarma cualquier cerradura del mundo.", tags: TASK },
+    { text: "Que no te tiemble la mano: la posteridad copia con prolijidad lo que hoy hagas bien.", tags: TASK },
+    { text: "Ningún manuscrito que valga la pena se escribió sin mancharse los dedos.", tags: BOTH },
+    { text: "Acordate: el dragón también figura en la crónica… del lado de los vencidos.", tags: COMBAT },
+    { text: "Sé de bibliotecas enteras dedicadas a un solo instante de coraje. Dame el tuyo.", tags: BOTH },
+    { text: "Lo que no sabés lo improvisás con elegancia. Es casi lo mismo, y a veces mejor.", tags: TASK },
+    { text: "Las grandes verdades se dijeron en voz baja y firme. Así, justo así.", tags: BOTH },
+    { text: "Toda nota al pie sueña con ser título. Hoy te toca el título.", tags: BOTH },
+    { text: "He catalogado peores augurios que éste, y siguen sin cumplirse. Adelante.", tags: COMBAT },
+  ],
 };
 
 export function getInspirePhraseDeck(name: string): InspirePhrase[] | undefined {

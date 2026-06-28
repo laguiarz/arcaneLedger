@@ -123,6 +123,40 @@ const wizardIllusionist = (ctx: SubclassContext): SubclassGrants => {
   };
 };
 
+/**
+ * Bard 2024 — College of Lore.
+ * - L3 Bonus Proficiencies: proficiency in three skills of your choice.
+ * - L3 Cutting Words: Reaction; spend a Bardic Inspiration use to subtract the
+ *   die from a creature's damage roll or successful D20 Test within 60 ft.
+ * (L6 Magical Secrets and L14 Peerless Skill are intentionally not modeled yet.)
+ */
+const bardLore = (ctx: SubclassContext): SubclassGrants => {
+  if (ctx.level < 3) return {};
+  return {
+    resources: [
+      {
+        name: "Cutting Words",
+        source: "Subclass: College of Lore",
+        desc:
+          "Reaction (Lore L3): when a creature you can see within 60 feet makes a damage roll or succeeds on a D20 Test, expend one use of Bardic Inspiration, roll the die, and subtract the number rolled from the creature's roll — reducing the damage or potentially turning the success into a failure.",
+        max: 0,
+        used: 0,
+        recharge: "manual",
+      },
+      {
+        name: "Bonus Proficiencies",
+        source: "Subclass: College of Lore",
+        desc:
+          "Lore L3: you gain proficiency in three skills of your choice (already reflected in this character's skill list).",
+        max: 0,
+        used: 0,
+        recharge: "manual",
+      },
+    ],
+  };
+};
+
 export const SUBCLASS_REGISTRY: Record<string, (ctx: SubclassContext) => SubclassGrants> = {
   "wizard:illusionist": wizardIllusionist,
+  "bard:lore": bardLore,
 };
