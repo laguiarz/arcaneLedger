@@ -24,6 +24,7 @@ export default function Encounter() {
   const c = useCharacter((s) => s.character);
   const takeDamage = useCharacter((s) => s.takeDamage);
   const heal = useCharacter((s) => s.heal);
+  const setTempHp = useCharacter((s) => s.setTempHp);
   const cast = useCharacter((s) => s.castSpell);
   const refund = useCharacter((s) => s.refundSlot);
 
@@ -71,7 +72,7 @@ export default function Encounter() {
     <div className="max-w-7xl mx-auto p-sm md:p-md space-y-sm">
       {/* Combat Strip: HP + Slots + Concentration */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-sm items-stretch">
-        <HpStrip onDamage={takeDamage} onHeal={heal} />
+        <HpStrip onDamage={takeDamage} onHeal={heal} onTemp={setTempHp} />
 
         <div className="lg:col-span-7 bg-surface-container border border-amber-900/30 rounded-lg p-sm">
           <div className="flex items-center justify-between mb-1">
@@ -228,20 +229,24 @@ function ActionFilterBar({
 function HpStrip({
   onDamage,
   onHeal,
+  onTemp,
 }: {
   onDamage: (n: number) => void;
   onHeal: (n: number) => void;
+  onTemp: (n: number) => void;
 }) {
   const c = useCharacter((s) => s.character);
   const pct = Math.max(0, Math.min(100, (c.hp.current / Math.max(1, c.hp.max)) * 100));
 
-  const apply = (op: "damage" | "heal") => {
+  const apply = (op: "damage" | "heal" | "temp") => {
     const input = (document.getElementById("encounter-delta") as HTMLInputElement | null);
     if (!input) return;
     const n = Math.max(0, parseInt(input.value, 10) || 0);
     if (!n) return;
     if (op === "damage") onDamage(n);
-    else onHeal(n);
+    else if (op === "heal") onHeal(n);
+    // Temp HP doesn't stack (D&D 5e RAW): keep the higher of current vs. new.
+    else onTemp(Math.max(c.hp.temp, n));
     input.value = "";
   };
 
@@ -262,7 +267,18 @@ function HpStrip({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 text-[11px] text-outline">
           {c.hp.temp > 0 && (
-            <span className="text-tertiary font-bold">+{c.hp.temp} temp</span>
+            <span className="inline-flex items-center gap-0.5 text-tertiary font-bold">
+              +{c.hp.temp} temp
+              <button
+                type="button"
+                onClick={() => onTemp(0)}
+                aria-label="Clear temporary HP"
+                title="Clear temporary HP"
+                className="inline-flex items-center text-tertiary/70 hover:text-tertiary active:scale-90 transition"
+              >
+                <Icon name="close" size={12} />
+              </button>
+            </span>
           )}
           {c.ac != null && (
             <span>
@@ -301,6 +317,13 @@ function HpStrip({
             onClick={() => apply("heal")}
           >
             <Icon name="healing" size={14} /> Heal
+          </button>
+          <button
+            className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-tertiary border border-tertiary/40 hover:bg-tertiary/10 active:scale-95 transition text-xs font-bold"
+            onClick={() => apply("temp")}
+            title="Add temporary HP (keeps the higher value — D&D 5e RAW)"
+          >
+            <Icon name="shield" size={14} /> Temp
           </button>
         </div>
       </div>
