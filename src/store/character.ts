@@ -433,3 +433,14 @@ export function preparedNonRituals(c: Character): Spell[] {
     .filter((s) => c.preparedSpells.includes(s.name))
     .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 }
+
+/**
+ * Rituals the character can actually cast as rituals. Wizards (Ritual Adept)
+ * cast any ritual in their spellbook even unprepared; every other class can
+ * only ritual-cast spells it has prepared (2024 rules).
+ */
+export function availableRituals(c: Character): Spell[] {
+  const rituals = c.spellbook.filter((s) => s.ritual);
+  if (c.className.trim().toLowerCase() === "wizard") return rituals;
+  return rituals.filter((s) => c.preparedSpells.includes(s.name));
+}
