@@ -6,7 +6,11 @@
  * most-recent picks to prevent immediate repeats).
  */
 
-import { getInspirePhraseDeck, type InspireTag } from "@/data/inspirePhrases";
+import {
+  getInspirePhraseDeck,
+  type InspirePhrase,
+  type InspireTag,
+} from "@/data/inspirePhrases";
 
 const STORAGE_KEY = "arcanist-ledger:inspirePhraseUsage";
 
@@ -33,10 +37,10 @@ function saveUsage(usage: UsageMap) {
   }
 }
 
-function poolFor(deckName: string, tag: InspireTag): string[] {
+function poolFor(deckName: string, tag: InspireTag): InspirePhrase[] {
   const deck = getInspirePhraseDeck(deckName);
   if (!deck) return [];
-  return deck.filter((p) => p.tags.includes(tag)).map((p) => p.text);
+  return deck.filter((p) => p.tags.includes(tag));
 }
 
 const trackerKey = (deckName: string, tag: InspireTag) => `${deckName}:${tag}`;
@@ -52,7 +56,7 @@ export function nextInspirePhrases(
   deckName: string,
   tag: InspireTag,
   count: number,
-): string[] {
+): InspirePhrase[] {
   const pool = poolFor(deckName, tag);
   if (pool.length === 0 || count <= 0) return [];
 
@@ -60,23 +64,23 @@ export function nextInspirePhrases(
   const key = trackerKey(deckName, tag);
   const stored = usage[key] ?? [];
 
-  // Filter to phrases still in the current pool (drops stale stored entries).
-  const used = new Set(pool.filter((p) => stored.includes(p)));
+  // Track by phrase text so adding/reordering phrases won't break rotation.
+  const used = new Set(stored.filter((t) => pool.some((p) => p.text === t)));
   const picked = new Set<string>();
-  const result: string[] = [];
+  const result: InspirePhrase[] = [];
 
   const target = Math.min(count, pool.length);
   while (result.length < target) {
-    let candidates = pool.filter((p) => !used.has(p) && !picked.has(p));
+    let candidates = pool.filter((p) => !used.has(p.text) && !picked.has(p.text));
     if (candidates.length === 0) {
       // All used — reset, but keep just-picked excluded so we don't echo them.
       used.clear();
-      candidates = pool.filter((p) => !picked.has(p));
+      candidates = pool.filter((p) => !picked.has(p.text));
       if (candidates.length === 0) break;
     }
     const pick = candidates[Math.floor(Math.random() * candidates.length)];
-    picked.add(pick);
-    used.add(pick);
+    picked.add(pick.text);
+    used.add(pick.text);
     result.push(pick);
   }
 
