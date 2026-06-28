@@ -302,6 +302,7 @@
     "exhaustion": 0
   },
   "concentration": null,
+  "party": ["Dunkelzan", "Lynala", "Kael", "Valeris", "Armathor"],
   "skills": {
     "persuasion": { "proficient": true },
     "arcana": { "proficient": true, "expertise": true },

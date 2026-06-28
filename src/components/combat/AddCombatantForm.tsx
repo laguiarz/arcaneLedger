@@ -1,63 +1,73 @@
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useCombat, type NewCombatantInput } from "@/store/combat";
-import { abilityMod } from "@/store/character";
-import {
-  fetchLibraryCharacter,
-  fetchLibraryManifest,
-} from "@/lib/characterLibrary";
+import { abilityMod, useCharacter } from "@/store/character";
 
 /**
- * Combat setup: pull the whole party from the cloud library in one click, and
- * add monsters/villains by hand. Party members already in the fight (matched by
- * library id) are skipped so re-clicking never duplicates them.
+ * Combat setup. The party is stored on the active character's sheet (a list of
+ * member names) so it persists between sessions; "Add party to combat" drops the
+ * active character plus every saved member into the initiative table. Monsters
+ * are added ad-hoc with optional initiative / HP / AC.
  */
 export default function AddCombatantForm() {
+  const character = useCharacter((s) => s.character);
+  const activeCharacterId = useCharacter((s) => s.activeCharacterId);
+  const setParty = useCharacter((s) => s.setParty);
+
   const combatants = useCombat((s) => s.combatants);
   const addCombatants = useCombat((s) => s.addCombatants);
   const addCombatant = useCombat((s) => s.addCombatant);
 
-  const [loadingParty, setLoadingParty] = useState(false);
-  const [partyError, setPartyError] = useState<string | null>(null);
+  const party = character.party ?? [];
+
+  const [newMember, setNewMember] = useState("");
+  const [partyMsg, setPartyMsg] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [init, setInit] = useState("");
   const [hp, setHp] = useState("");
   const [ac, setAc] = useState("");
 
-  const loadParty = async () => {
-    setLoadingParty(true);
-    setPartyError(null);
-    try {
-      const summaries = await fetchLibraryManifest();
-      const present = new Set(
-        combatants.map((c) => c.sourceId).filter(Boolean) as string[],
-      );
-      const toFetch = summaries.filter((s) => !present.has(s.id));
-      // Parallel fetch — no sequential N+1 over the network.
-      const chars = await Promise.all(
-        toFetch.map((s) =>
-          fetchLibraryCharacter(s.id).then((c) => ({ summary: s, char: c })),
-        ),
-      );
-      const inputs: NewCombatantInput[] = chars.map(({ summary, char }) => ({
-        name: char.name,
-        kind: "pc",
-        initiative: null,
-        initiativeBonus: char.initiativeBonus ?? abilityMod(char.abilities.dex),
-        ac: char.ac,
-        sourceId: summary.id,
-      }));
-      if (inputs.length === 0) {
-        setPartyError("The whole party is already in the fight.");
-      } else {
-        addCombatants(inputs);
-      }
-    } catch (e) {
-      setPartyError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoadingParty(false);
+  const addMember = () => {
+    const n = newMember.trim();
+    if (!n) return;
+    if (party.some((m) => m.toLowerCase() === n.toLowerCase())) {
+      setPartyMsg(`${n} is already in the party.`);
+      return;
     }
+    setParty([...party, n]);
+    setNewMember("");
+    setPartyMsg(null);
+  };
+
+  const removeMember = (member: string) => {
+    setParty(party.filter((m) => m !== member));
+  };
+
+  const addPartyToCombat = () => {
+    setPartyMsg(null);
+    const present = new Set(combatants.map((c) => c.name.toLowerCase()));
+    // The active character leads the line; the saved members follow.
+    const roster = [character.name, ...party];
+    const inputs: NewCombatantInput[] = roster
+      .filter((n) => n.trim() && !present.has(n.toLowerCase()))
+      .map((n) => {
+        const isActive = n === character.name;
+        return {
+          name: n,
+          kind: "pc",
+          initiative: null,
+          initiativeBonus: isActive
+            ? character.initiativeBonus ?? abilityMod(character.abilities.dex)
+            : undefined,
+          sourceId: isActive ? activeCharacterId ?? undefined : undefined,
+        };
+      });
+    if (inputs.length === 0) {
+      setPartyMsg("Everyone is already in the fight.");
+      return;
+    }
+    addCombatants(inputs);
   };
 
   const addMonster = () => {
@@ -77,25 +87,71 @@ export default function AddCombatantForm() {
   };
 
   return (
-    <div className="bg-surface-container border border-amber-900/30 rounded-lg p-sm space-y-sm">
-      <div className="flex items-center justify-between gap-sm flex-wrap">
-        <span className="label-caps text-primary">Setup</span>
-        <button
-          className="btn-ghost !py-1"
-          onClick={() => void loadParty()}
-          disabled={loadingParty}
+    <div className="bg-surface-container border border-amber-900/30 rounded-lg p-sm space-y-md">
+      {/* Party (persisted on the character sheet) */}
+      <div className="space-y-sm">
+        <div className="flex items-center justify-between gap-sm flex-wrap">
+          <span className="label-caps text-primary">Party — {character.name}</span>
+          <button className="btn-ghost !py-1" onClick={addPartyToCombat}>
+            <Icon name="groups" filled /> Add party to combat
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {/* The active character is always part of the line-up. */}
+          <span className="inline-flex items-center gap-1 text-xs bg-secondary/10 border border-secondary/40 text-secondary rounded-full px-2 py-1">
+            <Icon name="person" size={14} filled />
+            {character.name}
+            <span className="text-[10px] uppercase tracking-wider opacity-70">you</span>
+          </span>
+          {party.map((member) => (
+            <span
+              key={member}
+              className="inline-flex items-center gap-1 text-xs bg-surface-container-low border border-outline-variant/40 text-on-surface rounded-full px-2 py-1"
+            >
+              <Icon name="person" size={14} />
+              {member}
+              <button
+                onClick={() => removeMember(member)}
+                aria-label={`Remove ${member} from party`}
+                className="text-outline hover:text-error active:scale-90 transition"
+              >
+                <Icon name="close" size={12} />
+              </button>
+            </span>
+          ))}
+          {party.length === 0 && (
+            <span className="text-xs text-outline italic">
+              No party members yet — add the names below.
+            </span>
+          )}
+        </div>
+
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            addMember();
+          }}
         >
-          <Icon name={loadingParty ? "hourglass_top" : "groups"} filled />
-          {loadingParty ? "Loading party…" : "Load party"}
-        </button>
+          <input
+            value={newMember}
+            onChange={(e) => setNewMember(e.target.value)}
+            placeholder="Add a party member's name"
+            className="input-inset flex-1 min-w-[10rem] text-sm"
+          />
+          <button type="submit" className="btn-ghost !py-1.5" disabled={!newMember.trim()}>
+            <Icon name="person_add" /> Add member
+          </button>
+        </form>
+        {partyMsg && (
+          <p className="text-xs text-outline italic">{partyMsg}</p>
+        )}
       </div>
 
-      {partyError && (
-        <p className="text-xs text-error border border-error/40 bg-error/10 rounded-md px-2 py-1">
-          {partyError}
-        </p>
-      )}
+      <div className="h-px bg-outline-variant/30" />
 
+      {/* Monsters / villains (ad-hoc, not persisted) */}
       <form
         className="flex flex-wrap items-end gap-2"
         onSubmit={(e) => {

@@ -55,6 +55,9 @@ interface CharacterState {
   toggleCondition: (id: ConditionId) => void;
   setExhaustion: (level: number) => void;
 
+  // Party (names of fellow party members, persisted on the sheet)
+  setParty: (names: string[]) => void;
+
   // Rests
   longRest: () => void;
   shortRest: () => void;
@@ -285,6 +288,14 @@ export const useCharacter = create<CharacterState>()(
               ...s.character.conditions,
               exhaustion: Math.max(0, Math.min(6, level)),
             },
+          },
+        })),
+
+      setParty: (names) =>
+        set((s) => ({
+          character: {
+            ...s.character,
+            party: names.map((n) => n.trim()).filter(Boolean),
           },
         })),
 
