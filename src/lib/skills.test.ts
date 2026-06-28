@@ -84,6 +84,49 @@ describe("passivePerception", () => {
   });
 });
 
+describe("jack of all trades", () => {
+  it("adds floor(PB/2) to non-proficient checks for a bard L2+", () => {
+    const c = makeChar({ className: "Bard", level: 5 });
+    // Arcana INT 16 (+3) + floor(3/2)=1 → 4
+    expect(skillModifier(c, "arcana")).toBe(4);
+  });
+
+  it("does not stack with proficiency (proficient skill unaffected)", () => {
+    const c = makeChar({ className: "Bard", level: 5, skills: { history: { proficient: true } } });
+    // INT 16 (+3) + PB 3 = 6 (no extra half)
+    expect(skillModifier(c, "history")).toBe(6);
+  });
+
+  it("does not stack with expertise", () => {
+    const c = makeChar({ className: "Bard", level: 5, skills: { arcana: { expertise: true } } });
+    // INT 16 (+3) + 2×PB 3 = 9
+    expect(skillModifier(c, "arcana")).toBe(9);
+  });
+
+  it("does not apply to non-bards", () => {
+    const c = makeChar({ className: "Wizard", level: 5 });
+    expect(skillModifier(c, "arcana")).toBe(3);
+  });
+
+  it("does not apply to a bard below level 2", () => {
+    const c = makeChar({ className: "Bard", level: 1, proficiencyBonus: 2 });
+    // INT 16 (+3), no JoAT yet
+    expect(skillModifier(c, "arcana")).toBe(3);
+  });
+
+  it("applies to passive perception when not proficient", () => {
+    const c = makeChar({ className: "Bard", level: 5 });
+    // WIS 13 (+1) + floor(3/2)=1 → 2; passive 10 + 2 = 12
+    expect(passivePerception(c)).toBe(12);
+  });
+
+  it("does not add half-PB to passive perception when proficient", () => {
+    const c = makeChar({ className: "Bard", level: 5, skills: { perception: { proficient: true } } });
+    // WIS 13 (+1) + PB 3 = 4 → 14
+    expect(passivePerception(c)).toBe(14);
+  });
+});
+
 describe("skills undefined", () => {
   it("yields base ability mod for every skill", () => {
     const c = makeChar({ skills: undefined });
