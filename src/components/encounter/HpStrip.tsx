@@ -1,4 +1,5 @@
 import { useCharacter } from "@/store/character";
+import { armorClass } from "@/lib/armor";
 import Icon from "@/components/ui/Icon";
 
 /**
@@ -69,11 +70,9 @@ export default function HpStrip({
               </button>
             </span>
           )}
-          {c.ac != null && (
-            <span>
-              AC <span className="text-primary font-bold">{c.ac}</span>
-            </span>
-          )}
+          <span>
+            AC <span className="text-primary font-bold">{armorClass(c)}</span>
+          </span>
           {c.speed != null && (
             <span>
               Speed <span className="text-primary font-bold">{c.speed}</span>

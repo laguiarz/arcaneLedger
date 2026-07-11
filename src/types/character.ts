@@ -131,7 +131,42 @@ export interface HitDice {
   spent: number;
 }
 
-export type AbilityScores = Record<Ability, number>;
+/**
+ * A single ability score, broken into its independent contributors so an
+ * antimagic field (or a lost/attuned item) can strip exactly the right part.
+ *   effective score = base + featBonus + magicBonus
+ *
+ * - `base`      original die roll / point-buy / standard-array value.
+ * - `featBonus` permanent non-magical bumps: species/background, ASI, feats,
+ *               class features. NOT removed by antimagic.
+ * - `magicBonus` bonuses from magic items. Suppressed inside an antimagic
+ *               field. Zero for everyone today — the split exists so it's ready.
+ */
+export interface AbilityBreakdown {
+  base: number;
+  featBonus: number;
+  magicBonus: number;
+}
+
+export type AbilityScores = Record<Ability, AbilityBreakdown>;
+
+/**
+ * How Dexterity feeds Armor Class, per 2024/2014 armor rules:
+ * - `full`  light armor / no armor / Unarmored Defense — add the whole Dex mod.
+ * - `max2`  medium armor — add Dex mod, capped at +2.
+ * - `none`  heavy armor — Dex doesn't apply.
+ */
+export type DexToAc = "full" | "max2" | "none";
+
+export interface ArmorConfig {
+  /** Armor's base AC: 10 unarmored, 11 leather, 14 chain shirt, 18 plate, … */
+  base: number;
+  dexMode: DexToAc;
+  /** Shield equipped (+2). */
+  shield: boolean;
+  /** Everything else: rings/cloaks of protection, magic armor, styles, … */
+  miscBonus: number;
+}
 
 export type SkillName =
   | "athletics" // STR
@@ -169,7 +204,18 @@ export interface Character {
   savingThrowProficiencies: Ability[];
   hp: HitPoints;
   hitDice: HitDice;
+  /**
+   * Flat Armor Class. Used as a fallback / legacy value when {@link armor} is
+   * not configured (e.g. library JSON and XML imports author a plain number).
+   * When `armor` is present, AC is computed from it instead — see
+   * `armorClass()` in @/lib/armor.
+   */
   ac?: number;
+  /**
+   * Structured AC so it tracks Dexterity (and armor/shield/misc) live. Optional
+   * and opt-in: absent for imported characters until the sheet configures it.
+   */
+  armor?: ArmorConfig;
   initiativeBonus?: number;
   speed?: number;
 

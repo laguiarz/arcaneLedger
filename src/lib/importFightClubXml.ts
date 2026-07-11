@@ -9,6 +9,7 @@ import type {
   SpellSlots,
   SpellSource,
 } from "@/types/character";
+import { toAbilityScores } from "./abilities";
 import { FEAT_REGISTRY, normalizeFeatName } from "./featRegistry";
 import {
   SUBCLASS_REGISTRY,
@@ -500,7 +501,8 @@ export function parseFightClubXml(xml: string): Character {
     subclass,
     level,
     proficiencyBonus: proficiencyBonusForLevel(level),
-    abilities,
+    // XML has no feat/magic split — imported scores are all `base`.
+    abilities: toAbilityScores(abilities),
     savingThrowProficiencies,
     hp: { max: hpMax, current: Math.min(hpMax, hpCurrent), temp: 0 },
     hitDice,

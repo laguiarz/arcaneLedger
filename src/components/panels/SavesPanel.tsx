@@ -1,4 +1,4 @@
-import { useCharacter, savingThrow, abilityMod, spellSaveDc, spellAttackBonus } from "@/store/character";
+import { useCharacter, savingThrow, abilityMod, abilityScore, spellSaveDc, spellAttackBonus } from "@/store/character";
 import type { Ability } from "@/types/character";
 import { abilityShort } from "@/lib/constants";
 import Icon from "../ui/Icon";
@@ -26,7 +26,7 @@ export default function SavesPanel() {
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {ABILITIES.map((ab) => {
             const proficient = c.savingThrowProficiencies.includes(ab);
-            const score = c.abilities[ab];
+            const score = abilityScore(c, ab);
             const save = savingThrow(c, ab);
             return (
               <div

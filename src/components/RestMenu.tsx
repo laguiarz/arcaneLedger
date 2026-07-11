@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useCharacter, arcaneRecoveryBudget, abilityMod } from "@/store/character";
+import { useCharacter, arcaneRecoveryBudget, abilityMod, abilityScore } from "@/store/character";
 import type { SpellLevel } from "@/types/character";
 import Icon from "./ui/Icon";
 import Modal from "./ui/Modal";
@@ -40,7 +40,7 @@ export default function RestMenu({ open, onClose }: Props) {
   const totalCost = SPELL_LEVELS.reduce((sum, lvl) => sum + (pick[lvl] ?? 0) * lvl, 0);
   const overBudget = totalCost > budget;
 
-  const conMod = abilityMod(c.abilities.con);
+  const conMod = abilityMod(abilityScore(c, "con"));
   const hdRemaining = c.hitDice.max - c.hitDice.spent;
   const shortRestResources = c.resources.filter((r) => r.recharge === "short" && r.used > 0);
 

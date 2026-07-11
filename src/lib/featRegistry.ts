@@ -1,6 +1,5 @@
 import type {
   Ability,
-  AbilityScores,
   Cantrip,
   Resource,
   Spell,
@@ -25,7 +24,8 @@ export interface FeatGrants {
 }
 
 export interface FeatContext {
-  abilities: AbilityScores;
+  /** Effective ability scores (base + feat + magic already summed). */
+  abilities: Record<Ability, number>;
   proficiencyBonus: number;
 }
 

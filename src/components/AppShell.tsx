@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: "/combat", label: "Combat", icon: "groups" },
   { to: "/spellbook", label: "Spellbook", icon: "menu_book" },
   { to: "/skills", label: "Skills", icon: "checklist" },
+  { to: "/coin", label: "Coin", icon: "paid" },
   { to: "/settings", label: "Settings", icon: "settings" },
 ];
 

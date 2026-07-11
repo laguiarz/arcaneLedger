@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCharacter } from "@/store/character";
 import { abilityMod, skillModifier, passivePerception } from "@/lib/skills";
+import { abilityScore } from "@/lib/abilities";
 import { SKILLS_IN_ORDER, abilityLabel, abilityShort } from "@/lib/constants";
 import { useSkillRoll } from "@/components/SkillRollModal";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -169,7 +170,7 @@ function Breakdown({
   const prof = c.skills?.[skill];
   const proficient = !!(prof?.proficient || prof?.expertise);
   const expertise = !!prof?.expertise;
-  const base = abilityMod(c.abilities[ability]);
+  const base = abilityMod(abilityScore(c, ability));
   const pb = c.proficiencyBonus;
 
   const parts: string[] = [`ability mod (${fmt(base)})`];
