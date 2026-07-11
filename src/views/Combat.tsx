@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { abilityMod, useCharacter } from "@/store/character";
+import { abilityMod, abilityScore, useCharacter } from "@/store/character";
 import { useCombat, type NewCombatantInput } from "@/store/combat";
 import {
   activeConditionsInRound,
@@ -56,7 +56,7 @@ export default function Combat() {
           kind: "pc",
           initiative: null,
           initiativeBonus: isActive
-            ? character.initiativeBonus ?? abilityMod(character.abilities.dex)
+            ? character.initiativeBonus ?? abilityMod(abilityScore(character, "dex"))
             : undefined,
           sourceId: isActive ? activeCharacterId ?? undefined : undefined,
         };

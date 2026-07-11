@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { Character, Spell } from "@/types/character";
 import { availableRituals } from "@/store/character";
+import { toAbilityScores } from "@/lib/abilities";
 
 const ritualPrepared: Spell = {
   name: "Detect Magic", level: 1, school: "Divination", ritual: true,
@@ -18,7 +19,7 @@ function makeChar(overrides: Partial<Character> = {}): Character {
     className: "Wizard",
     level: 5,
     proficiencyBonus: 3,
-    abilities: { str: 10, dex: 14, con: 12, int: 16, wis: 13, cha: 8 },
+    abilities: toAbilityScores({ str: 10, dex: 14, con: 12, int: 16, wis: 13, cha: 8 }),
     savingThrowProficiencies: [],
     hp: { max: 20, current: 20, temp: 0 },
     hitDice: { die: 6, max: 5, spent: 0 },

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { Character } from "@/types/character";
 import { abilityMod, skillModifier, passivePerception } from "@/lib/skills";
+import { abilityScore, toAbilityScores } from "@/lib/abilities";
 
 function makeChar(overrides: Partial<Character> = {}): Character {
   return {
@@ -8,7 +9,7 @@ function makeChar(overrides: Partial<Character> = {}): Character {
     className: "Wizard",
     level: 5,
     proficiencyBonus: 3,
-    abilities: { str: 10, dex: 14, con: 12, int: 16, wis: 13, cha: 8 },
+    abilities: toAbilityScores({ str: 10, dex: 14, con: 12, int: 16, wis: 13, cha: 8 }),
     savingThrowProficiencies: [],
     hp: { max: 20, current: 20, temp: 0 },
     hitDice: { die: 6, max: 5, spent: 0 },
@@ -130,8 +131,8 @@ describe("jack of all trades", () => {
 describe("skills undefined", () => {
   it("yields base ability mod for every skill", () => {
     const c = makeChar({ skills: undefined });
-    expect(skillModifier(c, "athletics")).toBe(abilityMod(c.abilities.str));
-    expect(skillModifier(c, "persuasion")).toBe(abilityMod(c.abilities.cha));
-    expect(skillModifier(c, "investigation")).toBe(abilityMod(c.abilities.int));
+    expect(skillModifier(c, "athletics")).toBe(abilityMod(abilityScore(c, "str")));
+    expect(skillModifier(c, "persuasion")).toBe(abilityMod(abilityScore(c, "cha")));
+    expect(skillModifier(c, "investigation")).toBe(abilityMod(abilityScore(c, "int")));
   });
 });

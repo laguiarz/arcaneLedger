@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
   Ability,
+  AbilityBreakdown,
+  ArmorConfig,
   Character,
   ConditionId,
   Resource,
@@ -9,6 +11,12 @@ import type {
   SpellLevel,
 } from "@/types/character";
 import { sampleWizard } from "@/data/sampleWizard";
+import { abilityMod, abilityScore, normalizeAbilities } from "@/lib/abilities";
+import { defaultArmorConfig } from "@/lib/armor";
+
+// Re-exported so existing `import { abilityMod } from "@/store/character"`
+// call sites keep working now that the helpers live in @/lib/abilities.
+export { abilityMod, abilityScore };
 
 interface CharacterState {
   character: Character;
@@ -50,6 +58,17 @@ interface CharacterState {
   useResource: (resourceName: string, count?: number) => void;
   refundResource: (resourceName: string, count?: number) => void;
   setResource: (resourceName: string, used: number) => void;
+
+  // Abilities
+  /** Patch one ability's breakdown (base / featBonus / magicBonus). */
+  setAbilityBreakdown: (ability: Ability, parts: Partial<AbilityBreakdown>) => void;
+
+  // Armor Class
+  /**
+   * Patch the AC formula. Seeds a config from the flat `ac` on first edit, so
+   * calling this instantiates `armor` (and AC starts tracking Dexterity).
+   */
+  setArmor: (parts: Partial<ArmorConfig>) => void;
 
   // Conditions
   toggleCondition: (id: ConditionId) => void;
@@ -129,7 +148,7 @@ export const useCharacter = create<CharacterState>()(
           const c = s.character;
           const remaining = c.hitDice.max - c.hitDice.spent;
           if (remaining <= 0) return {};
-          const conMod = abilityMod(c.abilities.con);
+          const conMod = abilityMod(abilityScore(c, "con"));
           const healed = Math.max(1, roll + conMod);
           return {
             character: {
@@ -264,6 +283,23 @@ export const useCharacter = create<CharacterState>()(
           },
         })),
 
+      setAbilityBreakdown: (ability, parts) =>
+        set((s) => ({
+          character: {
+            ...s.character,
+            abilities: {
+              ...s.character.abilities,
+              [ability]: { ...s.character.abilities[ability], ...parts },
+            },
+          },
+        })),
+
+      setArmor: (parts) =>
+        set((s) => {
+          const cur = s.character.armor ?? defaultArmorConfig(s.character);
+          return { character: { ...s.character, armor: { ...cur, ...parts } } };
+        }),
+
       toggleCondition: (id) =>
         set((s) => {
           const has = s.character.conditions.active.includes(id);
@@ -371,6 +407,9 @@ export const useCharacter = create<CharacterState>()(
             innateSpells: c.innateSpells ?? [],
             racialFreeCastsUsed: c.racialFreeCastsUsed ?? {},
             hitDice: c.hitDice ?? { die: 8, max: c.level, spent: 0 },
+            // Library JSON and hand-edited files may author abilities as plain
+            // numbers; coerce to the base/feat/magic breakdown shape.
+            abilities: normalizeAbilities(c.abilities),
           },
           // Default to "custom" when the caller didn't tell us where the
           // character came from (e.g. Settings file import).
@@ -384,19 +423,27 @@ export const useCharacter = create<CharacterState>()(
     {
       name: "arcanist-ledger:character",
       // v4: added activeCharacterId for the cloud character library.
-      // Old saves are dropped so users see the first-run picker.
-      version: 4,
+      // v5: abilities became base/feat/magic breakdowns. Migrate in place so
+      // users keep their active character instead of re-picking.
+      version: 5,
+      migrate: (persisted, version) => {
+        const state = persisted as { character?: Character } | undefined;
+        if (state?.character && version < 5) {
+          state.character = {
+            ...state.character,
+            abilities: normalizeAbilities(state.character.abilities),
+          };
+        }
+        return state as CharacterState;
+      },
     },
   ),
 );
 
 // Selectors / helpers
-export function abilityMod(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
 
 export function savingThrow(c: Character, ability: Ability): number {
-  const mod = abilityMod(c.abilities[ability]);
+  const mod = abilityMod(abilityScore(c, ability));
   const prof = c.savingThrowProficiencies.includes(ability) ? c.proficiencyBonus : 0;
   return mod + prof;
 }
@@ -404,13 +451,13 @@ export function savingThrow(c: Character, ability: Ability): number {
 export function spellSaveDc(c: Character): number {
   if (c.spellSaveDcOverride != null) return c.spellSaveDcOverride;
   const ab = c.spellcastingAbility ?? "int";
-  return 8 + c.proficiencyBonus + abilityMod(c.abilities[ab]);
+  return 8 + c.proficiencyBonus + abilityMod(abilityScore(c, ab));
 }
 
 export function spellAttackBonus(c: Character): number {
   if (c.spellAttackBonusOverride != null) return c.spellAttackBonusOverride;
   const ab = c.spellcastingAbility ?? "int";
-  return c.proficiencyBonus + abilityMod(c.abilities[ab]);
+  return c.proficiencyBonus + abilityMod(abilityScore(c, ab));
 }
 
 export function arcaneRecoveryBudget(level: number): number {

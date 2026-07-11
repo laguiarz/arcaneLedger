@@ -5,6 +5,7 @@ import Encounter from "./views/Encounter";
 import Combat from "./views/Combat";
 import Spellbook from "./views/Spellbook";
 import Skills from "./views/Skills";
+import Coin from "./views/Coin";
 import Settings from "./views/Settings";
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/combat" element={<Combat />} />
         <Route path="/spellbook" element={<Spellbook />} />
         <Route path="/skills" element={<Skills />} />
+        <Route path="/coin" element={<Coin />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>

@@ -1,5 +1,5 @@
 import type { Ability, Character, SkillName } from "@/types/character";
-import { abilityMod } from "@/store/character";
+import { abilityMod, abilityScore } from "@/lib/abilities";
 import { SKILLS_IN_ORDER } from "@/lib/constants";
 
 export { abilityMod };
@@ -25,7 +25,7 @@ export function isJackOfAllTrades(c: Character): boolean {
  */
 export function skillModifier(c: Character, skill: SkillName): number {
   const ability = SKILL_ABILITY[skill];
-  const base = abilityMod(c.abilities[ability]);
+  const base = abilityMod(abilityScore(c, ability));
   const prof = c.skills?.[skill];
   if (prof?.expertise) return base + 2 * c.proficiencyBonus;
   if (prof?.proficient) return base + c.proficiencyBonus;

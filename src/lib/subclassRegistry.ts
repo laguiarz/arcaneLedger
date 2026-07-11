@@ -1,5 +1,5 @@
 import type {
-  AbilityScores,
+  Ability,
   Cantrip,
   Resource,
   Spell,
@@ -54,7 +54,8 @@ export interface SubclassGrants {
 }
 
 export interface SubclassContext {
-  abilities: AbilityScores;
+  /** Effective ability scores (base + feat + magic already summed). */
+  abilities: Record<Ability, number>;
   proficiencyBonus: number;
   /** Class level — drives which features are active. */
   level: number;

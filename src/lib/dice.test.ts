@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { Character } from "@/types/character";
 import { rollD20, rollSkillCheck } from "@/lib/dice";
+import { toAbilityScores } from "@/lib/abilities";
 
 function makeChar(overrides: Partial<Character> = {}): Character {
   return {
@@ -8,7 +9,7 @@ function makeChar(overrides: Partial<Character> = {}): Character {
     className: "Wizard",
     level: 5,
     proficiencyBonus: 3,
-    abilities: { str: 10, dex: 14, con: 12, int: 16, wis: 13, cha: 8 },
+    abilities: toAbilityScores({ str: 10, dex: 14, con: 12, int: 16, wis: 13, cha: 8 }),
     savingThrowProficiencies: [],
     hp: { max: 20, current: 20, temp: 0 },
     hitDice: { die: 6, max: 5, spent: 0 },

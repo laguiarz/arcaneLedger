@@ -1,4 +1,5 @@
 import type { Character } from "@/types/character";
+import { toAbilityScores } from "@/lib/abilities";
 
 /**
  * Sample wizard, level 5 (School of Evocation).
@@ -12,7 +13,7 @@ export const sampleWizard: Character = {
   subclass: "School of Evocation",
   level: 5,
   proficiencyBonus: 3,
-  abilities: { str: 8, dex: 14, con: 14, int: 16, wis: 12, cha: 10 },
+  abilities: toAbilityScores({ str: 8, dex: 14, con: 14, int: 16, wis: 12, cha: 10 }),
   savingThrowProficiencies: ["int", "wis"],
   hp: { max: 32, current: 32, temp: 0 },
   hitDice: { die: 6, max: 5, spent: 0 },
