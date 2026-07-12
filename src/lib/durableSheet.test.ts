@@ -39,6 +39,7 @@ describe("applyDurable", () => {
         int: { base: 18, featBonus: 2, magicBonus: 0 },
       },
       party: ["Grommash", "Sildar"],
+      narrationPrompt: "Narrá como un juglar sarcástico.",
     });
 
     const next = applyDurable(live, durable);
@@ -49,6 +50,7 @@ describe("applyDurable", () => {
     expect(next.hp.max).toBe(40);
     expect(next.abilities.int.base).toBe(18);
     expect(next.party).toEqual(["Grommash", "Sildar"]);
+    expect(next.narrationPrompt).toBe("Narrá como un juglar sarcástico.");
 
     // Volatile session state preserved:
     expect(next.hp.current).toBe(7);

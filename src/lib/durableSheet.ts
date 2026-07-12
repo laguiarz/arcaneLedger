@@ -21,6 +21,8 @@ export interface DurableSheet {
   party: string[];
   level: number;
   proficiencyBonus: number;
+  /** Per-character AI narration prompt (each character its own voice). */
+  narrationPrompt?: string;
 }
 
 /** Pull the durable fields out of a character. */
@@ -33,6 +35,7 @@ export function extractDurable(c: Character): DurableSheet {
     party: c.party ?? [],
     level: c.level,
     proficiencyBonus: c.proficiencyBonus,
+    narrationPrompt: c.narrationPrompt,
   };
 }
 
@@ -51,6 +54,7 @@ export function applyDurable(c: Character, d: DurableSheet): Character {
     party: d.party,
     level: d.level,
     proficiencyBonus: d.proficiencyBonus,
+    narrationPrompt: d.narrationPrompt,
     hp: {
       ...c.hp,
       max,

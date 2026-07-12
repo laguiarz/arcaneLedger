@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Character, Spell } from "@/types/character";
-import { availableRituals } from "@/store/character";
+import { availableRituals, useCharacter } from "@/store/character";
 import { toAbilityScores } from "@/lib/abilities";
 
 const ritualPrepared: Spell = {
@@ -51,5 +51,17 @@ describe("availableRituals", () => {
   it("never returns non-ritual spells", () => {
     const names = availableRituals(makeChar()).map((s) => s.name);
     expect(names).not.toContain("Magic Missile");
+  });
+});
+
+describe("setNarrationPrompt", () => {
+  it("stores a per-character prompt and clears back to undefined when emptied", () => {
+    useCharacter.setState({ character: makeChar() });
+    useCharacter.getState().setNarrationPrompt("Narrá con ironía.");
+    expect(useCharacter.getState().character.narrationPrompt).toBe("Narrá con ironía.");
+
+    // Blank input clears it (falls back to the default at read time).
+    useCharacter.getState().setNarrationPrompt("   ");
+    expect(useCharacter.getState().character.narrationPrompt).toBeUndefined();
   });
 });

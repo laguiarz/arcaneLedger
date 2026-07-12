@@ -4,15 +4,15 @@ import Icon from "@/components/ui/Icon";
 import type { Combatant } from "@/types/combat";
 import { buildNarrationPayload } from "@/lib/combatLog";
 import { generateNarration } from "@/lib/gemini";
+import { useCharacter } from "@/store/character";
 import {
   DEFAULT_MODEL,
+  DEFAULT_NARRATION_PROMPT,
+  effectiveNarrationPrompt,
   getApiKey,
   getModel,
-  getPrompt,
-  resetPrompt,
   setApiKey,
   setModel,
-  setPrompt,
 } from "@/lib/combatNarration";
 
 type Phase = "idle" | "loading" | "result" | "error";
@@ -56,7 +56,12 @@ export default function NarrationModal({
     if (!open) return;
     setApiKeyDraft(getApiKey());
     setModelDraft(getModel());
-    setPromptDraft(getPrompt());
+    // Adopt the pre-migration global prompt into this character (once), then
+    // seed the draft from the character's own prompt (or the default).
+    useCharacter.getState().adoptLegacyNarrationPrompt();
+    setPromptDraft(
+      effectiveNarrationPrompt(useCharacter.getState().character.narrationPrompt),
+    );
     // Settings stay collapsed by default — production needs no client key
     // (the /api/narrate proxy holds it). Open them on demand for model/prompt.
     setShowSettings(false);
@@ -73,7 +78,7 @@ export default function NarrationModal({
   const persistSettings = () => {
     setApiKey(apiKeyDraft);
     setModel(modelDraft);
-    setPrompt(promptDraft);
+    useCharacter.getState().setNarrationPrompt(promptDraft);
   };
 
   const generate = async () => {
@@ -92,7 +97,7 @@ export default function NarrationModal({
         // Optional: only used if the proxy is absent (local dev fallback).
         apiKey: apiKeyDraft.trim() || undefined,
         model: modelDraft.trim() || DEFAULT_MODEL,
-        systemPrompt: promptDraft.trim() || getPrompt(),
+        systemPrompt: promptDraft.trim() || DEFAULT_NARRATION_PROMPT,
         userContent,
         signal: controller.signal,
       });
@@ -176,8 +181,8 @@ export default function NarrationModal({
               <button
                 className="btn-ghost !py-1"
                 onClick={() => {
-                  resetPrompt();
-                  setPromptDraft(getPrompt());
+                  useCharacter.getState().setNarrationPrompt("");
+                  setPromptDraft(DEFAULT_NARRATION_PROMPT);
                 }}
               >
                 <Icon name="refresh" /> Reset prompt
