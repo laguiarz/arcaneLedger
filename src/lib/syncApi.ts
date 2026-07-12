@@ -14,7 +14,10 @@ export interface RemoteBundle {
 }
 
 function base(characterId: string): string {
-  return `/api/sync/${encodeURIComponent(characterId)}`;
+  // characterId travels as a query param (not a path segment) so the function
+  // is a plain `api/sync.ts` — dynamic route files don't route reliably under
+  // `vercel dev`.
+  return `/api/sync?characterId=${encodeURIComponent(characterId)}`;
 }
 
 function authHeaders(): Record<string, string> {

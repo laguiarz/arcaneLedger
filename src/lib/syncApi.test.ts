@@ -46,7 +46,7 @@ describe("syncApi", () => {
     const bundle = await getRemote("lyari");
 
     const [url, init] = fetchFn.mock.calls[0];
-    expect(url).toBe("/api/sync/lyari");
+    expect(url).toBe("/api/sync?characterId=lyari");
     expect(init.method).toBe("GET");
     expect(init.headers.Authorization).toBe("Bearer test-secret");
     expect(bundle.state).toEqual(state);
@@ -64,7 +64,7 @@ describe("syncApi", () => {
     const fetchFn = mockFetch({ ok: true });
     await putState("lyari", state);
     const [url, init] = fetchFn.mock.calls[0];
-    expect(url).toBe("/api/sync/lyari");
+    expect(url).toBe("/api/sync?characterId=lyari");
     expect(init.method).toBe("PUT");
     expect(JSON.parse(init.body ?? "{}")).toEqual({ state });
   });

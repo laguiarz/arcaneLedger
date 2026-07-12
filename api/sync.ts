@@ -37,9 +37,12 @@ interface CombatRecord {
 
 /** Run one Redis command via the Upstash REST endpoint. Returns `result`. */
 async function redis(command: unknown[]): Promise<unknown> {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) throw new Error("Server is missing Upstash env vars.");
+  // Vercel's Upstash Marketplace integration injects KV_REST_API_* names; the
+  // UPSTASH_REDIS_REST_* names are the fallback if wired up by hand.
+  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const token =
+    process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) throw new Error("Server is missing Upstash/KV env vars.");
   const r = await fetch(url, {
     method: "POST",
     headers: {

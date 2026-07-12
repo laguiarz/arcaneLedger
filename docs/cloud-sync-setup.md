@@ -9,9 +9,10 @@ steps only turn on cross-device sync. Everything below sits on **free tiers**.
    **Upstash** → create a **Redis** database (or create it at upstash.com and
    copy the REST credentials). The free plan (~500K commands/month, 256 MB) is
    far more than a single-user companion needs.
-2. From the database's REST section, copy **`UPSTASH_REDIS_REST_URL`** and
-   **`UPSTASH_REDIS_REST_TOKEN`**. (The Vercel integration usually injects these
-   env vars automatically.)
+2. Connecting the store to the project auto-injects the REST credentials as
+   **`KV_REST_API_URL`** and **`KV_REST_API_TOKEN`** (Production + Preview). The
+   function reads those names (falling back to `UPSTASH_REDIS_REST_URL` /
+   `UPSTASH_REDIS_REST_TOKEN` if you wire them by hand). No manual step needed.
 
 ## 2. Set the shared secret
 
@@ -23,11 +24,11 @@ Preview):
 
 | Name | Value |
 |------|-------|
-| `UPSTASH_REDIS_REST_URL` | (from Upstash) |
-| `UPSTASH_REDIS_REST_TOKEN` | (from Upstash) |
 | `SYNC_SECRET` | your long random string |
 
-Redeploy so the `/api/sync/[characterId]` function picks them up.
+(The `KV_REST_API_*` vars come from the Upstash integration automatically.)
+
+Redeploy so the `/api/sync` function picks up the new secret.
 
 ## 3. Enable sync in the app
 
@@ -54,6 +55,20 @@ merge by id, and the append is idempotent). The combat itself syncs; re-run
 
 ## Local dev
 
-`vite` alone does not run the `/api` functions. To exercise sync end-to-end
-locally use `vercel dev` with the same env vars in a `.env` file. Without them,
-the app still runs — sync just reports an error/offline status and no-ops.
+`npm run dev` serves `/api/sync` via a dev-only Vite middleware (see
+`devApiSync` in `vite.config.ts`), so you can exercise sync locally without
+`vercel dev` (whose proxy breaks Vite's HMR client → blank screen).
+
+It needs the credentials in a git-ignored `.env.local`:
+
+```
+KV_REST_API_URL="https://<your-db>.upstash.io"
+KV_REST_API_TOKEN="<token>"
+SYNC_SECRET="<your secret>"
+```
+
+`vercel env pull .env.local` returns Sensitive/integration vars as empty, so
+copy the two `KV_REST_API_*` values from the Vercel Storage → your DB →
+".env.local" snippet, and set `SYNC_SECRET` to the same string you type in the
+app's Settings. Without these, the app still runs — sync just reports
+error/offline and no-ops.
