@@ -60,7 +60,7 @@ export default function AddCombatantForm() {
   };
 
   return (
-    <div className="bg-surface-container-low border border-amber-900/30 rounded-lg p-sm space-y-md">
+    <div className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-sm space-y-md">
       {/* Add monster — the most common setup action, so it goes first here. */}
       <div className="space-y-sm">
         <span className="label-caps text-primary">Add monster / villain</span>

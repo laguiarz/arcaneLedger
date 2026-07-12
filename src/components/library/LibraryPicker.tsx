@@ -108,7 +108,7 @@ export default function LibraryPicker({
                   className={`w-full text-left flex items-center gap-sm rounded-lg border px-sm py-2 transition ${
                     isActive
                       ? "border-primary/60 bg-primary/10"
-                      : "border-amber-900/30 bg-surface-container-lowest hover:border-primary/40 hover:bg-primary/5"
+                      : "border-outline-variant/30 bg-surface-container-lowest hover:border-primary/40 hover:bg-primary/5"
                   } disabled:opacity-50`}
                 >
                   <div className="flex-1 min-w-0">

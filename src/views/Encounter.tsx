@@ -75,7 +75,7 @@ export default function Encounter() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-sm items-stretch">
         <HpStrip onDamage={takeDamage} onHeal={heal} onTemp={setTempHp} />
 
-        <div className="lg:col-span-7 bg-surface-container border border-amber-900/30 rounded-lg p-sm">
+        <div className="lg:col-span-7 bg-surface-container border border-outline-variant/30 rounded-lg p-sm">
           <div className="flex items-center justify-between mb-1">
             <span className="label-caps text-primary">Spell Slots</span>
             <span className="text-[10px] text-outline">tap to spend / recover</span>
@@ -101,7 +101,7 @@ export default function Encounter() {
                           className={`w-3.5 h-6 rounded-sm transition active:scale-90 ${
                             filled
                               ? "bg-primary shadow-[0_0_6px_rgba(233,193,118,0.5)] border border-primary-fixed"
-                              : "bg-surface-container-highest border border-amber-900/50 hover:border-primary/40"
+                              : "bg-surface-container-highest border border-outline-variant/50 hover:border-primary/40"
                           }`}
                         />
                       );

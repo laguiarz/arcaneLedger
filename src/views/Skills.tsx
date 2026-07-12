@@ -61,7 +61,7 @@ export default function Skills() {
 
 function PassivePerceptionCard({ c }: { c: Character }) {
   return (
-    <div className="bg-surface-container border border-amber-900/30 rounded-xl p-md relative overflow-hidden">
+    <div className="bg-surface-container border border-outline-variant/30 rounded-xl p-md relative overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-sm">

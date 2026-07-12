@@ -87,7 +87,7 @@ export default function Combat() {
           inputId="combat-delta"
           className="lg:col-span-5"
         />
-        <div className="lg:col-span-7 bg-surface-container border border-amber-900/30 rounded-lg p-sm flex items-center justify-between gap-sm flex-wrap">
+        <div className="lg:col-span-7 bg-surface-container border border-outline-variant/30 rounded-lg p-sm flex items-center justify-between gap-sm flex-wrap">
           <div className="flex items-center gap-2">
             <Icon name="hourglass_top" className="text-primary" filled />
             <span className="font-serif text-title-sm text-primary">Round {round}</span>
@@ -109,7 +109,7 @@ export default function Combat() {
           Preloading the party…
         </p>
       ) : (
-        <div className="bg-surface-container border border-amber-900/30 rounded-lg p-sm overflow-x-auto">
+        <div className="bg-surface-container border border-outline-variant/30 rounded-lg p-sm overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="text-left">

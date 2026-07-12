@@ -47,7 +47,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
   const isCounter = resource.max > 0;
 
   return (
-    <div className="bg-surface-container border border-amber-900/30 rounded-xl p-sm relative overflow-hidden">
+    <div className="bg-surface-container border border-outline-variant/30 rounded-xl p-sm relative overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative">
         <div className="flex items-start justify-between gap-sm">
@@ -124,7 +124,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
                   onClick={() => setUsed(resource.name, used ? i : i + 1)}
                   className={`flex-1 h-2 rounded-sm transition ${
                     used
-                      ? "bg-surface-container-highest border border-amber-900/50"
+                      ? "bg-surface-container-highest border border-outline-variant/50"
                       : "bg-primary/80 shadow-[0_0_6px_rgba(233,193,118,0.4)]"
                   }`}
                   aria-label={used ? `Restore use ${i + 1}` : `Spend use ${i + 1}`}

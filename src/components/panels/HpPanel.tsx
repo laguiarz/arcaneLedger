@@ -48,7 +48,7 @@ export default function HpPanel() {
         <div className="flex flex-col items-center mt-sm gap-sm">
           <div className="relative w-36 h-36 flex items-center justify-center">
             <div className="absolute inset-0 rounded-full" style={gaugeStyle} />
-            <div className="absolute inset-2 rounded-full bg-surface-container-low border border-amber-900/30" />
+            <div className="absolute inset-2 rounded-full bg-surface-container-low border border-outline-variant/30" />
             <div className="relative text-center">
               <div className="font-serif text-display-lg text-primary leading-none">{c.hp.current}</div>
               <div className="label-caps text-on-surface-variant mt-1">OF {c.hp.max} HP</div>
