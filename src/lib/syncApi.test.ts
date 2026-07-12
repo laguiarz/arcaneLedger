@@ -7,13 +7,19 @@ import { getRemote, putState, postCombat } from "./syncApi";
 import type { SyncedState } from "./syncMerge";
 import type { CombatRecord } from "@/types/combatLog";
 
+interface FetchInit {
+  method: string;
+  headers: Record<string, string>;
+  body?: string;
+}
+
 function mockFetch(response: {
   ok: boolean;
   status?: number;
   statusText?: string;
   json?: unknown;
 }) {
-  const fn = vi.fn(async () => ({
+  const fn = vi.fn(async (_url: string, _init: FetchInit) => ({
     ok: response.ok,
     status: response.status ?? (response.ok ? 200 : 500),
     statusText: response.statusText ?? "",
@@ -60,14 +66,14 @@ describe("syncApi", () => {
     const [url, init] = fetchFn.mock.calls[0];
     expect(url).toBe("/api/sync/lyari");
     expect(init.method).toBe("PUT");
-    expect(JSON.parse(init.body)).toEqual({ state });
+    expect(JSON.parse(init.body ?? "{}")).toEqual({ state });
   });
 
   it("postCombat PUTs a { combat } body", async () => {
     const fetchFn = mockFetch({ ok: true });
     await postCombat("lyari", record);
     const [, init] = fetchFn.mock.calls[0];
-    expect(JSON.parse(init.body)).toEqual({ combat: record });
+    expect(JSON.parse(init.body ?? "{}")).toEqual({ combat: record });
   });
 
   it("throws on a 401 with the server error message", async () => {
