@@ -35,6 +35,17 @@ export interface Purse {
 
 const LEGACY = "__legacy__";
 const emptyPurse = (): Purse => ({ startingGold: 0, entries: [], treasure: [] });
+/**
+ * A single stable, frozen empty purse. {@link purseFor} returns THIS reference
+ * for a character with no purse yet, so a `useCoin((s) => purseFor(s, cid))`
+ * selector keeps a stable identity across renders (a fresh object each time
+ * would trip Zustand's getSnapshot equality check → infinite re-render loop).
+ */
+const EMPTY_PURSE: Purse = Object.freeze({
+  startingGold: 0,
+  entries: [],
+  treasure: [],
+});
 
 interface CoinState {
   /** Purses keyed by character id. */
@@ -60,7 +71,7 @@ export function purseFor(
   state: { purses: Record<string, Purse> },
   cid: string,
 ): Purse {
-  return state.purses[cid] ?? emptyPurse();
+  return state.purses[cid] ?? EMPTY_PURSE;
 }
 
 /** Running balance = starting gold + sum of every entry. */

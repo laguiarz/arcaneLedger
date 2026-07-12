@@ -34,6 +34,12 @@ describe("purseFor", () => {
       treasure: [],
     });
   });
+
+  it("returns a STABLE reference for a missing purse (no getSnapshot loop)", () => {
+    const state = { purses: {} };
+    // Same identity across calls → safe to use directly as a Zustand selector.
+    expect(purseFor(state, "nobody")).toBe(purseFor(state, "nobody"));
+  });
 });
 
 describe("useCoin — per-character purses", () => {

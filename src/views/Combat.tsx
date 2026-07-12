@@ -8,6 +8,7 @@ import {
 } from "@/lib/combat";
 import { hasNarratableActions } from "@/lib/combatLog";
 import { useCombatLog } from "@/store/combatLog";
+import { useSync } from "@/store/sync";
 import { CONDITIONS } from "@/lib/constants";
 import type { Combatant, CombatantCondition } from "@/types/combat";
 import Icon from "@/components/ui/Icon";
@@ -59,6 +60,8 @@ export default function Combat() {
         endedAt: Date.now(),
       });
       setSavedRecordId(rec.id);
+      // Push to the cloud (no-op unless sync is enabled).
+      void useSync.getState().pushCombat(rec);
     }
     setNarrateOpen(true);
   };
