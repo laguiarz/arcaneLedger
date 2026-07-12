@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useCoin, coinBalance } from "@/store/coin";
+import { useEffect, useState } from "react";
+import { useCoin, coinBalance, purseFor } from "@/store/coin";
+import { useCharacter } from "@/store/character";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Icon from "@/components/ui/Icon";
 
@@ -8,16 +9,23 @@ function gold(n: number) {
 }
 
 export default function Coin() {
-  const startingGold = useCoin((s) => s.startingGold);
-  const entries = useCoin((s) => s.entries);
-  const treasure = useCoin((s) => s.treasure);
+  const activeCharacterId = useCharacter((s) => s.activeCharacterId);
+  const cid = activeCharacterId ?? "custom";
+
+  // First time this character is viewed, inherit the pre-v2 global purse.
+  useEffect(() => {
+    useCoin.getState().adoptLegacyPurse(cid);
+  }, [cid]);
+
+  const purse = useCoin((s) => purseFor(s, cid));
+  const { startingGold, entries, treasure } = purse;
   const setStartingGold = useCoin((s) => s.setStartingGold);
   const addEntry = useCoin((s) => s.addEntry);
   const removeEntry = useCoin((s) => s.removeEntry);
   const addTreasure = useCoin((s) => s.addTreasure);
   const removeTreasure = useCoin((s) => s.removeTreasure);
 
-  const balance = coinBalance(startingGold, entries);
+  const balance = coinBalance(purse);
 
   // Running balance per entry (oldest→newest), then displayed newest-first.
   const chronological = [...entries].reverse();
@@ -43,7 +51,7 @@ export default function Coin() {
           <input
             type="number"
             value={startingGold}
-            onChange={(e) => setStartingGold(Number(e.target.value) || 0)}
+            onChange={(e) => setStartingGold(cid, Number(e.target.value) || 0)}
             className="input-inset w-28 text-right font-mono text-on-surface"
             aria-label="Starting gold"
           />
@@ -54,7 +62,7 @@ export default function Coin() {
         {/* Movements */}
         <section className="md:col-span-2 space-y-sm">
           <SectionHeader icon="account_balance" title="Movements" subtitle="Income and expenses" />
-          <EntryForm onAdd={addEntry} />
+          <EntryForm onAdd={(amount, note) => addEntry(cid, amount, note)} />
 
           {entries.length === 0 ? (
             <p className="text-outline text-sm italic px-1">No movements yet.</p>
@@ -88,7 +96,7 @@ export default function Coin() {
                       {gold(Math.abs(e.amount))}
                     </span>
                     <button
-                      onClick={() => removeEntry(e.id)}
+                      onClick={() => removeEntry(cid, e.id)}
                       className="btn-icon shrink-0"
                       aria-label="Delete movement"
                     >
@@ -104,7 +112,7 @@ export default function Coin() {
         {/* Treasure */}
         <section className="space-y-sm">
           <SectionHeader icon="diamond" title="Treasure" subtitle="Found, not yet cashed" />
-          <TreasureForm onAdd={addTreasure} />
+          <TreasureForm onAdd={(text) => addTreasure(cid, text)} />
 
           {treasure.length === 0 ? (
             <p className="text-outline text-sm italic px-1">Nothing hoarded yet.</p>
@@ -118,7 +126,7 @@ export default function Coin() {
                   <Icon name="diamond" size={16} className="text-primary shrink-0" />
                   <span className="text-sm text-on-surface flex-1 break-words">{t.text}</span>
                   <button
-                    onClick={() => removeTreasure(t.id)}
+                    onClick={() => removeTreasure(cid, t.id)}
                     className="btn-icon shrink-0"
                     aria-label="Remove treasure"
                   >
