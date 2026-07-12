@@ -168,12 +168,12 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
       lore: "El mythal era el escudo mágico que envolvía Myth Drannor, tejido por sus archimagos.",
     },
     {
-      text: "En la Guerra de las Lágrimas no triunfó el temor, / sino quien cantó con la espada en alto. Cantá, jugador.",
+      text: "No es la espada la que sostiene el reino, sino la mano que se niega a soltarla.No es la muralla la que guarda la memoria,sino el corazón que rehúsa olvidarla.",
       tags: COMBAT,
       lore: "La Guerra de las Lágrimas (711–714 DR) fue la caída de Myth Drannor ante el Ejército de la Oscuridad.",
     },
     {
-      text: "Caé, si hay que caer, como cayó Myth Drannor: / tan alto que aún hoy se la nombra con honor.",
+      text: "Si hay que caer, cae como cayó Myth Drannor: / tan alto que aún hoy se la nombra con honor.",
       tags: COMBAT,
       lore: "Myth Drannor cayó en 714 DR, pero su esplendor la volvió legendaria por milenios.",
     },
@@ -183,17 +183,17 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
       lore: "El Canto de Espadas élfico no distingue al bailarín del guerrero: son una misma cosa.",
     },
     {
-      text: "Canta-espada, paso liviano: / la fortuna sigue a quien va ufano.",
+      text: "Que hoy nuestras espadas escriban el verso que mañana otros cantarán.",
       tags: COMBAT,
-      lore: "El estilo de los Cantaespadas se apoyaba en el movimiento ágil tanto como en el acero.",
+      lore: "",
     },
     {
-      text: "La Srinshee esperó el momento sin perder la calma. / Esperá el tuyo: la paciencia también es un arma.",
+      text: "Srinshee esperó el momento sin perder la calma. / Esperá el tuyo: la paciencia también es un arma.",
       tags: TASK,
       lore: "La Srinshee fue una legendaria maga élfica de Cormanthyr, guardiana de la Corona del Coronal.",
     },
     {
-      text: "El mythal se tejió hilo por hilo, sin apuro. / Tejé tu obra igual: paso firme, pulso seguro.",
+      text: "El mythal se tejió hilo por hilo, sin apuro. / Tejé tu obra igual: paso firme y pulso seguro.",
       tags: TASK,
       lore: "Tejer un mythal llevaba años de trabajo mágico coordinado entre muchos archimagos.",
     },
@@ -213,7 +213,7 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
       lore: "Sostener un mythal exigía precisión absoluta: un error podía colapsar toda su trama.",
     },
     {
-      text: "Un verso bien puesto desarma más que un ejército entero. Probalo.",
+      text: "Un verso bien puesto desarma más que un ejército entero.",
       tags: TASK,
       lore: "En la Ciudad del Canto la palabra y la música tenían tanto poder como la espada.",
     },
@@ -320,7 +320,7 @@ export const inspirePhraseDecks: Record<string, InspirePhrase[]> = {
       lore: "La Espada-Corona (Crownblade), una de las tres Espadas Élficas, elegía y probaba al Coronal.",
     },
     {
-      text: "La Hoja de Guerra cantaba al desenvainar. / Que la tuya también: dale al filo algo que contar.",
+      text: "La Warblade cantaba al desenvainar. / Dale al filo de tu espada algo que contar.",
       tags: COMBAT,
       lore: "La Hoja de Guerra (Warblade) era una de las tres Espadas Élficas de Cormanthyr, ligada a la defensa.",
     },
