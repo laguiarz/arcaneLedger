@@ -4,12 +4,15 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import Icon from "@/components/ui/Icon";
 import { parseFightClubXml } from "@/lib/importFightClubXml";
 import LibraryPicker from "@/components/library/LibraryPicker";
+import { useTheme, type Theme } from "@/store/theme";
 
 export default function Settings() {
   const character = useCharacter((s) => s.character);
   const exportJson = useCharacter((s) => s.exportJson);
   const loadCharacter = useCharacter((s) => s.loadCharacter);
   const resetToSample = useCharacter((s) => s.resetToSample);
+  const theme = useTheme((s) => s.theme);
+  const setTheme = useTheme((s) => s.setTheme);
 
   const [paste, setPaste] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +72,39 @@ export default function Settings() {
         subtitle="Switch characters, import, export, or reset"
       />
 
-      <section className="bg-surface-container border border-amber-900/30 rounded-xl p-md relative overflow-hidden">
+      <section className="bg-surface-container border border-outline-variant/30 rounded-xl p-md relative overflow-hidden">
+        <div className="leather-noise absolute inset-0" />
+        <div className="relative">
+          <h3 className="font-serif text-title-sm text-primary mb-sm">Appearance</h3>
+          <p className="text-sm text-on-surface-variant mb-sm">
+            Switch between the dark &ldquo;midnight tome&rdquo; and light &ldquo;parchment&rdquo; themes.
+          </p>
+          <div
+            className="inline-flex rounded-md border border-outline-variant/60 overflow-hidden"
+            role="group"
+            aria-label="Theme"
+          >
+            {(["dark", "light"] as Theme[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                aria-pressed={theme === t}
+                className={
+                  "inline-flex items-center gap-2 px-sm py-2 text-xs font-bold uppercase tracking-wider transition " +
+                  (theme === t
+                    ? "bg-primary-container text-on-primary-container"
+                    : "bg-transparent text-on-surface-variant hover:text-primary")
+                }
+              >
+                <Icon name={t === "dark" ? "dark_mode" : "light_mode"} />
+                {t === "dark" ? "Dark" : "Light"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-surface-container border border-outline-variant/30 rounded-xl p-md relative overflow-hidden">
         <div className="leather-noise absolute inset-0" />
         <div className="relative">
           <h3 className="font-serif text-title-sm text-primary mb-sm">Library</h3>
