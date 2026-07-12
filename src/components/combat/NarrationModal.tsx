@@ -29,12 +29,15 @@ export default function NarrationModal({
   combatants,
   totalRounds,
   activeName,
+  onNarrated,
 }: {
   open: boolean;
   onClose: () => void;
   combatants: Combatant[];
   totalRounds: number;
   activeName?: string;
+  /** Called with the generated text so callers can cache it on a saved record. */
+  onNarrated?: (text: string) => void;
 }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [text, setText] = useState("");
@@ -95,6 +98,7 @@ export default function NarrationModal({
       });
       setText(result);
       setPhase("result");
+      onNarrated?.(result);
     } catch (e) {
       if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : String(e));
