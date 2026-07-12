@@ -36,7 +36,7 @@ export default function SpellCard({ spell, ritualMode = false, showPrepareToggle
   };
 
   return (
-    <div className="group relative bg-surface-container-high border border-amber-900/20 rounded-xl etched-top overflow-hidden">
+    <div className="group relative bg-surface-container-high border border-outline-variant/20 rounded-xl etched-top overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative p-md">
         <div className="flex items-start justify-between gap-sm">

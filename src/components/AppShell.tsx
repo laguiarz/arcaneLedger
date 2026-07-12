@@ -46,13 +46,13 @@ export default function AppShell() {
       {/* Sidebar */}
       <aside
         className={[
-          "hidden md:flex flex-col bg-surface-container-low border-r border-amber-900/40 shadow-[inset_-10px_0_30px_rgba(0,0,0,0.4)] transition-[width] duration-200 ease-out",
+          "hidden md:flex flex-col bg-surface-container-low border-r border-outline-variant/40 shadow-[inset_-10px_0_30px_rgba(0,0,0,0.4)] transition-[width] duration-200 ease-out",
           expanded ? "w-64" : "w-16",
         ].join(" ")}
       >
         <div
           className={[
-            "border-b border-amber-900/30 flex",
+            "border-b border-outline-variant/30 flex",
             expanded ? "px-md pt-md pb-sm flex-col" : "px-2 pt-2 pb-2 items-center justify-center",
           ].join(" ")}
         >
@@ -124,7 +124,7 @@ export default function AppShell() {
 
         <div
           className={[
-            "border-t border-amber-900/30 space-y-2",
+            "border-t border-outline-variant/30 space-y-2",
             expanded ? "p-md" : "p-2 flex flex-col items-center",
           ].join(" ")}
         >
@@ -148,7 +148,7 @@ export default function AppShell() {
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="h-14 border-b border-amber-900/30 bg-surface-container-lowest/80 backdrop-blur shadow-[0_2px_10px_rgba(0,0,0,0.4)] flex items-center justify-between px-md">
+        <header className="h-14 border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur shadow-[0_2px_10px_rgba(0,0,0,0.4)] flex items-center justify-between px-md">
           <div className="md:hidden flex items-center gap-2">
             <Icon name="auto_stories" className="text-primary" />
             <span className="font-serif font-bold tracking-widest uppercase text-primary">Arcanist's Ledger</span>
@@ -188,7 +188,7 @@ export default function AppShell() {
           <Outlet />
         </main>
 
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest border-t border-amber-900/40 flex justify-around items-center z-40">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest border-t border-outline-variant/40 flex justify-around items-center z-40">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}

@@ -40,14 +40,14 @@ export default function HpStrip({
 
   return (
     <div
-      className={`bg-surface-container border border-amber-900/30 rounded-lg p-sm flex items-center gap-sm ${className}`}
+      className={`bg-surface-container border border-outline-variant/30 rounded-lg p-sm flex items-center gap-sm ${className}`}
     >
       <div
         className="relative w-16 h-16 shrink-0 flex items-center justify-center"
         style={{ background: `conic-gradient(#e9c176 0% ${pct}%, #38342e ${pct}% 100%)`, borderRadius: "50%" }}
         aria-label={`HP ${c.hp.current} of ${c.hp.max}`}
       >
-        <div className="absolute inset-1 rounded-full bg-surface-container-low border border-amber-900/30" />
+        <div className="absolute inset-1 rounded-full bg-surface-container-low border border-outline-variant/30" />
         <div className="relative text-center">
           <div className="font-serif text-primary text-lg leading-none">{c.hp.current}</div>
           <div className="text-[8px] text-outline">/ {c.hp.max}</div>

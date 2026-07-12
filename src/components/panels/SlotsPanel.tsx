@@ -50,7 +50,7 @@ function SlotTier({
   onRefund?: () => void;
 }) {
   return (
-    <div className="relative bg-surface-container border border-amber-900/30 rounded-xl p-sm overflow-hidden">
+    <div className="relative bg-surface-container border border-outline-variant/30 rounded-xl p-sm overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative">
         <div className="flex justify-between items-end mb-2">
@@ -75,7 +75,7 @@ function SlotTier({
                 className={`w-5 h-8 rounded-sm transition active:scale-90 ${
                   filled
                     ? "bg-primary shadow-[0_0_8px_rgba(233,193,118,0.55)] border border-primary-fixed"
-                    : "bg-surface-container-highest border border-amber-900/50 hover:border-primary/40"
+                    : "bg-surface-container-highest border border-outline-variant/50 hover:border-primary/40"
                 }`}
               />
             );

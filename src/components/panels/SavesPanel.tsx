@@ -15,7 +15,7 @@ export default function SavesPanel() {
   const atk = spellAttackBonus(c);
 
   return (
-    <div className="bg-surface-container border border-amber-900/30 rounded-xl p-md relative overflow-hidden">
+    <div className="bg-surface-container border border-outline-variant/30 rounded-xl p-md relative overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative">
         <div className="flex items-baseline justify-between mb-sm">

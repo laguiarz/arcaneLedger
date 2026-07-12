@@ -16,7 +16,7 @@ export default function AbilitiesPanel() {
   const [editing, setEditing] = useState<Ability | null>(null);
 
   return (
-    <div className="bg-surface-container border border-amber-900/30 rounded-xl p-md relative overflow-hidden">
+    <div className="bg-surface-container border border-outline-variant/30 rounded-xl p-md relative overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative">
         <div className="flex items-baseline justify-between mb-sm">
@@ -54,7 +54,7 @@ export default function AbilitiesPanel() {
                       </span>
                     )}
                     {hasMagic && (
-                      <span className="text-amber-400" title="Magic bonus — removed in an antimagic field">
+                      <span className="text-primary" title="Magic bonus — removed in an antimagic field">
                         ✦{fmt(b.magicBonus)}
                       </span>
                     )}
@@ -66,7 +66,7 @@ export default function AbilitiesPanel() {
         </div>
 
         <p className="mt-sm text-[10px] text-outline flex items-center gap-1">
-          <Icon name="auto_awesome" filled size={12} className="text-amber-400" />
+          <Icon name="auto_awesome" filled size={12} className="text-primary" />
           Amber = magic bonus; it's what an antimagic field strips.
         </p>
       </div>
