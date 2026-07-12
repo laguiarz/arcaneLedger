@@ -45,6 +45,7 @@ later assemble the character's ongoing story (Brunella / Lyari).
 - AC config (`armor`)
 - Party names
 - Level / proficiency bonus
+- **Combat log** (finished-combat records — see below; synced via `char:{id}:combats`)
 
 **Volatile (local only, NOT synced) — session/encounter state that should start
 clean:**
@@ -97,8 +98,9 @@ logic in a shared, unit-tested module.
 
 - On **end combat** in `/combat`, snapshot into a `CombatRecord`:
   `{ id, characterId, endedAt, title?, rounds, combatants, narration? }`.
-- New section lists saved combats for the active character: view transcript
-  (reuse `buildNarrationPayload`), (re)generate narration, delete.
+- Surfaced as a **"Crónica" tab inside `/combat`** (not a separate nav item). The
+  tab lists saved combats for the active character: view transcript (reuse
+  `buildNarrationPayload`), (re)generate narration, delete.
 - The combat *tracker* store (`useCombat`) stays ephemeral; only the **finished**
   record is persisted + synced.
 
@@ -170,9 +172,15 @@ interface CombatRecord {
 - Syncing volatile session state (spell usage, current HP, conditions).
 - Relational queries (blobs, not SQL).
 
-## Open items to confirm during implementation
+## Resolved during review
 
-1. Exact `DurableSheet` field list (first-pass above).
-2. "Crónica" placement: new nav item vs. a tab inside `/combat`.
-3. Coin store refactor: global → per-character keyed by `activeCharacterId`,
-   with a `persist` version bump + migration of the existing purse.
+1. **Combat log is durable/synced** — confirmed. It rides in `char:{id}:combats`
+   and is also persisted locally in `useCombatLog`.
+2. **"Crónica" placement: a tab inside `/combat`** (not a separate nav item).
+3. **Coin store → per-character**, keyed by `activeCharacterId`, with a `persist`
+   version bump + migration of the existing global purse to the active character.
+
+## Open items (refine during implementation, no gate)
+
+- Exact `DurableSheet` field list (first-pass above; `level`/`proficiencyBonus`
+  mostly come from import — keep them durable but low-risk).
