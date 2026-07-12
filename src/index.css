@@ -5,7 +5,110 @@
 @layer base {
   :root {
     color-scheme: dark;
+    /* Dark — Mystic Steampunk (the original hardcoded values) */
+    --surface: 22 19 14;
+    --surface-dim: 22 19 14;
+    --surface-bright: 61 57 51;
+    --surface-container-lowest: 17 14 9;
+    --surface-container-low: 30 27 22;
+    --surface-container: 35 31 26;
+    --surface-container-high: 45 41 36;
+    --surface-container-highest: 56 52 46;
+    --surface-variant: 56 52 46;
+    --on-surface: 233 225 216;
+    --on-surface-variant: 209 197 180;
+    --outline: 154 143 128;
+    --outline-variant: 78 70 57;
+    --primary: 233 193 118;
+    --on-primary: 65 45 0;
+    --primary-container: 197 160 89;
+    --on-primary-container: 78 55 0;
+    --primary-fixed: 255 222 165;
+    --primary-fixed-dim: 233 193 118;
+    --on-primary-fixed: 38 25 0;
+    --on-primary-fixed-variant: 93 66 1;
+    --inverse-primary: 119 90 25;
+    --secondary: 186 198 236;
+    --on-secondary: 35 48 78;
+    --secondary-container: 58 70 102;
+    --on-secondary-container: 168 180 218;
+    --tertiary: 176 198 249;
+    --on-tertiary: 23 48 89;
+    --tertiary-container: 143 165 214;
+    --on-tertiary-container: 35 58 101;
+    --error: 255 180 171;
+    --on-error: 105 0 5;
+    --error-container: 147 0 10;
+    --on-error-container: 255 218 214;
+    --background: 22 19 14;
+    --on-background: 233 225 216;
+
+    /* Non-token surfaces (dark) */
+    --app-bg: radial-gradient(1200px 600px at 80% -10%, rgba(46, 58, 89, 0.25), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(119, 90, 25, 0.18), transparent 60%),
+      linear-gradient(180deg, #110e09 0%, #16130e 60%, #121625 100%);
+    --glass-bg: rgba(35, 31, 26, 0.72);
+    --leather-noise-opacity: 0.03;
+    --brass-from: #c5a059;
+    --brass-to: #4e3700;
+    --etched-tint: rgba(197, 160, 89, 0.06);
+    --scrollbar-thumb: #38342e;
+    --scrollbar-thumb-hover: #4e4639;
   }
+
+  .light {
+    color-scheme: light;
+    /* Parchment — bespoke light theme (WCAG-checked) */
+    --surface: 244 234 214;
+    --surface-dim: 231 217 189;
+    --surface-bright: 251 245 230;
+    --surface-container-lowest: 251 245 230;
+    --surface-container-low: 240 228 203;
+    --surface-container: 234 221 194;
+    --surface-container-high: 226 211 180;
+    --surface-container-highest: 217 200 165;
+    --surface-variant: 217 200 165;
+    --on-surface: 46 36 22;
+    --on-surface-variant: 92 77 56;
+    --outline: 138 118 88;
+    --outline-variant: 200 181 143;
+    --primary: 122 90 18;
+    --on-primary: 255 246 224;
+    --primary-container: 227 199 128;
+    --on-primary-container: 78 55 0;
+    --primary-fixed: 227 199 128;
+    --primary-fixed-dim: 200 168 90;
+    --on-primary-fixed: 38 25 0;
+    --on-primary-fixed-variant: 93 66 1;
+    --inverse-primary: 233 193 118;
+    --secondary: 58 70 102;
+    --on-secondary: 238 242 251;
+    --secondary-container: 190 202 232;
+    --on-secondary-container: 35 48 78;
+    --tertiary: 47 75 122;
+    --on-tertiary: 238 242 251;
+    --tertiary-container: 180 200 240;
+    --on-tertiary-container: 23 48 89;
+    --error: 140 29 24;
+    --on-error: 255 240 238;
+    --error-container: 255 218 214;
+    --on-error-container: 105 0 5;
+    --background: 244 234 214;
+    --on-background: 46 36 22;
+
+    /* Non-token surfaces (parchment) */
+    --app-bg: radial-gradient(1200px 600px at 80% -10%, rgba(197, 160, 89, 0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(150, 120, 60, 0.12), transparent 60%),
+      linear-gradient(180deg, #f6ecd8 0%, #f2e7cf 60%, #ede0c4 100%);
+    --glass-bg: rgba(244, 234, 214, 0.72);
+    --leather-noise-opacity: 0.04;
+    --brass-from: #9a7a2c;
+    --brass-to: #6b4e12;
+    --etched-tint: rgba(122, 90, 18, 0.08);
+    --scrollbar-thumb: #cdb98f;
+    --scrollbar-thumb-hover: #b79f6f;
+  }
+
   html,
   body,
   #root {
@@ -13,12 +116,9 @@
   }
   body {
     font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
-    background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(46, 58, 89, 0.25), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, rgba(119, 90, 25, 0.18), transparent 60%),
-      linear-gradient(180deg, #110e09 0%, #16130e 60%, #121625 100%);
+    background: var(--app-bg);
     background-attachment: fixed;
-    color: #e9e1d8;
+    color: rgb(var(--on-surface));
   }
 
   h1, h2, h3, h4 {
@@ -29,12 +129,12 @@
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: #38342e;
+    background: var(--scrollbar-thumb);
     border-radius: 8px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
-  ::-webkit-scrollbar-thumb:hover { background: #4e4639; background-clip: padding-box; border: 2px solid transparent; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); background-clip: padding-box; border: 2px solid transparent; }
 
   .material-symbols-outlined {
     font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
