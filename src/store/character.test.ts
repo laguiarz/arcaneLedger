@@ -54,6 +54,32 @@ describe("availableRituals", () => {
   });
 });
 
+describe("setMaxHp", () => {
+  it("raises the max and leaves current HP alone", () => {
+    useCharacter.setState({ character: makeChar() });
+    useCharacter.getState().setMaxHp(50);
+    const hp = useCharacter.getState().character.hp;
+    expect(hp.max).toBe(50);
+    expect(hp.current).toBe(20);
+  });
+
+  it("clamps current HP down when the new max is lower", () => {
+    useCharacter.setState({ character: makeChar() });
+    useCharacter.getState().setMaxHp(10);
+    const hp = useCharacter.getState().character.hp;
+    expect(hp.max).toBe(10);
+    expect(hp.current).toBe(10);
+  });
+
+  it("never goes below 1", () => {
+    useCharacter.setState({ character: makeChar() });
+    useCharacter.getState().setMaxHp(0);
+    expect(useCharacter.getState().character.hp.max).toBe(1);
+    useCharacter.getState().setMaxHp(-5);
+    expect(useCharacter.getState().character.hp.max).toBe(1);
+  });
+});
+
 describe("setNarrationPrompt", () => {
   it("stores a per-character prompt and clears back to undefined when emptied", () => {
     useCharacter.setState({ character: makeChar() });

@@ -4,6 +4,8 @@ import { HashRouter } from "react-router-dom";
 import App from "./App";
 import { useSync } from "./store/sync";
 import "./index.css";
+// Registers the service worker and starts the periodic update check.
+import "./lib/swUpdate";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 /**
  * Dev-only middleware that serves the `api/sync.ts` serverless function from the
@@ -55,24 +56,53 @@ function devApiSync(): Plugin {
   };
 }
 
+/**
+ * Short commit for the running build. Vercel exposes the full SHA as an env
+ * var; locally we ask git. Wrapped in try/catch so a build from a tarball with
+ * no `.git` still succeeds.
+ */
+function appCommit(): string {
+  const fromVercel = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (fromVercel) return fromVercel.slice(0, 7);
+  try {
+    // execFileSync, not execSync: no shell is spawned at all.
+    return execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return "dev";
+  }
+}
+
 export default defineConfig(({ command }) => ({
-  // Dev only: expose the OS GEMINI_KEY to the client as VITE_GEMINI_KEY so the
-  // direct fallback works under `npm run dev`. In production builds we inject
-  // NOTHING — the key stays server-side in the /api/narrate function and is
-  // never baked into the client bundle.
-  define:
-    command === "serve"
+  define: {
+    // Build identity, surfaced in Settings → "Acerca de" so a device can say
+    // exactly which build it is running.
+    __APP_COMMIT__: JSON.stringify(appCommit()),
+    __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    // Dev only: expose the OS GEMINI_KEY to the client as VITE_GEMINI_KEY so
+    // the direct fallback works under `npm run dev`. Production builds inject
+    // NOTHING — the key stays server-side in the /api/narrate function and is
+    // never baked into the client bundle.
+    ...(command === "serve"
       ? {
           "import.meta.env.VITE_GEMINI_KEY": JSON.stringify(
             process.env.GEMINI_KEY ?? "",
           ),
         }
-      : {},
+      : {}),
+  },
   plugins: [
     devApiSync(),
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" (not "autoUpdate"): a silent reload mid-session is worse than
+      // an explicit button. `injectRegister: null` because src/lib/swUpdate.ts
+      // registers by hand — leaving it on would register the SW twice.
+      registerType: "prompt",
+      injectRegister: null,
       includeAssets: ["icon.svg"],
       manifest: {
         name: "Arcanist's Ledger",
