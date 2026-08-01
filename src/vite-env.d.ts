@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 /** Short git SHA of the build, injected by vite.config.ts. `"dev"` if unknown. */
 declare const __APP_COMMIT__: string;

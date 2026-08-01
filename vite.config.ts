@@ -98,7 +98,11 @@ export default defineConfig(({ command }) => ({
     devApiSync(),
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" (not "autoUpdate"): a silent reload mid-session is worse than
+      // an explicit button. `injectRegister: null` because src/lib/swUpdate.ts
+      // registers by hand — leaving it on would register the SW twice.
+      registerType: "prompt",
+      injectRegister: null,
       includeAssets: ["icon.svg"],
       manifest: {
         name: "Arcanist's Ledger",
