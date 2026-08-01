@@ -6,20 +6,29 @@ Zustand, deployed on Vercel (arcaneledger.vercel.app).
 
 ## Feature workflow (how we work here)
 
-For any feature: **brainstorm → spec → plan → implement**, but the approval gates
-are calibrated as follows:
+For any feature: **brainstorm → spec → critic → plan → implement**.
 
-1. **Spec** — write the design spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-   and commit it. **The user reviews the spec** (this gate stays).
-2. **Plan** — after spec approval, write the implementation plan, **persist it**
-   (`docs/plans/YYYY-MM-DD-<topic>-plan.md`) and commit it, then **proceed
-   DIRECTLY to implementation**. Do **not** wait for inline plan approval each
-   time. The persisted plan is the artifact of record: if a discrepancy shows up
-   later, the user reviews the committed plan and we discuss from there.
-3. **Implement** — go straight through once the plan is committed.
+**There is NO user approval gate on the spec or the plan.** Do not stop and ask
+the user to review either one. Run the whole chain and report at the end.
 
-Rationale: the user wants to review the *spec* and have the *plan on file* for
-accountability, but does not want to hand-approve every plan inline.
+1. **Brainstorm** — this is where the user is involved. Ask the design questions
+   here, get the decisions, then stop asking.
+2. **Spec** — write it to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+   and commit it.
+3. **Critic** — dispatch a **subagent** to review the committed spec before any
+   plan exists. Its job is to attack the spec: unstated assumptions, missing edge
+   cases, contradictions, scope creep, decisions that will hurt later. Read its
+   findings, fix what is genuinely wrong (say so if a finding is wrong — do not
+   apply feedback reflexively), and commit the revisions.
+4. **Plan** — write the implementation plan, persist it to
+   `docs/superpowers/plans/YYYY-MM-DD-<topic>.md`, commit it, and proceed
+   **DIRECTLY** to implementation.
+5. **Implement** — straight through once the plan is committed.
+
+Rationale: the user does not want to hand-review specs and plans, but wants them
+on file as the artifacts of record, with an independent critic catching what a
+single pass misses. If a discrepancy shows up later, the committed spec and plan
+are what we go back to.
 
 ## Conventions
 
