@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+/** Short git SHA of the build, injected by vite.config.ts. `"dev"` if unknown. */
+declare const __APP_COMMIT__: string;
+/** ISO timestamp of the build, injected by vite.config.ts. */
+declare const __APP_BUILD_TIME__: string;
+
 interface ImportMetaEnv {
   /**
    * Gemini API key for the DIRECT dev fallback only. Injected from
