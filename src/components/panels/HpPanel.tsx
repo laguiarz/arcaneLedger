@@ -7,9 +7,12 @@ export default function HpPanel() {
   const takeDamage = useCharacter((s) => s.takeDamage);
   const heal = useCharacter((s) => s.heal);
   const setTempHp = useCharacter((s) => s.setTempHp);
+  const setMaxHp = useCharacter((s) => s.setMaxHp);
 
   const [delta, setDelta] = useState<string>("");
   const [tempInput, setTempInput] = useState<string>("");
+  const [editingMax, setEditingMax] = useState(false);
+  const [maxDraft, setMaxDraft] = useState<string>("");
 
   const pct = Math.max(0, Math.min(100, (c.hp.current / Math.max(1, c.hp.max)) * 100));
 
@@ -24,6 +27,17 @@ export default function HpPanel() {
     if (op === "damage") takeDamage(n);
     else heal(n);
     setDelta("");
+  };
+
+  const openMaxEdit = () => {
+    setMaxDraft(String(c.hp.max));
+    setEditingMax(true);
+  };
+
+  const commitMax = () => {
+    const n = parseInt(maxDraft, 10);
+    if (!Number.isNaN(n)) setMaxHp(n);
+    setEditingMax(false);
   };
 
   return (
@@ -51,7 +65,30 @@ export default function HpPanel() {
             <div className="absolute inset-2 rounded-full bg-surface-container-low border border-outline-variant/30" />
             <div className="relative text-center">
               <div className="font-serif text-display-lg text-primary leading-none">{c.hp.current}</div>
-              <div className="label-caps text-on-surface-variant mt-1">OF {c.hp.max} HP</div>
+              {editingMax ? (
+                <input
+                  autoFocus
+                  type="number"
+                  inputMode="numeric"
+                  aria-label="HP máximo"
+                  value={maxDraft}
+                  onChange={(e) => setMaxDraft(e.target.value)}
+                  onBlur={commitMax}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commitMax();
+                    if (e.key === "Escape") setEditingMax(false);
+                  }}
+                  className="input-inset w-20 text-center font-mono text-sm mt-1"
+                />
+              ) : (
+                <button
+                  onClick={openMaxEdit}
+                  aria-label={`HP máximo ${c.hp.max}. Tocar para editar`}
+                  className="label-caps text-on-surface-variant mt-1 hover:text-primary transition underline decoration-dotted underline-offset-4"
+                >
+                  OF {c.hp.max} HP
+                </button>
+              )}
               {c.hp.temp > 0 && (
                 <div className="label-caps text-tertiary mt-1">+{c.hp.temp} TEMP</div>
               )}
