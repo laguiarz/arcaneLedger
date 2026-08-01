@@ -54,6 +54,12 @@ interface SyncStoreState {
   dirty: boolean;
   /** The cloud holds a stamp this device has not applied. */
   remoteAhead: boolean;
+  /**
+   * Sync is configured AND a character is active. Mirrored into the store so
+   * the header re-renders when it changes — `isSyncEnabled()` reads
+   * localStorage and is not reactive on its own.
+   */
+  enabled: boolean;
 
   /** Recalculate the flags from storage plus current store contents. */
   recompute: () => void;
@@ -109,7 +115,7 @@ export const useSync = create<SyncStoreState>()((set, get) => {
       remoteUpdatedAt: get().remoteUpdatedAt,
       enabled,
     });
-    set({ dirty, remoteAhead });
+    set({ dirty, remoteAhead, enabled });
   }
 
   async function checkRemote(): Promise<void> {
@@ -208,6 +214,7 @@ export const useSync = create<SyncStoreState>()((set, get) => {
     remoteUpdatedAt: null,
     dirty: false,
     remoteAhead: false,
+    enabled: false,
 
     recompute,
     checkRemote,

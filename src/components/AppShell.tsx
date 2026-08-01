@@ -4,7 +4,7 @@ import { useCharacter } from "@/store/character";
 import Icon from "./ui/Icon";
 import RestMenu from "./RestMenu";
 import FirstRunPicker from "./library/FirstRunPicker";
-import UpdateBar from "./UpdateBar";
+import HeaderStatus from "./HeaderStatus";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: "auto_awesome_motion" },
@@ -150,11 +150,18 @@ export default function AppShell() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
         <header className="h-14 border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur shadow-[0_2px_10px_rgba(0,0,0,0.4)] flex items-center justify-between px-md">
-          <div className="md:hidden flex items-center gap-2">
-            <Icon name="auto_stories" className="text-primary" />
-            <span className="font-serif font-bold tracking-widest uppercase text-primary">Arcanist's Ledger</span>
+          {/* Left slot: brand on mobile, and the build + sync state always. The
+              brand lives in the sidebar on desktop and disappears when it is
+              collapsed, so this is the only slot visible on every layout. */}
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="md:hidden flex items-center gap-2">
+              <Icon name="auto_stories" className="text-primary" />
+              <span className="font-serif font-bold tracking-widest uppercase text-primary text-sm">
+                Arcanist's Ledger
+              </span>
+            </div>
+            <HeaderStatus />
           </div>
-          <div className="hidden md:block" />
 
           <div className="flex items-center gap-sm">
             <Pill icon="favorite" tone="error" label={`${c.hp.current}${c.hp.temp ? `+${c.hp.temp}` : ""}/${c.hp.max} HP`} />
@@ -209,7 +216,6 @@ export default function AppShell() {
       </div>
 
       <RestMenu open={restOpen} onClose={() => setRestOpen(false)} />
-      <UpdateBar />
       {activeCharacterId === null && <FirstRunPicker />}
     </div>
   );

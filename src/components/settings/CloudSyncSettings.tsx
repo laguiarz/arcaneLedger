@@ -26,6 +26,8 @@ export default function CloudSyncSettings() {
     setSecret(secretDraft);
     // Enabling requires a secret; the config helper already enforces this on read.
     setSyncEnabled(enabled && secretDraft.trim().length > 0);
+    // The header mirrors `enabled` from the store, so it has to be told.
+    useSync.getState().recompute();
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
