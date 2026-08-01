@@ -4,6 +4,7 @@ import { useCharacter } from "@/store/character";
 import Icon from "./ui/Icon";
 import RestMenu from "./RestMenu";
 import FirstRunPicker from "./library/FirstRunPicker";
+import UpdateBar from "./UpdateBar";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: "auto_awesome_motion" },
@@ -208,6 +209,7 @@ export default function AppShell() {
       </div>
 
       <RestMenu open={restOpen} onClose={() => setRestOpen(false)} />
+      <UpdateBar />
       {activeCharacterId === null && <FirstRunPicker />}
     </div>
   );

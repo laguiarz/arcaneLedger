@@ -5,6 +5,7 @@ import Icon from "@/components/ui/Icon";
 import { parseFightClubXml } from "@/lib/importFightClubXml";
 import LibraryPicker from "@/components/library/LibraryPicker";
 import CloudSyncSettings from "@/components/settings/CloudSyncSettings";
+import AboutPanel from "@/components/settings/AboutPanel";
 import { useTheme, type Theme } from "@/store/theme";
 
 export default function Settings() {
@@ -195,6 +196,8 @@ export default function Settings() {
           </pre>
         </div>
       </section>
+
+      <AboutPanel />
     </div>
   );
 }
