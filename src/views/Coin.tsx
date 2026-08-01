@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useCoin, coinBalance, purseFor } from "@/store/coin";
+import { useCoin, coinBalance, purseFor, type MagicItem } from "@/store/coin";
 import { useCharacter } from "@/store/character";
+import { partyRoster } from "@/lib/partyRoster";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Icon from "@/components/ui/Icon";
 
@@ -17,13 +18,25 @@ export default function Coin() {
     useCoin.getState().adoptLegacyPurse(cid);
   }, [cid]);
 
+  // One selector for the whole purse, then derive. Never select a nested list
+  // with `?? []` — a fresh array per snapshot reintroduces the getSnapshot
+  // render loop that EMPTY_PURSE exists to prevent.
   const purse = useCoin((s) => purseFor(s, cid));
-  const { startingGold, entries, treasure } = purse;
+  const { startingGold, entries, treasure, partyItems, personalItems } = purse;
   const setStartingGold = useCoin((s) => s.setStartingGold);
   const addEntry = useCoin((s) => s.addEntry);
   const removeEntry = useCoin((s) => s.removeEntry);
   const addTreasure = useCoin((s) => s.addTreasure);
   const removeTreasure = useCoin((s) => s.removeTreasure);
+  const addPartyItem = useCoin((s) => s.addPartyItem);
+  const addPersonalItem = useCoin((s) => s.addPersonalItem);
+  const removePartyItem = useCoin((s) => s.removePartyItem);
+  const removePersonalItem = useCoin((s) => s.removePersonalItem);
+  const updatePartyItem = useCoin((s) => s.updatePartyItem);
+  const updatePersonalItem = useCoin((s) => s.updatePersonalItem);
+
+  const character = useCharacter((s) => s.character);
+  const roster = partyRoster(character);
 
   const balance = coinBalance(purse);
 
@@ -138,6 +151,70 @@ export default function Coin() {
           )}
         </section>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-md items-start">
+        {/* Party magic items */}
+        <section className="space-y-sm">
+          <SectionHeader
+            icon="group"
+            title="Party items"
+            subtitle="Shared magic items and who carries them"
+          />
+          <ItemForm
+            withCarrier
+            roster={roster}
+            onAdd={(name, note, carrier) =>
+              addPartyItem(cid, { name, note, carrier })
+            }
+          />
+
+          {partyItems.length === 0 ? (
+            <p className="text-outline text-sm italic px-1">No party items yet.</p>
+          ) : (
+            <ul className="space-y-1">
+              {partyItems.map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  roster={roster}
+                  onCarrier={(carrier) =>
+                    updatePartyItem(cid, item.id, { carrier })
+                  }
+                  onNote={(note) => updatePartyItem(cid, item.id, { note })}
+                  onRemove={() => removePartyItem(cid, item.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Personal magic items */}
+        <section className="space-y-sm">
+          <SectionHeader
+            icon="auto_awesome"
+            title="Personal items"
+            subtitle="Carried by this character"
+          />
+          <ItemForm onAdd={(name, note) => addPersonalItem(cid, { name, note })} />
+
+          {personalItems.length === 0 ? (
+            <p className="text-outline text-sm italic px-1">
+              No personal items yet.
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {personalItems.map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  onNote={(note) => updatePersonalItem(cid, item.id, { note })}
+                  onRemove={() => removePersonalItem(cid, item.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
@@ -201,6 +278,138 @@ function EntryForm({ onAdd }: { onAdd: (amount: number, note: string) => void })
         </button>
       </div>
     </form>
+  );
+}
+
+function ItemForm({
+  withCarrier = false,
+  roster = [],
+  onAdd,
+}: {
+  withCarrier?: boolean;
+  roster?: string[];
+  onAdd: (name: string, note: string, carrier: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [note, setNote] = useState("");
+  const [carrier, setCarrier] = useState("");
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    onAdd(name, note, carrier);
+    setName("");
+    setNote("");
+    setCarrier("");
+  };
+
+  return (
+    <form
+      onSubmit={submit}
+      className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-sm space-y-2"
+    >
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Item name…"
+        className="input-inset w-full text-on-surface"
+        aria-label="Item name"
+      />
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Note (charges, attunement…)"
+          className="input-inset flex-1 text-on-surface text-sm min-w-0"
+          aria-label="Item note"
+        />
+        {withCarrier && (
+          <select
+            value={carrier}
+            onChange={(e) => setCarrier(e.target.value)}
+            className="input-inset text-on-surface text-sm shrink-0"
+            aria-label="Carried by"
+          >
+            <option value="">Unassigned</option>
+            {roster.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        )}
+        <button type="submit" className="btn-brass shrink-0" aria-label="Add item">
+          <Icon name="add" filled />
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function ItemRow({
+  item,
+  roster,
+  onCarrier,
+  onNote,
+  onRemove,
+}: {
+  item: MagicItem;
+  roster?: string[];
+  onCarrier?: (carrier: string) => void;
+  onNote: (note: string) => void;
+  onRemove: () => void;
+}) {
+  // A carrier can fall out of the roster: a party member removed in combat, a
+  // sync pull replacing `party` wholesale, or the character re-imported under a
+  // different name. A <select> whose value matches no option renders blank, so
+  // the row would read as unassigned while still storing the old name.
+  const options = roster ?? [];
+  const dangling = item.carrier !== "" && !options.includes(item.carrier);
+
+  return (
+    <li className="bg-surface-container border border-outline-variant/30 rounded-lg px-sm py-2">
+      <div className="flex items-center gap-2">
+        <Icon name="auto_awesome" size={16} className="text-primary shrink-0" />
+        <span className="text-sm text-on-surface flex-1 break-words">
+          {item.name}
+        </span>
+        {onCarrier && (
+          <select
+            value={item.carrier}
+            onChange={(e) => onCarrier(e.target.value)}
+            className="input-inset text-xs text-on-surface shrink-0"
+            aria-label={`Carried by, ${item.name}`}
+          >
+            <option value="">Unassigned</option>
+            {options.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+            {dangling && (
+              <option value={item.carrier}>{item.carrier} (not in party)</option>
+            )}
+          </select>
+        )}
+        <button
+          onClick={onRemove}
+          className="btn-icon shrink-0"
+          aria-label={`Remove ${item.name}`}
+        >
+          <Icon name="close" size={16} />
+        </button>
+      </div>
+      <input
+        type="text"
+        value={item.note}
+        onChange={(e) => onNote(e.target.value)}
+        placeholder="Note…"
+        className="mt-1 w-full bg-transparent border-none px-0 text-[11px] text-outline focus:text-on-surface focus:outline-none"
+        aria-label={`Note for ${item.name}`}
+      />
+    </li>
   );
 }
 

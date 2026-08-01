@@ -93,7 +93,10 @@ export const useSync = create<SyncStoreState>()((set) => {
         useCharacter.setState((s) => ({
           character: applyDurable(s.character, sheet),
         }));
-        useCoin.setState((s) => ({ purses: { ...s.purses, [cid]: coin } }));
+        // NOT setState: a device on an older build pushes a purse with no magic
+        // -item arrays, and sync overwrites the blob wholesale. applyRemotePurse
+        // backfills them from the local purse so a stale peer can't delete them.
+        useCoin.getState().applyRemotePurse(cid, coin);
         setLastSynced(remote.updatedAt);
       }
       set({ status: "ok", lastError: undefined });

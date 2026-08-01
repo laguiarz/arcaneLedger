@@ -7,6 +7,7 @@ import {
   rollInitiative,
 } from "@/lib/combat";
 import { hasNarratableActions } from "@/lib/combatLog";
+import { partyRoster } from "@/lib/partyRoster";
 import { useCombatLog } from "@/store/combatLog";
 import { useSync } from "@/store/sync";
 import { CONDITIONS } from "@/lib/constants";
@@ -71,7 +72,7 @@ export default function Combat() {
   const combatantCount = combatants.length;
   useEffect(() => {
     if (combatantCount > 0) return;
-    const roster = [character.name, ...(character.party ?? [])];
+    const roster = partyRoster(character);
     const inputs: NewCombatantInput[] = roster
       .filter((n) => n.trim())
       .map((n) => {
