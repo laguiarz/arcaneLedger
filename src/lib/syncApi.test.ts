@@ -60,13 +60,33 @@ describe("syncApi", () => {
     expect(bundle.combats).toEqual([]);
   });
 
-  it("putState PUTs a { state } body", async () => {
-    const fetchFn = mockFetch({ ok: true });
-    await putState("lyari", state);
+  it("putState sends the state with the base stamp for compare-and-set", async () => {
+    const fetchFn = mockFetch({ ok: true, json: { ok: true, applied: true, updatedAt: 99 } });
+    const result = await putState("lyari", state, { baseUpdatedAt: 42 });
     const [url, init] = fetchFn.mock.calls[0];
     expect(url).toBe("/api/sync?characterId=lyari");
     expect(init.method).toBe("PUT");
-    expect(JSON.parse(init.body ?? "{}")).toEqual({ state });
+    expect(JSON.parse(init.body ?? "{}")).toEqual({
+      state,
+      baseUpdatedAt: 42,
+      force: false,
+    });
+    expect(result).toEqual({ ok: true, applied: true, updatedAt: 99 });
+  });
+
+  it("putState forwards force and surfaces a refusal", async () => {
+    const fetchFn = mockFetch({ ok: true, json: { ok: true, applied: false, updatedAt: 7 } });
+    const result = await putState("lyari", state, { baseUpdatedAt: null, force: true });
+    const [, init] = fetchFn.mock.calls[0];
+    expect(JSON.parse(init.body ?? "{}").force).toBe(true);
+    expect(result.applied).toBe(false);
+    expect(result.updatedAt).toBe(7);
+  });
+
+  it("putState treats a legacy server's bare {ok:true} as applied", async () => {
+    mockFetch({ ok: true, json: { ok: true } });
+    const result = await putState("lyari", state, { baseUpdatedAt: 1 });
+    expect(result.applied).toBeUndefined();
   });
 
   it("postCombat PUTs a { combat } body", async () => {
