@@ -7,6 +7,8 @@ import {
   rollInitiative,
 } from "@/lib/combat";
 import { hasNarratableActions } from "@/lib/combatLog";
+import { useCombatLog } from "@/store/combatLog";
+import { useSync } from "@/store/sync";
 import { CONDITIONS } from "@/lib/constants";
 import type { Combatant, CombatantCondition } from "@/types/combat";
 import Icon from "@/components/ui/Icon";
@@ -16,6 +18,7 @@ import AddCombatantForm from "@/components/combat/AddCombatantForm";
 import ConditionsModal from "@/components/combat/ConditionsModal";
 import ActionCellModal from "@/components/combat/ActionCellModal";
 import NarrationModal from "@/components/combat/NarrationModal";
+import ChronicleTab from "@/components/combat/ChronicleTab";
 
 /** How many empty rounds to show ahead of the active one, for condition look-ahead. */
 const ROUNDS_AHEAD = 3;
@@ -34,12 +37,34 @@ export default function Combat() {
   const reset = useCombat((s) => s.reset);
   const seed = useCombat((s) => s.seed);
 
+  const [view, setView] = useState<"tracker" | "chronicle">("tracker");
   const [conditionsFor, setConditionsFor] = useState<string | null>(null);
   const [actionTarget, setActionTarget] = useState<{
     combatantId: string;
     round: number;
   } | null>(null);
   const [narrateOpen, setNarrateOpen] = useState(false);
+  // The combat-log record saved for the current fight (once "End & narrate" is
+  // pressed) so re-generating narration updates the same entry instead of
+  // duplicating it.
+  const [savedRecordId, setSavedRecordId] = useState<string | null>(null);
+
+  // End the fight: snapshot it into the Chronicle (once per combat) and open the
+  // narration modal.
+  const openNarrate = () => {
+    if (!savedRecordId) {
+      const rec = useCombatLog.getState().save({
+        characterId: activeCharacterId ?? "custom",
+        combatants,
+        rounds: round,
+        endedAt: Date.now(),
+      });
+      setSavedRecordId(rec.id);
+      // Push to the cloud (no-op unless sync is enabled).
+      void useSync.getState().pushCombat(rec);
+    }
+    setNarrateOpen(true);
+  };
 
   // Preload the party (active character + saved roster) whenever the table is
   // empty — on first open and after a reset. `seed` is a no-op once populated.
@@ -78,6 +103,28 @@ export default function Combat() {
         subtitle="Run the party's initiative, rounds, actions and conditions"
       />
 
+      {/* Tracker | Crónica segmented control */}
+      <div className="flex gap-1 bg-surface-container-low border border-outline-variant/30 rounded-lg p-1 w-fit">
+        {(["tracker", "chronicle"] as const).map((v) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={`px-sm py-1 rounded-md text-sm font-bold transition inline-flex items-center gap-1 ${
+              view === v
+                ? "bg-primary/20 text-primary border border-primary/40"
+                : "text-outline border border-transparent hover:text-on-surface"
+            }`}
+          >
+            <Icon name={v === "tracker" ? "swords" : "menu_book"} size={16} />
+            {v === "tracker" ? "Tracker" : "Crónica"}
+          </button>
+        ))}
+      </div>
+
+      {view === "chronicle" && <ChronicleTab />}
+
+      {view === "tracker" && (
+        <>
       {/* Active-character HP header (same control as the Encounter page). */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-sm items-stretch">
         <HpStrip
@@ -161,11 +208,11 @@ export default function Combat() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             className="btn-brass"
-            onClick={() => setNarrateOpen(true)}
+            onClick={openNarrate}
             disabled={!canNarrate}
             title={
               canNarrate
-                ? "Generate Brunella's chronicle of the fight"
+                ? "Save this fight to the Chronicle and narrate it"
                 : "Record some actions first"
             }
           >
@@ -180,6 +227,7 @@ export default function Combat() {
                 )
               ) {
                 reset();
+                setSavedRecordId(null);
               }
             }}
           >
@@ -190,6 +238,8 @@ export default function Combat() {
 
       {/* Setup lives at the bottom — touched rarely; the focus is round control. */}
       <AddCombatantForm />
+        </>
+      )}
 
       <ConditionsModal
         combatantId={conditionsFor}
@@ -204,6 +254,11 @@ export default function Combat() {
         combatants={combatants}
         totalRounds={round}
         activeName={character.name}
+        onNarrated={(text) => {
+          if (savedRecordId) {
+            useCombatLog.getState().setNarration(savedRecordId, text);
+          }
+        }}
       />
     </div>
   );

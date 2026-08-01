@@ -4,6 +4,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import Icon from "@/components/ui/Icon";
 import { parseFightClubXml } from "@/lib/importFightClubXml";
 import LibraryPicker from "@/components/library/LibraryPicker";
+import CloudSyncSettings from "@/components/settings/CloudSyncSettings";
 import { useTheme, type Theme } from "@/store/theme";
 
 export default function Settings() {
@@ -103,6 +104,8 @@ export default function Settings() {
           </div>
         </div>
       </section>
+
+      <CloudSyncSettings />
 
       <section className="bg-surface-container border border-outline-variant/30 rounded-xl p-md relative overflow-hidden">
         <div className="leather-noise absolute inset-0" />

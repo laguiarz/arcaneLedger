@@ -82,15 +82,27 @@ export function setModel(value: string): void {
   write(KEY_MODEL, value.trim() || DEFAULT_MODEL);
 }
 
-export function getPrompt(): string {
-  const stored = read(KEY_PROMPT);
-  return stored && stored.trim() ? stored : DEFAULT_NARRATION_PROMPT;
+/**
+ * The narration prompt is now a per-character sheet field
+ * ({@link Character.narrationPrompt}). These helpers only deal with the pre-
+ * migration GLOBAL prompt so it can be adopted once into the active character.
+ */
+
+/** The legacy global prompt, or "" if none was ever saved. */
+export function getLegacyGlobalPrompt(): string {
+  return read(KEY_PROMPT)?.trim() ?? "";
 }
 
-export function setPrompt(value: string): void {
-  write(KEY_PROMPT, value);
+/** Remove the legacy global prompt once it has been adopted by a character. */
+export function clearLegacyGlobalPrompt(): void {
+  try {
+    if (typeof window !== "undefined") window.localStorage.removeItem(KEY_PROMPT);
+  } catch {
+    /* storage unavailable — ignore */
+  }
 }
 
-export function resetPrompt(): void {
-  write(KEY_PROMPT, DEFAULT_NARRATION_PROMPT);
+/** The prompt actually used for a character: its own, else the default. */
+export function effectiveNarrationPrompt(prompt: string | undefined): string {
+  return prompt && prompt.trim() ? prompt : DEFAULT_NARRATION_PROMPT;
 }

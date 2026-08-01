@@ -13,6 +13,10 @@ import type {
 import { sampleWizard } from "@/data/sampleWizard";
 import { abilityMod, abilityScore, normalizeAbilities } from "@/lib/abilities";
 import { defaultArmorConfig } from "@/lib/armor";
+import {
+  clearLegacyGlobalPrompt,
+  getLegacyGlobalPrompt,
+} from "@/lib/combatNarration";
 
 // Re-exported so existing `import { abilityMod } from "@/store/character"`
 // call sites keep working now that the helpers live in @/lib/abilities.
@@ -76,6 +80,11 @@ interface CharacterState {
 
   // Party (names of fellow party members, persisted on the sheet)
   setParty: (names: string[]) => void;
+
+  // Narration prompt (per-character AI narration voice)
+  setNarrationPrompt: (text: string) => void;
+  /** One-time: adopt the pre-migration global narration prompt if unset. */
+  adoptLegacyNarrationPrompt: () => void;
 
   // Rests
   longRest: () => void;
@@ -334,6 +343,24 @@ export const useCharacter = create<CharacterState>()(
             party: names.map((n) => n.trim()).filter(Boolean),
           },
         })),
+
+      setNarrationPrompt: (text) =>
+        set((s) => ({
+          character: {
+            ...s.character,
+            // Empty string clears back to the default at read time.
+            narrationPrompt: text.trim() ? text : undefined,
+          },
+        })),
+
+      adoptLegacyNarrationPrompt: () =>
+        set((s) => {
+          if (s.character.narrationPrompt) return {};
+          const legacy = getLegacyGlobalPrompt();
+          if (!legacy) return {};
+          clearLegacyGlobalPrompt();
+          return { character: { ...s.character, narrationPrompt: legacy } };
+        }),
 
       longRest: () =>
         set((s) => {

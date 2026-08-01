@@ -4,15 +4,15 @@ import Icon from "@/components/ui/Icon";
 import type { Combatant } from "@/types/combat";
 import { buildNarrationPayload } from "@/lib/combatLog";
 import { generateNarration } from "@/lib/gemini";
+import { useCharacter } from "@/store/character";
 import {
   DEFAULT_MODEL,
+  DEFAULT_NARRATION_PROMPT,
+  effectiveNarrationPrompt,
   getApiKey,
   getModel,
-  getPrompt,
-  resetPrompt,
   setApiKey,
   setModel,
-  setPrompt,
 } from "@/lib/combatNarration";
 
 type Phase = "idle" | "loading" | "result" | "error";
@@ -29,12 +29,15 @@ export default function NarrationModal({
   combatants,
   totalRounds,
   activeName,
+  onNarrated,
 }: {
   open: boolean;
   onClose: () => void;
   combatants: Combatant[];
   totalRounds: number;
   activeName?: string;
+  /** Called with the generated text so callers can cache it on a saved record. */
+  onNarrated?: (text: string) => void;
 }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [text, setText] = useState("");
@@ -53,7 +56,12 @@ export default function NarrationModal({
     if (!open) return;
     setApiKeyDraft(getApiKey());
     setModelDraft(getModel());
-    setPromptDraft(getPrompt());
+    // Adopt the pre-migration global prompt into this character (once), then
+    // seed the draft from the character's own prompt (or the default).
+    useCharacter.getState().adoptLegacyNarrationPrompt();
+    setPromptDraft(
+      effectiveNarrationPrompt(useCharacter.getState().character.narrationPrompt),
+    );
     // Settings stay collapsed by default — production needs no client key
     // (the /api/narrate proxy holds it). Open them on demand for model/prompt.
     setShowSettings(false);
@@ -70,7 +78,7 @@ export default function NarrationModal({
   const persistSettings = () => {
     setApiKey(apiKeyDraft);
     setModel(modelDraft);
-    setPrompt(promptDraft);
+    useCharacter.getState().setNarrationPrompt(promptDraft);
   };
 
   const generate = async () => {
@@ -89,12 +97,13 @@ export default function NarrationModal({
         // Optional: only used if the proxy is absent (local dev fallback).
         apiKey: apiKeyDraft.trim() || undefined,
         model: modelDraft.trim() || DEFAULT_MODEL,
-        systemPrompt: promptDraft.trim() || getPrompt(),
+        systemPrompt: promptDraft.trim() || DEFAULT_NARRATION_PROMPT,
         userContent,
         signal: controller.signal,
       });
       setText(result);
       setPhase("result");
+      onNarrated?.(result);
     } catch (e) {
       if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : String(e));
@@ -172,8 +181,8 @@ export default function NarrationModal({
               <button
                 className="btn-ghost !py-1"
                 onClick={() => {
-                  resetPrompt();
-                  setPromptDraft(getPrompt());
+                  useCharacter.getState().setNarrationPrompt("");
+                  setPromptDraft(DEFAULT_NARRATION_PROMPT);
                 }}
               >
                 <Icon name="refresh" /> Reset prompt

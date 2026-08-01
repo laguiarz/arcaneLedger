@@ -6,3 +6,5 @@ dist-ssr
 .DS_Store
 .env*.local
 tsconfig.tsbuildinfo
+.vercel
+.env*

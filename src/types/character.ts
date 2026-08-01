@@ -257,4 +257,13 @@ export interface Character {
   skills?: Partial<Record<SkillName, SkillProficiency>>;
 
   notes?: string;
+
+  /**
+   * Per-character system prompt for the AI combat narration ("Brunella's
+   * chronicle"). Optional: when absent, the narration falls back to
+   * {@link "@/lib/combatNarration".DEFAULT_NARRATION_PROMPT}. Editable from the
+   * narration modal and synced as a durable sheet field so each character keeps
+   * its own narrative voice across devices.
+   */
+  narrationPrompt?: string;
 }
