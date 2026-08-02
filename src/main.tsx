@@ -28,6 +28,10 @@ function maybeCheck() {
   lastCheck = now;
   void useSync.getState().checkRemote();
 }
+// Seed the flags before any network call: `enabled` lives in the store and the
+// header reads it, so without this a device with sync off (or a failing check)
+// renders an empty slot that looks broken.
+useSync.getState().recompute();
 maybeCheck();
 window.addEventListener("focus", maybeCheck);
 window.addEventListener("online", maybeCheck);

@@ -22,14 +22,24 @@ export default function CloudSyncSettings() {
   const [saved, setSaved] = useState(false);
   const [lastSynced, setLastSyncedState] = useState<number | null>(getLastSynced());
 
-  const persist = () => {
-    setSecret(secretDraft);
+  const persist = (nextEnabled = enabled, nextSecret = secretDraft) => {
+    setSecret(nextSecret);
     // Enabling requires a secret; the config helper already enforces this on read.
-    setSyncEnabled(enabled && secretDraft.trim().length > 0);
+    setSyncEnabled(nextEnabled && nextSecret.trim().length > 0);
     // The header mirrors `enabled` from the store, so it has to be told.
     useSync.getState().recompute();
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
+  };
+
+  /**
+   * The toggle persists immediately. It used to be React state that did nothing
+   * until you found a separate button, so ticking it and walking away left sync
+   * silently off — which is exactly how an edit sat unsynced on a device.
+   */
+  const toggleEnabled = (next: boolean) => {
+    setEnabled(next);
+    persist(next);
   };
 
   // Deliberately a CHECK, not a sync: applying in either direction is the
@@ -69,14 +79,16 @@ export default function CloudSyncSettings() {
           <input
             type="checkbox"
             checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
+            onChange={(e) => toggleEnabled(e.target.checked)}
           />
           Activar sincronización
         </label>
 
         <div className="flex flex-wrap items-center gap-2 pt-1">
-          <button className="btn-ghost !py-1" onClick={persist}>
-            <Icon name="save" /> Guardar
+          {/* "Guardar ajustes", never just "Guardar": the header's Guardar
+              uploads your data, and two buttons with one name is a trap. */}
+          <button className="btn-ghost !py-1" onClick={() => persist()}>
+            <Icon name="save" /> Guardar ajustes
           </button>
           <button
             className="btn-brass !py-1"

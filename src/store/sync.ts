@@ -102,6 +102,10 @@ export const useSync = create<SyncStoreState>()((set, get) => {
       status: offlineNow() ? "offline" : "error",
       lastError: e instanceof Error ? e.message : String(e),
     });
+    // Recompute even on failure: `enabled` is mirrored here, and without this a
+    // failed boot check leaves it false and the header hides the error instead
+    // of showing it.
+    recompute();
   }
 
   function recompute(): void {

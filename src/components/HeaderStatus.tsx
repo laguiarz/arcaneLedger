@@ -56,6 +56,16 @@ export default function HeaderStatus() {
 
       {sync.kind !== "hidden" && (
         <div role="status" className="flex items-center gap-1 shrink-0">
+          {sync.kind === "off" && (
+            <span
+              title="Sincronización desactivada — activala en Ajustes → Cloud sync"
+              aria-label="Sincronización desactivada"
+              className="inline-flex"
+            >
+              <Icon name="cloud_off" size={14} className="text-outline/60" />
+            </span>
+          )}
+
           {sync.kind === "busy" && (
             <Icon name="sync" size={14} className="text-primary animate-spin" />
           )}
