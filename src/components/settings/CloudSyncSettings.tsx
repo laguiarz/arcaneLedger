@@ -26,13 +26,18 @@ export default function CloudSyncSettings() {
     setSecret(secretDraft);
     // Enabling requires a secret; the config helper already enforces this on read.
     setSyncEnabled(enabled && secretDraft.trim().length > 0);
+    // The header mirrors `enabled` from the store, so it has to be told.
+    useSync.getState().recompute();
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
 
-  const syncNow = async () => {
+  // Deliberately a CHECK, not a sync: applying in either direction is the
+  // user's decision and lives in the header. `syncNow` used to pull before it
+  // pushed, which could overwrite the very edit it was meant to upload.
+  const checkNow = async () => {
     persist();
-    await useSync.getState().syncNow();
+    await useSync.getState().checkRemote();
     setLastSyncedState(getLastSynced());
   };
 
@@ -75,10 +80,10 @@ export default function CloudSyncSettings() {
           </button>
           <button
             className="btn-brass !py-1"
-            onClick={() => void syncNow()}
+            onClick={() => void checkNow()}
             disabled={status === "syncing" || !secretDraft.trim()}
           >
-            <Icon name="cloud_sync" filled /> Sincronizar ahora
+            <Icon name="cloud_sync" filled /> Comprobar
           </button>
           {saved && <span className="text-[11px] text-secondary">Guardado</span>}
           <StatusPill status={status} />
@@ -109,6 +114,8 @@ function StatusPill({ status }: { status: string }) {
     idle: { icon: "cloud", label: "En espera", cls: "text-outline" },
     syncing: { icon: "sync", label: "Sincronizando…", cls: "text-primary" },
     ok: { icon: "cloud_done", label: "Sincronizado", cls: "text-secondary" },
+    // A conflict is a normal outcome, not a failure — never render it red.
+    conflict: { icon: "sync_problem", label: "Conflicto", cls: "text-primary" },
     error: { icon: "cloud_off", label: "Error", cls: "text-error" },
     offline: { icon: "cloud_off", label: "Offline", cls: "text-outline" },
   };

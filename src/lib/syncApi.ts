@@ -54,19 +54,38 @@ export async function getRemote(
   return { state: data.state ?? null, combats: data.combats ?? [] };
 }
 
-/** PUT the durable state blob (server enforces last-write-wins). */
+export interface PutResult {
+  /**
+   * Whether the server actually wrote. `undefined` means a deployment older
+   * than compare-and-set, which must be treated as applied — never as failure.
+   */
+  applied?: boolean;
+  /** The stamp now stored server-side: the new one, or the existing one. */
+  updatedAt?: number;
+}
+
+/**
+ * PUT the durable state blob. `baseUpdatedAt` is the stamp this device last
+ * applied; the server writes only if it still matches, unless `force`.
+ */
 export async function putState(
   characterId: string,
   state: SyncedState,
+  opts: { baseUpdatedAt: number | null; force?: boolean },
   signal?: AbortSignal,
-): Promise<void> {
+): Promise<PutResult> {
   const res = await fetch(base(characterId), {
     method: "PUT",
     headers: authHeaders(),
-    body: JSON.stringify({ state }),
+    body: JSON.stringify({
+      state,
+      baseUpdatedAt: opts.baseUpdatedAt,
+      force: opts.force === true,
+    }),
     signal,
   });
   await ensureOk(res);
+  return (await res.json().catch(() => ({}))) as PutResult;
 }
 
 /** PUT a single combat record (server appends idempotently by id). */

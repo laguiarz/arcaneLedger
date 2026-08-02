@@ -8,6 +8,8 @@
 const KEY_SECRET = "al.sync.secret";
 const KEY_ENABLED = "al.sync.enabled";
 const KEY_LAST = "al.sync.lastSynced";
+const KEY_BASELINE = "al.sync.baseline";
+const KEY_APPLIED = "al.sync.appliedUpdatedAt";
 
 function read(key: string): string | null {
   try {
@@ -49,4 +51,30 @@ export function getLastSynced(): number | null {
 
 export function setLastSynced(ms: number): void {
   write(KEY_LAST, String(ms));
+}
+
+/**
+ * Digest of the durable payload as of the last CONFIRMED write or apply.
+ * `null` means this device has never confirmed a sync — which the flag logic
+ * treats as "has unsaved work", so an upgrading device is offered Save rather
+ * than being told it is clean.
+ */
+export function getBaseline(): string | null {
+  return read(KEY_BASELINE);
+}
+
+export function setBaseline(digest: string): void {
+  write(KEY_BASELINE, digest);
+}
+
+/** The server-issued stamp this device last applied or successfully wrote. */
+export function getAppliedUpdatedAt(): number | null {
+  const raw = read(KEY_APPLIED);
+  if (raw === null) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function setAppliedUpdatedAt(ms: number): void {
+  write(KEY_APPLIED, String(ms));
 }

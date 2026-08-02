@@ -8,6 +8,17 @@
  * Auth: a single shared secret (process.env.SYNC_SECRET) sent as
  * `Authorization: Bearer <secret>`. Single-user app — this is enough.
  *
+ * Writes use optimistic concurrency, not last-write-wins on a client stamp: the
+ * client sends the `updatedAt` it last applied and the server writes only if it
+ * still matches (or the user forced it). `updatedAt` is stamped by the SERVER,
+ * so no device clock can order anything, and the response reports whether the
+ * write actually happened — it used to answer `{ok:true}` for writes it threw
+ * away, which made a device show a green tick while its data went nowhere.
+ *
+ * Known limitation: the read-then-write is not atomic. Two concurrent PUTs can
+ * both pass the check. Acceptable for a single user; fixing it needs a Lua
+ * script or a WATCH/MULTI equivalent.
+ *
  * Self-contained on purpose (no imports from src/) so it bundles as a standalone
  * function, like api/narrate.ts. Requires env vars:
  *   UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, SYNC_SECRET
@@ -108,21 +119,45 @@ export default async function handler(req: Req, res: Res): Promise<void> {
       return;
     }
 
-    // --- PUT: upsert state (LWW) and/or append a combat (idempotent) -----
+    // --- PUT: compare-and-set the state and/or append a combat ------------
     if (req.method === "PUT") {
-      const body: { state?: SyncedState; combat?: CombatRecord } =
+      const body: {
+        state?: SyncedState;
+        combat?: CombatRecord;
+        /** The stamp the client last applied; `null` if it never synced. */
+        baseUpdatedAt?: number | null;
+        /** Set by a user-initiated save after they have seen the conflict. */
+        force?: boolean;
+      } =
         typeof req.body === "string"
           ? JSON.parse(req.body || "{}")
-          : ((req.body as { state?: SyncedState; combat?: CombatRecord }) ?? {});
+          : ((req.body as Record<string, never>) ?? {});
+
+      let applied: boolean | undefined;
+      let stamp: number | undefined;
 
       if (body.state) {
         const existing = await readJson<SyncedState | null>(stateKey, null);
-        // Last-write-wins: only overwrite when the incoming stamp is >=.
-        if (!existing || body.state.updatedAt >= existing.updatedAt) {
-          await writeJson(stateKey, body.state);
+        // Optimistic concurrency, NOT last-write-wins on a client stamp: write
+        // when nothing exists, when the client based its edit on exactly what
+        // we hold, or when the user forced it after seeing the conflict. No
+        // client clock is compared — the server stamps the write itself, so a
+        // device with a skewed clock can neither lose nor steal a write.
+        const ok =
+          !existing ||
+          body.baseUpdatedAt === existing.updatedAt ||
+          body.force === true;
+        if (ok) {
+          stamp = Date.now();
+          await writeJson(stateKey, { ...body.state, updatedAt: stamp });
+          applied = true;
+        } else {
+          stamp = existing.updatedAt;
+          applied = false;
         }
       }
 
+      // Combat records are immutable and idempotent by id — always appended.
       if (body.combat && body.combat.id) {
         const combats = await readJson<CombatRecord[]>(combatsKey, []);
         if (!combats.some((c) => c.id === body.combat!.id)) {
@@ -131,7 +166,12 @@ export default async function handler(req: Req, res: Res): Promise<void> {
         }
       }
 
-      res.status(200).json({ ok: true });
+      // `applied`/`updatedAt` are omitted when the request carried no state, so
+      // a combat-only PUT never reads as a rejected state write.
+      res.status(200).json({
+        ok: true,
+        ...(applied === undefined ? {} : { applied, updatedAt: stamp }),
+      });
       return;
     }
 
