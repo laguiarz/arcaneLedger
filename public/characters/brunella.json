@@ -5,20 +5,20 @@
   "level": 5,
   "proficiencyBonus": 3,
   "abilities": {
-    "str": 10,
-    "dex": 14,
-    "con": 13,
-    "int": 13,
-    "wis": 11,
-    "cha": 18
+    "str": { "base": 10, "featBonus": 0, "magicBonus": 0 },
+    "dex": { "base": 15, "featBonus": 2, "magicBonus": 0 },
+    "con": { "base": 11, "featBonus": 0, "magicBonus": 0 },
+    "int": { "base": 15, "featBonus": 0, "magicBonus": 0 },
+    "wis": { "base": 11, "featBonus": 0, "magicBonus": 0 },
+    "cha": { "base": 17, "featBonus": 2, "magicBonus": 0 }
   },
   "savingThrowProficiencies": [
     "dex",
     "cha"
   ],
   "hp": {
-    "max": 33,
-    "current": 33,
+    "max": 28,
+    "current": 28,
     "temp": 0
   },
   "hitDice": {
@@ -196,15 +196,14 @@
       "source": "class"
     },
     {
-      "name": "Slow",
+      "name": "Astral Flood",
       "level": 3,
-      "school": "Transmutation",
+      "school": "Evocation",
       "castingTime": "Action",
-      "range": "120 feet",
-      "components": "V, S, M (a drop of molasses)",
-      "duration": "Concentration, up to 1 minute",
-      "desc": "You alter time around up to six creatures of your choice in a 40-foot Cube within range. Each target must succeed on a Wisdom saving throw or be affected by this spell for the duration.\n\tAn affected target's Speed is halved, it takes a -2 penalty to AC and Dexterity saving throws, and it can't take Reactions. On its turn, it can use either an action or a Bonus Action, not both, and it can't make more than one attack on its turn. If it casts a spell with a Somatic component, there is a 25 percent chance the spell fails as a result of the target making the necessary gestures too slowly.\n\tAn affected target repeats the save at the end of each of its turns, ending the spell on itself on a success.\n\nSource: Player's Handbook 2024 p. 316",
-      "concentration": true,
+      "range": "Self (30-foot Cone)",
+      "components": "V, S, M (a mixture of water and powdered silver)",
+      "duration": "Instantaneous",
+      "desc": "You channel energy from the Astral Sea to unleash a torrent of magic from you in a 30-foot Cone. Each creature in the Cone must succeed on a Dexterity saving throw or take 4d10 Cold or Radiant damage (chosen when you cast this spell). Your choice of damage type determines an additional effect:\n\tCold Damage. The target has Disadvantage on the next D20 Test it makes before the end of your next turn.\n\tRadiant Damage. The target can see only within 15 feet of itself, and it has the Blinded condition for everything beyond that distance until the end of your next turn.\n\tUsing a Higher-Level Spell Slot. The damage increases by 1d10 for each spell slot level above 3.\n\nSource: D&D Beyond Drops, May 2026",
       "source": "class"
     }
   ],
@@ -257,7 +256,7 @@
     "Lesser Restoration",
     "Dispel Magic",
     "Mass Healing Word",
-    "Slow"
+    "Astral Flood"
   ],
   "racialFreeCastsUsed": {},
   "resources": [
