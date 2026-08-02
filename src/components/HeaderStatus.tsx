@@ -36,22 +36,25 @@ export default function HeaderStatus() {
 
   return (
     <div className="flex items-center gap-2 min-w-0">
-      {needRefresh ? (
+      {/* The version is ALWAYS shown. It used to be replaced by the update
+          button, which hid the one fact you need to tell whether updating
+          worked: the hash has to change after you press it. */}
+      <span
+        className="font-mono text-[10px] text-outline truncate"
+        title={`Build ${APP_COMMIT}`}
+      >
+        {formatVersion(APP_COMMIT, APP_BUILD_TIME)}
+      </span>
+
+      {needRefresh && (
         <button
           onClick={updateNow}
-          className="inline-flex items-center gap-1 rounded-md border border-primary/50 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary hover:bg-primary/20 transition"
+          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-primary/50 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary hover:bg-primary/20 transition"
           aria-label="Actualizar a la versión nueva"
         >
           <Icon name="system_update" size={14} filled />
-          Actualizar
+          <span className="hidden md:inline">Actualizar</span>
         </button>
-      ) : (
-        <span
-          className="font-mono text-[10px] text-outline truncate"
-          title={`Build ${APP_COMMIT}`}
-        >
-          {formatVersion(APP_COMMIT, APP_BUILD_TIME)}
-        </span>
       )}
 
       {sync.kind !== "hidden" && (
