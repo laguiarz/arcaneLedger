@@ -3,6 +3,7 @@ import { useCharacter } from "@/store/character";
 import type { RechargeType, Resource } from "@/types/character";
 import Icon from "../ui/Icon";
 import { useInspire } from "../InspireModal";
+import DawnRecharge from "../DawnRecharge";
 
 const RECHARGE_LABEL: Record<RechargeType, string> = {
   long: "LR",
@@ -22,12 +23,17 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
 
   return (
     <div className="bg-surface-container-low border border-outline-variant/40 rounded-md hover:border-primary/40 transition">
-      <div className="flex items-center gap-2 px-2 py-1.5">
+      {/* flex-wrap so the dawn control's input can drop to its own line. */}
+      <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
         <span
           className="shrink-0 w-6 h-6 inline-flex items-center justify-center rounded text-[9px] font-bold bg-surface-container-highest text-on-surface-variant border border-outline-variant/50"
-          title={`Recharge: ${resource.recharge}`}
+          title={
+            resource.rechargeDice
+              ? `Recharge: ${resource.rechargeDice} at dawn`
+              : `Recharge: ${resource.recharge}`
+          }
         >
-          {RECHARGE_LABEL[resource.recharge]}
+          {resource.rechargeDice ? "☀" : RECHARGE_LABEL[resource.recharge]}
         </span>
         <button
           className="flex-1 min-w-0 text-left"
@@ -52,6 +58,7 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
             <span className="font-mono text-xs text-on-surface-variant shrink-0">
               <span className="text-primary font-bold">{remaining}</span>/{resource.max}
             </span>
+            <DawnRecharge resource={resource} />
             <button
               onClick={() => refund(resource.name)}
               disabled={resource.used <= 0}

@@ -3,6 +3,7 @@ import { useCharacter } from "@/store/character";
 import type { RechargeType, Resource } from "@/types/character";
 import Icon from "../ui/Icon";
 import { useInspire } from "../InspireModal";
+import DawnRecharge from "../DawnRecharge";
 
 const RECHARGE_LABEL: Record<RechargeType, string> = {
   long: "Long Rest",
@@ -61,7 +62,11 @@ function ResourceCard({ resource }: { resource: Resource }) {
               )}
               <span className={`chip border ${RECHARGE_TONE[resource.recharge]}`}>
                 <Icon name="schedule" size={11} className="mr-1" />
-                {RECHARGE_LABEL[resource.recharge]}
+                {/* Name the die: "Dawn" alone reads as a full refill, which is
+                    exactly what a dice-recharge item does not do. */}
+                {resource.rechargeDice
+                  ? `Dawn ${resource.rechargeDice}`
+                  : RECHARGE_LABEL[resource.recharge]}
               </span>
               {inspire.enabled && (
                 <button
@@ -87,7 +92,8 @@ function ResourceCard({ resource }: { resource: Resource }) {
           </div>
 
           {isCounter ? (
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex flex-wrap items-center justify-end gap-1 shrink-0">
+              <DawnRecharge resource={resource} />
               <button
                 className="btn-icon"
                 disabled={resource.used <= 0}
