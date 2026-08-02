@@ -145,6 +145,9 @@ export default defineConfig(({ command }) => ({
     },
   },
   server: {
-    port: 5173,
+    // 5180, not Vite's default 5173, which collides with another app on the
+    // maintainer's machine. CLAUDE.md documents 5180 as this project's port;
+    // `npm run dev` is a bare `vite`, so the config has to be what makes it true.
+    port: 5180,
   },
 }));
