@@ -28,6 +28,11 @@ export default function CloudSyncSettings() {
     setSyncEnabled(nextEnabled && nextSecret.trim().length > 0);
     // The header mirrors `enabled` from the store, so it has to be told.
     useSync.getState().recompute();
+  };
+
+  /** Persist and flash "Guardado" — for the explicit button presses only. */
+  const persistAndAnnounce = (nextEnabled = enabled, nextSecret = secretDraft) => {
+    persist(nextEnabled, nextSecret);
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
@@ -39,7 +44,19 @@ export default function CloudSyncSettings() {
    */
   const toggleEnabled = (next: boolean) => {
     setEnabled(next);
-    persist(next);
+    persistAndAnnounce(next);
+  };
+
+  /**
+   * The secret persists on every keystroke, for the same reason the toggle
+   * does. Ticking the box before typing the secret leaves sync off (enabling
+   * requires a secret), so if the secret only landed on a separate button
+   * press, that order left the box checked while sync stayed silently off and
+   * the header still read "desactivada".
+   */
+  const editSecret = (next: string) => {
+    setSecretDraft(next);
+    persist(enabled, next);
   };
 
   // Deliberately a CHECK, not a sync: applying in either direction is the
@@ -69,7 +86,7 @@ export default function CloudSyncSettings() {
           <input
             type="password"
             value={secretDraft}
-            onChange={(e) => setSecretDraft(e.target.value)}
+            onChange={(e) => editSecret(e.target.value)}
             placeholder="El mismo secreto en todos tus dispositivos"
             className="input-inset w-full font-mono text-xs"
           />
@@ -84,10 +101,23 @@ export default function CloudSyncSettings() {
           Activar sincronización
         </label>
 
+        {/* Ticking the box without a secret is a silent refusal — the server
+            rejects every request without one, so sync stays off while the box
+            reads as on. Say so, in the place where it happened. Not red: this
+            is incomplete, not broken. */}
+        {enabled && secretDraft.trim().length === 0 && (
+          <p
+            role="alert"
+            className="text-[11px] text-primary border border-primary/40 bg-primary/10 rounded-md px-sm py-1"
+          >
+            Falta el secreto compartido — la sincronización sigue apagada.
+          </p>
+        )}
+
         <div className="flex flex-wrap items-center gap-2 pt-1">
           {/* "Guardar ajustes", never just "Guardar": the header's Guardar
               uploads your data, and two buttons with one name is a trap. */}
-          <button className="btn-ghost !py-1" onClick={() => persist()}>
+          <button className="btn-ghost !py-1" onClick={() => persistAndAnnounce()}>
             <Icon name="save" /> Guardar ajustes
           </button>
           <button
