@@ -79,6 +79,14 @@ export default function RestMenu({ open, onClose }: Props) {
                   Restore HP & spell slots, recover {Math.max(1, Math.ceil(c.hitDice.max / 2))} Hit Dice,
                   reset daily resources, reduce exhaustion by 1.
                 </p>
+                {/* Say it here rather than let the user discover a resource
+                    that quietly didn't come back. */}
+                {c.resources.some((r) => r.rechargeDice) && (
+                  <p className="text-xs text-outline mt-1">
+                    Items that recharge on a die (☀) are not included — roll those
+                    yourself.
+                  </p>
+                )}
               </div>
             </div>
           </button>

@@ -367,9 +367,15 @@ export const useCharacter = create<CharacterState>()(
           const c = s.character;
           const restoredSlots: typeof c.spellSlots = { ...c.spellSlotsMax };
           const restoredResources: Resource[] = c.resources.map((r) =>
-            r.recharge === "long" || r.recharge === "short" || r.recharge === "dawn"
-              ? { ...r, used: 0 }
-              : r,
+            // A dawn item that recovers on a die roll is left alone: rolling is
+            // the mechanic, and a long rest would hand back charges the item
+            // never granted. Scoped to "dawn" deliberately — a `recharge:
+            // "long"` resource means what it says, dice or no dice.
+            r.recharge === "dawn" && r.rechargeDice
+              ? r
+              : r.recharge === "long" || r.recharge === "short" || r.recharge === "dawn"
+                ? { ...r, used: 0 }
+                : r,
           );
           // 2024 PHB: regain spent HD up to ceil(level/2), minimum 1.
           const hdRegain = Math.max(1, Math.ceil(c.hitDice.max / 2));
