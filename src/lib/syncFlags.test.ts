@@ -61,9 +61,14 @@ describe("syncHeaderState", () => {
     hasCharacter: true,
   };
 
-  it("hides the region when sync is off or no character is active", () => {
-    expect(syncHeaderState({ ...d, enabled: false }).kind).toBe("hidden");
+  it("hides the region only when no character is active", () => {
     expect(syncHeaderState({ ...d, hasCharacter: false }).kind).toBe("hidden");
+  });
+
+  it("reports sync-off explicitly rather than rendering nothing", () => {
+    // An empty header is indistinguishable from a broken one — this is exactly
+    // how a user concluded the save button was missing when sync was just off.
+    expect(syncHeaderState({ ...d, enabled: false }).kind).toBe("off");
   });
 
   it("shows synced, save, fetch and conflict", () => {

@@ -59,6 +59,9 @@ export function syncFlags(a: {
 
 export type HeaderSync =
   | { kind: "hidden" }
+  /** Sync is configured off. Shown, not hidden: an empty header is
+   *  indistinguishable from a broken one. */
+  | { kind: "off" }
   | { kind: "synced" }
   | { kind: "save" }
   | { kind: "fetch" }
@@ -79,7 +82,8 @@ export function syncHeaderState(a: {
   hasCharacter: boolean;
   message?: string;
 }): HeaderSync {
-  if (!a.enabled || !a.hasCharacter) return { kind: "hidden" };
+  if (!a.hasCharacter) return { kind: "hidden" };
+  if (!a.enabled) return { kind: "off" };
   if (a.status === "syncing") return { kind: "busy" };
   if (a.status === "error" || a.status === "offline") {
     return { kind: "error", message: a.message ?? "Sync error" };
