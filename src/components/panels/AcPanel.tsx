@@ -6,6 +6,7 @@ import type { DexToAc } from "@/types/character";
 import Icon from "../ui/Icon";
 import Modal from "../ui/Modal";
 import Stepper from "../ui/Stepper";
+import BreakdownRow from "../ui/BreakdownRow";
 
 function fmt(n: number) {
   return n >= 0 ? `+${n}` : `${n}`;
@@ -69,30 +70,6 @@ export default function AcPanel() {
 
       {editing && <AcEditModal onClose={() => setEditing(false)} />}
     </div>
-  );
-}
-
-function BreakdownRow({
-  label,
-  value,
-  hint,
-  signed,
-}: {
-  label: string;
-  value: number;
-  hint?: string;
-  signed?: boolean;
-}) {
-  return (
-    <li className="flex items-center justify-between gap-2">
-      <span className="text-on-surface-variant truncate">
-        {label}
-        {hint && <span className="text-outline text-xs"> · {hint}</span>}
-      </span>
-      <span className="font-mono text-on-surface shrink-0">
-        {signed ? fmt(value) : value}
-      </span>
-    </li>
   );
 }
 
