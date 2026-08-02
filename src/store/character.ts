@@ -432,6 +432,7 @@ export const useCharacter = create<CharacterState>()(
             ...c,
             // Tolerate older saves / hand-edited JSON missing the new fields.
             innateSpells: c.innateSpells ?? [],
+            weapons: c.weapons ?? [],
             racialFreeCastsUsed: c.racialFreeCastsUsed ?? {},
             hitDice: c.hitDice ?? { die: 8, max: c.level, spent: 0 },
             // Library JSON and hand-edited files may author abilities as plain
