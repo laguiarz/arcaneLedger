@@ -5,13 +5,15 @@
       "id": "lyari",
       "name": "Lyari Mistweaver",
       "className": "Wizard (Illusionist)",
-      "level": 5
+      "level": 5,
+      "revision": "d99681c22a39"
     },
     {
       "id": "brunella",
       "name": "Brunella",
       "className": "Bard (Lore)",
-      "level": 5
+      "level": 5,
+      "revision": "f12171effc41"
     }
   ]
 }

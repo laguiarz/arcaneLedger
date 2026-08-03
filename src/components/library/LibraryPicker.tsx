@@ -49,7 +49,9 @@ export default function LibraryPicker({
     setLoadError(null);
     try {
       const character = await fetchLibraryCharacter(s.id);
-      loadCharacter(character, { sourceId: s.id });
+      // Record which revision this is, or the header would immediately offer to
+      // reload the character the user just picked.
+      loadCharacter(character, { sourceId: s.id, revision: s.revision ?? null });
       onLoaded?.(s.id, character.name);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));

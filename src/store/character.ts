@@ -33,6 +33,14 @@ interface CharacterState {
    */
   activeCharacterId: string | null;
 
+  /**
+   * Revision of the library entry this character was loaded from. `null` when
+   * the character did not come from the library, or came from a build that
+   * predates revisions — in which case the app says "I don't know which version
+   * this is" rather than claiming a newer one exists.
+   */
+  libraryRevision: string | null;
+
   // HP
   takeDamage: (amount: number) => void;
   heal: (amount: number) => void;
@@ -92,9 +100,15 @@ interface CharacterState {
   arcaneRecovery: (slotsByLevel: Partial<Record<SpellLevel, number>>) => void;
 
   // Persistence
+  /**
+   * `sourceId` is REQUIRED inside `opts` on purpose. The setter decides the
+   * origin by key presence, so an optional one would let
+   * `loadCharacter(c, { revision })` typecheck and silently mark a library
+   * character as "custom".
+   */
   loadCharacter: (
     c: Character,
-    opts?: { sourceId?: string | null },
+    opts?: { sourceId: string | null; revision?: string | null },
   ) => void;
   resetToSample: () => void;
   exportJson: () => string;
@@ -107,6 +121,7 @@ export const useCharacter = create<CharacterState>()(
     (set, get) => ({
       character: sampleWizard,
       activeCharacterId: null,
+      libraryRevision: null,
 
       takeDamage: (amount) =>
         set((s) => {
@@ -449,9 +464,18 @@ export const useCharacter = create<CharacterState>()(
           // character came from (e.g. Settings file import).
           activeCharacterId:
             opts && "sourceId" in opts ? opts.sourceId ?? null : "custom",
+          // An import has no library origin, so it must CLEAR any revision left
+          // over from the character it replaced — otherwise the header would
+          // compare a custom sheet against someone else's library entry.
+          libraryRevision:
+            opts && "sourceId" in opts ? opts.revision ?? null : null,
         }),
       resetToSample: () =>
-        set({ character: sampleWizard, activeCharacterId: "sample" }),
+        set({
+          character: sampleWizard,
+          activeCharacterId: "sample",
+          libraryRevision: null,
+        }),
       exportJson: () => JSON.stringify(get().character, null, 2),
     }),
     {
@@ -459,7 +483,11 @@ export const useCharacter = create<CharacterState>()(
       // v4: added activeCharacterId for the cloud character library.
       // v5: abilities became base/feat/magic breakdowns. Migrate in place so
       // users keep their active character instead of re-picking.
-      version: 5,
+      // v6: added libraryRevision. No migration body needed — zustand's default
+      // merge is {...currentState, ...persistedState}, so the absent key already
+      // resolves to the initial null. Do NOT rebuild the state object here; that
+      // is how you drop activeCharacterId.
+      version: 6,
       migrate: (persisted, version) => {
         const state = persisted as { character?: Character } | undefined;
         if (state?.character && version < 5) {

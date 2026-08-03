@@ -13,6 +13,12 @@ export interface CharacterSummary {
   /** Display label e.g. "Wizard (Illusionist)". */
   className: string;
   level: number;
+  /**
+   * Content digest of the character JSON, stamped by scripts/stampLibrary.mjs.
+   * Optional: a manifest published before revisions existed has none, and the
+   * app must stay silent rather than guess when it is missing.
+   */
+  revision?: string;
 }
 
 export interface LibraryManifest {
