@@ -18,7 +18,9 @@ export type SpellSource =
   | "race"
   | "background"
   | "feat"
-  | "item";
+  | "item"
+  /** Authored in-app by the player. The only source the UI may edit or delete. */
+  | "custom";
 
 export interface SpellBase {
   name: string;

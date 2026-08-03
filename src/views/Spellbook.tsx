@@ -3,6 +3,7 @@ import {
   useCharacter,
   preparedNonRituals,
   availableRituals,
+  ritualsNeedingPreparation,
   spellSaveDc,
   spellAttackBonus,
 } from "@/store/character";
@@ -10,7 +11,8 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import SlotsPanel from "@/components/panels/SlotsPanel";
 import SpellCard, { CantripCard } from "@/components/SpellCard";
 import Icon from "@/components/ui/Icon";
-import type { Spell } from "@/types/character";
+import SpellForm from "@/components/spells/SpellForm";
+import type { Cantrip, Spell } from "@/types/character";
 
 type Tab = "prepared" | "cantrips" | "rituals" | "all";
 
@@ -26,6 +28,21 @@ export default function Spellbook() {
   const [tab, setTab] = useState<Tab>("prepared");
   const [query, setQuery] = useState("");
   const [levels, setLevels] = useState<Set<number>>(new Set());
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Spell | Cantrip | null>(null);
+
+  const openAdd = () => {
+    setEditing(null);
+    setFormOpen(true);
+  };
+  const openEdit = (s: Spell | Cantrip) => {
+    setEditing(s);
+    setFormOpen(true);
+  };
+  const closeForm = () => {
+    setFormOpen(false);
+    setEditing(null);
+  };
 
   const toggleLevel = (l: number) =>
     setLevels((prev) => {
@@ -37,6 +54,7 @@ export default function Spellbook() {
 
   const prepared = useMemo(() => preparedNonRituals(c), [c]);
   const ritualsAvail = useMemo(() => availableRituals(c), [c]);
+  const ritualsToPrepare = useMemo(() => ritualsNeedingPreparation(c), [c]);
 
   const allSorted = useMemo(
     () =>
@@ -150,6 +168,14 @@ export default function Spellbook() {
           </div>
         )}
 
+        <button
+          type="button"
+          onClick={openAdd}
+          className="inline-flex items-center gap-2 px-sm py-2 rounded-md border border-primary/40 bg-surface-container-low text-primary text-sm font-bold tracking-wide transition hover:bg-primary/15"
+        >
+          <Icon name="add" size={16} /> Add spell
+        </button>
+
         <div className="ml-auto relative">
           <Icon name="search" className="absolute left-2 top-2.5 text-outline" size={16} />
           <input
@@ -161,6 +187,8 @@ export default function Spellbook() {
         </div>
       </div>
 
+      {formOpen && <SpellForm editing={editing} onClose={closeForm} />}
+
       {tab === "prepared" && (
         <div className="space-y-md">
           <SectionHeader icon="star" title="Prepared Incantations" />
@@ -170,7 +198,7 @@ export default function Spellbook() {
           {groupByLevel(prepared.filter(spellFilter)).map(([lvl, spells]) => (
             <LevelGroup key={lvl} level={lvl}>
               {spells.map((s) => (
-                <SpellCard key={s.name} spell={s} />
+                <SpellCard key={s.name} spell={s} onEdit={openEdit} />
               ))}
             </LevelGroup>
           ))}
@@ -182,7 +210,7 @@ export default function Spellbook() {
           <SectionHeader icon="flash_on" title="Cantrips" subtitle="Always available, no slot cost" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
             {c.cantrips.filter(matchesSearch).map((s) => (
-              <CantripCard key={s.name} spell={s} />
+              <CantripCard key={s.name} spell={s} onEdit={openEdit} />
             ))}
           </div>
           {c.cantrips.length === 0 && <EmptyState text="No cantrips known." />}
@@ -200,14 +228,36 @@ export default function Spellbook() {
                 : "Prepared rituals, plus ones granted by lineage, feats and items (+10 min, no slot)"
             }
           />
-          {ritualsAvail.length === 0 && <EmptyState text="No rituals available." />}
+          {ritualsAvail.length === 0 && ritualsToPrepare.length === 0 && (
+            <EmptyState text="No rituals available." />
+          )}
           {groupByLevel(ritualsAvail.filter(spellFilter)).map(([lvl, spells]) => (
             <LevelGroup key={lvl} level={lvl}>
               {spells.map((s) => (
-                <SpellCard key={s.name} spell={s} ritualMode />
+                <SpellCard key={s.name} spell={s} ritualMode onEdit={openEdit} />
               ))}
             </LevelGroup>
           ))}
+
+          {/* Without this, a non-Wizard who owns a ritual but has not prepared
+              it sees nothing at all on the page named for rituals — which reads
+              as the spell having failed to save. */}
+          {ritualsToPrepare.length > 0 && (
+            <div className="space-y-md pt-md border-t border-outline-variant/30">
+              <SectionHeader
+                icon="star_border"
+                title="Needs preparing"
+                subtitle="Rituals in the spellbook. Tap the star to prepare one, then it can be ritual-cast."
+              />
+              {groupByLevel(ritualsToPrepare.filter(spellFilter)).map(([lvl, spells]) => (
+                <LevelGroup key={lvl} level={lvl}>
+                  {spells.map((s) => (
+                    <SpellCard key={s.name} spell={s} showPrepareToggle onEdit={openEdit} />
+                  ))}
+                </LevelGroup>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -221,7 +271,7 @@ export default function Spellbook() {
           {groupByLevel(allSorted.filter(spellFilter)).map(([lvl, spells]) => (
             <LevelGroup key={lvl} level={lvl}>
               {spells.map((s) => (
-                <SpellCard key={s.name} spell={s} showPrepareToggle />
+                <SpellCard key={s.name} spell={s} showPrepareToggle onEdit={openEdit} />
               ))}
             </LevelGroup>
           ))}

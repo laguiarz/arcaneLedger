@@ -1,7 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import type { Character, Spell } from "@/types/character";
-import { availableRituals, useCharacter } from "@/store/character";
+import {
+  availableRituals,
+  ritualsNeedingPreparation,
+  useCharacter,
+} from "@/store/character";
 import { toAbilityScores } from "@/lib/abilities";
+import { extractDurable } from "@/lib/durableSheet";
 
 const ritualPrepared: Spell = {
   name: "Detect Magic", level: 1, school: "Divination", ritual: true,
@@ -179,5 +184,298 @@ describe("loadCharacter origin tracking", () => {
     useCharacter.getState().resetToSample();
     expect(useCharacter.getState().activeCharacterId).toBe("sample");
     expect(useCharacter.getState().libraryRevision).toBeNull();
+  });
+});
+
+describe("addCustomSpell", () => {
+  beforeEach(() => {
+    useCharacter.setState({
+      character: makeChar({
+        spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+        cantrips: [{ name: "Fire Bolt", school: "Evocation", source: "class" }],
+        innateSpells: [{ name: "Misty Step", level: 2, school: "Conjuration" }],
+        preparedSpells: [],
+      }),
+      activeCharacterId: "lyari",
+      customSpells: {},
+    });
+  });
+
+  it("puts a leveled spell in the spellbook and the stash, tagged custom", () => {
+    const res = useCharacter.getState().addCustomSpell({
+      name: "Fireball", level: 3, school: "Evocation",
+    });
+    expect(res.ok).toBe(true);
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield", "Fireball"]);
+    expect(s.character.spellbook[1].source).toBe("custom");
+    expect(s.customSpells["lyari"].spellbook).toHaveLength(1);
+  });
+
+  it("puts a level 0 spell in the cantrips", () => {
+    useCharacter.getState().addCustomSpell({ name: "Spark", level: 0, school: "Evocation" });
+    const s = useCharacter.getState();
+    expect(s.character.cantrips.map((x) => x.name)).toEqual(["Fire Bolt", "Spark"]);
+    expect(s.customSpells["lyari"].cantrips).toHaveLength(1);
+  });
+
+  it("refuses a duplicate name across casing, cantrips and innate spells", () => {
+    expect(useCharacter.getState().addCustomSpell({
+      name: "shield", level: 1, school: "Abjuration",
+    })).toEqual({ ok: false, error: expect.stringContaining("already") });
+
+    expect(useCharacter.getState().addCustomSpell({
+      name: "Fire Bolt", level: 0, school: "Evocation",
+    }).ok).toBe(false);
+
+    expect(useCharacter.getState().addCustomSpell({
+      name: "Misty Step", level: 2, school: "Conjuration",
+    }).ok).toBe(false);
+
+    expect(useCharacter.getState().customSpells["lyari"]).toBeUndefined();
+  });
+
+  it("refuses a blank name", () => {
+    expect(useCharacter.getState().addCustomSpell({
+      name: "   ", level: 1, school: "Evocation",
+    }).ok).toBe(false);
+  });
+
+  it("does not auto-prepare", () => {
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+    expect(useCharacter.getState().character.preparedSpells).toEqual([]);
+  });
+});
+
+describe("updateCustomSpell / removeCustomSpell", () => {
+  beforeEach(() => {
+    useCharacter.setState({
+      character: makeChar({
+        spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+        cantrips: [],
+        innateSpells: [],
+        preparedSpells: [],
+        concentration: null,
+      }),
+      activeCharacterId: "lyari",
+      customSpells: {},
+    });
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+    useCharacter.getState().togglePrepared("Fireball");
+    useCharacter.getState().setConcentration("Fireball", 3);
+  });
+
+  it("renames, carrying preparation and concentration with it", () => {
+    const res = useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Fire Ball", level: 3, school: "Evocation",
+    });
+    expect(res.ok).toBe(true);
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield", "Fire Ball"]);
+    expect(s.character.preparedSpells).toEqual(["Fire Ball"]);
+    expect(s.character.concentration?.spellName).toBe("Fire Ball");
+    expect(s.customSpells["lyari"].spellbook[0].name).toBe("Fire Ball");
+  });
+
+  it("refuses a rename onto an existing name but allows keeping its own", () => {
+    expect(useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Shield", level: 3, school: "Evocation",
+    }).ok).toBe(false);
+
+    expect(useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Fireball", level: 4, school: "Evocation",
+    }).ok).toBe(true);
+    expect(useCharacter.getState().character.spellbook[1].level).toBe(4);
+  });
+
+  it("refuses to move a spell across the cantrip boundary", () => {
+    expect(useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Fireball", level: 0, school: "Evocation",
+    })).toEqual({ ok: false, error: expect.stringContaining("cantrip") });
+  });
+
+  it("refuses to touch a library spell", () => {
+    expect(useCharacter.getState().updateCustomSpell("Shield", {
+      name: "Shielded", level: 1, school: "Abjuration",
+    }).ok).toBe(false);
+    useCharacter.getState().removeCustomSpell("Shield");
+    expect(useCharacter.getState().character.spellbook.map((x) => x.name)).toContain("Shield");
+  });
+
+  it("deletes, pruning preparation and dropping concentration", () => {
+    useCharacter.getState().removeCustomSpell("Fireball");
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield"]);
+    expect(s.character.preparedSpells).toEqual([]);
+    expect(s.character.concentration).toBeNull();
+    expect(s.customSpells["lyari"].spellbook).toHaveLength(0);
+  });
+
+  it("leaves concentration alone when it names a different spell", () => {
+    useCharacter.getState().setConcentration("Shield", 1);
+    useCharacter.getState().removeCustomSpell("Fireball");
+    expect(useCharacter.getState().character.concentration?.spellName).toBe("Shield");
+  });
+});
+
+describe("loadCharacter and the custom-spell stash", () => {
+  const lyari = () => makeChar({
+    name: "Lyari",
+    spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+    cantrips: [], innateSpells: [], preparedSpells: [],
+  });
+  const brunella = () => makeChar({
+    name: "Brunella",
+    spellbook: [{ name: "Vicious Mockery", level: 1, school: "Enchantment", source: "class" }],
+    cantrips: [], innateSpells: [], preparedSpells: [],
+  });
+
+  beforeEach(() => {
+    useCharacter.setState({ character: lyari(), activeCharacterId: "lyari", customSpells: {} });
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+  });
+
+  it("re-applies the customs when the same character reloads from the library", () => {
+    useCharacter.getState().loadCharacter(lyari(), { sourceId: "lyari", revision: "abc" });
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Shield", "Fireball"]);
+  });
+
+  it("does not hand them to a different character, and restores them on the way back", () => {
+    useCharacter.getState().loadCharacter(brunella(), { sourceId: "brunella" });
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Vicious Mockery"]);
+
+    useCharacter.getState().loadCharacter(lyari(), { sourceId: "lyari" });
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Shield", "Fireball"]);
+  });
+
+  it("drops a custom the library now provides itself (promotion)", () => {
+    const promoted = makeChar({
+      name: "Lyari",
+      spellbook: [
+        { name: "Shield", level: 1, school: "Abjuration", source: "class" },
+        { name: "Fireball", level: 3, school: "Evocation", source: "class" },
+      ],
+      cantrips: [], innateSpells: [], preparedSpells: [],
+    });
+    useCharacter.getState().loadCharacter(promoted, { sourceId: "lyari" });
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.filter((x) => x.name === "Fireball")).toHaveLength(1);
+    expect(s.character.spellbook.find((x) => x.name === "Fireball")?.source).toBe("class");
+    expect(s.customSpells["lyari"].spellbook).toHaveLength(0);
+  });
+
+  it("clears the shared custom bucket on an import", () => {
+    // Every Settings import lands in the same "custom" id, so spells typed for
+    // one imported sheet must not follow her onto the next.
+    useCharacter.getState().loadCharacter(brunella());
+    expect(useCharacter.getState().activeCharacterId).toBe("custom");
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Vicious Mockery"]);
+    useCharacter.getState().addCustomSpell({ name: "Bless", level: 1, school: "Enchantment" });
+    useCharacter.getState().loadCharacter(lyari());
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name)).toEqual(["Shield"]);
+    expect(useCharacter.getState().customSpells["custom"]).toEqual({ spellbook: [], cantrips: [] });
+  });
+});
+
+describe("applyRemoteSheet", () => {
+  beforeEach(() => {
+    useCharacter.setState({
+      character: makeChar({
+        spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+        cantrips: [], innateSpells: [], preparedSpells: [],
+      }),
+      activeCharacterId: "lyari",
+      customSpells: {},
+    });
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+  });
+
+  it("takes the remote customs when the remote has them", () => {
+    const sheet = extractDurable(useCharacter.getState().character);
+    useCharacter.getState().applyRemoteSheet("lyari", {
+      ...sheet,
+      customSpells: {
+        spellbook: [{ name: "Counterspell", level: 3, school: "Abjuration", source: "custom" }],
+        cantrips: [],
+      },
+    });
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield", "Counterspell"]);
+    expect(s.customSpells["lyari"].spellbook.map((x) => x.name)).toEqual(["Counterspell"]);
+  });
+
+  it("keeps the local ones when the remote sheet predates the field", () => {
+    const sheet = extractDurable(useCharacter.getState().character);
+    // What a device on an older build pushes: no customSpells key at all.
+    const stale = { ...sheet } as Record<string, unknown>;
+    delete stale.customSpells;
+    useCharacter.getState().applyRemoteSheet("lyari", stale as never);
+    expect(useCharacter.getState().character.spellbook.map((x) => x.name))
+      .toEqual(["Shield", "Fireball"]);
+  });
+
+  it("applies an empty remote list as a deletion", () => {
+    const sheet = extractDurable(useCharacter.getState().character);
+    useCharacter.getState().applyRemoteSheet("lyari", {
+      ...sheet,
+      customSpells: { spellbook: [], cantrips: [] },
+    });
+    expect(useCharacter.getState().character.spellbook.map((x) => x.name)).toEqual(["Shield"]);
+  });
+});
+
+/**
+ * The Rituals tab used to show a non-Wizard only their PREPARED rituals, with
+ * no hint the others existed. Adding a ritual made that immediately visible:
+ * the spell saved fine, appeared under Spellbook, and was simply absent from
+ * the page named for rituals.
+ */
+describe("ritualsNeedingPreparation", () => {
+  const ritual: Spell = { name: "Detect Magic", level: 1, school: "Divination", ritual: true };
+  const other: Spell = { name: "Illusory Script", level: 1, school: "Illusion", ritual: true };
+
+  it("lists a Bard's unprepared spellbook rituals", () => {
+    const names = ritualsNeedingPreparation(
+      makeChar({ className: "Bard", spellbook: [ritual, other], preparedSpells: ["Detect Magic"] }),
+    ).map((s) => s.name);
+    expect(names).toEqual(["Illusory Script"]);
+  });
+
+  it("is empty for a Wizard, whose unprepared rituals are already castable", () => {
+    expect(
+      ritualsNeedingPreparation(
+        makeChar({ spellbook: [ritual, other], preparedSpells: [] }),
+      ),
+    ).toEqual([]);
+  });
+
+  it("never lists innate rituals, which need no preparation", () => {
+    const names = ritualsNeedingPreparation(
+      makeChar({
+        className: "Bard",
+        spellbook: [],
+        preparedSpells: [],
+        innateSpells: [{ name: "Guiding Hand", level: 1, school: "Divination", ritual: true }],
+      }),
+    ).map((s) => s.name);
+    expect(names).toEqual([]);
+  });
+
+  it("catches a freshly added custom ritual, which is never auto-prepared", () => {
+    useCharacter.setState({
+      character: makeChar({ className: "Bard", spellbook: [], preparedSpells: [], cantrips: [] }),
+      activeCharacterId: "brunella",
+      customSpells: {},
+    });
+    useCharacter.getState().addCustomSpell({
+      name: "Bard Probe Ritual", level: 1, school: "Evocation", ritual: true,
+    });
+    const c = useCharacter.getState().character;
+    expect(availableRituals(c).map((s) => s.name)).toEqual([]);
+    expect(ritualsNeedingPreparation(c).map((s) => s.name)).toEqual(["Bard Probe Ritual"]);
   });
 });

@@ -37,6 +37,17 @@ export function digestState(payload: unknown): string {
   return `${(h1 >>> 0).toString(36)}${(h2 >>> 0).toString(36)}-${s.length.toString(36)}`;
 }
 
+/**
+ * The baseline to record after a pull: the digest of what the CLOUD holds, not
+ * of what this device ended up with. The two differ whenever an apply kept
+ * local data the remote lacked (a backfill), and in that case the device
+ * genuinely does have unsaved work — recording the merged result instead would
+ * render a green "synced" over a cloud that is missing her data.
+ */
+export function baselineFromRemote(remote: { sheet: unknown; coin: unknown }): string {
+  return digestState({ sheet: remote.sheet, coin: remote.coin });
+}
+
 export function syncFlags(a: {
   /** Digest as of the last confirmed write or apply. `null` = never confirmed. */
   baseline: string | null;

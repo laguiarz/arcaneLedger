@@ -39,6 +39,12 @@ export const SCHOOL_ICONS: Record<SpellSchool, string> = {
   Transmutation: "change_circle",
 };
 
+/**
+ * The eight schools as a runtime array. `SpellSchool` is a type and erases at
+ * compile time, so the spell form needs this to render its options.
+ */
+export const SPELL_SCHOOLS = Object.keys(SCHOOL_ICONS) as SpellSchool[];
+
 export const SPELL_LEVELS: SpellLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export function levelLabel(lvl: SpellLevel): string {

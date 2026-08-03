@@ -13,10 +13,22 @@ import type {
 import { sampleWizard } from "@/data/sampleWizard";
 import { abilityMod, abilityScore, normalizeAbilities } from "@/lib/abilities";
 import { defaultArmorConfig } from "@/lib/armor";
+import { applyDurable, type DurableSheet } from "@/lib/durableSheet";
 import {
   clearLegacyGlobalPrompt,
   getLegacyGlobalPrompt,
 } from "@/lib/combatNarration";
+import {
+  draftToCantrip,
+  draftToSpell,
+  emptyCustomSpells,
+  isCantripDraft,
+  nameCollides,
+  projectCustoms,
+  pruneCustoms,
+  type CustomSpellDraft,
+  type CustomSpells,
+} from "@/lib/customSpells";
 
 // Re-exported so existing `import { abilityMod } from "@/store/character"`
 // call sites keep working now that the helpers live in @/lib/abilities.
@@ -41,6 +53,15 @@ interface CharacterState {
    */
   libraryRevision: string | null;
 
+  /**
+   * Spells the player authored, keyed by character id — the same shape
+   * `useCoin.purses` uses, and for the same reason: `character` is replaced
+   * wholesale by every load, so anything that must outlive a reload cannot
+   * live inside it. This is the SOURCE OF TRUTH; the entries tagged
+   * `source: "custom"` in `character.spellbook`/`cantrips` are a projection.
+   */
+  customSpells: Record<string, CustomSpells>;
+
   // HP
   takeDamage: (amount: number) => void;
   heal: (amount: number) => void;
@@ -60,6 +81,24 @@ interface CharacterState {
   castSpellFree: (spellName: string, opts?: { concentration?: { level: SpellLevel } }) => void;
   refundSlot: (slotLevel: SpellLevel) => void;
   togglePrepared: (spellName: string) => void;
+
+  // Player-authored spells
+  /**
+   * Add a spell the player wrote herself. Returns an error instead of throwing
+   * so the form can render it inline.
+   */
+  addCustomSpell: (draft: CustomSpellDraft) => { ok: true } | { ok: false; error: string };
+  /**
+   * Edit a spell the player wrote. `originalName` identifies it — names are the
+   * identity key — so a rename has to be followed through into `preparedSpells`
+   * and `concentration`. Level may change within its kind, never across it.
+   */
+  updateCustomSpell: (
+    originalName: string,
+    draft: CustomSpellDraft,
+  ) => { ok: true } | { ok: false; error: string };
+  /** Delete a player-authored spell, pruning preparation and concentration. */
+  removeCustomSpell: (name: string) => void;
 
   // Concentration
   setConcentration: (spellName: string, level: SpellLevel) => void;
@@ -110,11 +149,44 @@ interface CharacterState {
     c: Character,
     opts?: { sourceId: string | null; revision?: string | null },
   ) => void;
+  /**
+   * Apply a durable sheet pulled from the cloud. Separate from `applyDurable`
+   * because custom spells live in the per-character stash, not inside the
+   * character — and because an older build's sheet has no `customSpells` key at
+   * all, which means "I know nothing about them", never "delete them".
+   */
+  applyRemoteSheet: (cid: string, sheet: DurableSheet) => void;
   resetToSample: () => void;
   exportJson: () => string;
 }
 
 const SPELL_LEVELS: SpellLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+/**
+ * Which stash bucket the active character uses. Every Settings import shares
+ * the id "custom", which is why `loadCharacter` clears that bucket rather than
+ * carrying it forward.
+ */
+function bucketOf(activeCharacterId: string | null): string {
+  return activeCharacterId ?? "custom";
+}
+
+/**
+ * Is `name` in this stash, and as which kind? Returning null is what makes
+ * "library spells are untouchable" a property of the model rather than of the
+ * rendering: a spell the player did not author simply is not there.
+ */
+function findInStash(
+  stash: CustomSpells,
+  name: string,
+): { kind: "spell" | "cantrip"; index: number } | null {
+  const needle = name.trim().toLowerCase();
+  const si = stash.spellbook.findIndex((s) => s.name.trim().toLowerCase() === needle);
+  if (si >= 0) return { kind: "spell", index: si };
+  const ci = stash.cantrips.findIndex((s) => s.name.trim().toLowerCase() === needle);
+  if (ci >= 0) return { kind: "cantrip", index: ci };
+  return null;
+}
 
 export const useCharacter = create<CharacterState>()(
   persist(
@@ -122,6 +194,7 @@ export const useCharacter = create<CharacterState>()(
       character: sampleWizard,
       activeCharacterId: null,
       libraryRevision: null,
+      customSpells: {},
 
       takeDamage: (amount) =>
         set((s) => {
@@ -271,6 +344,105 @@ export const useCharacter = create<CharacterState>()(
               preparedSpells: has
                 ? s.character.preparedSpells.filter((n) => n !== spellName)
                 : [...s.character.preparedSpells, spellName],
+            },
+          };
+        }),
+
+      addCustomSpell: (draft) => {
+        const s = get();
+        const name = draft.name.trim();
+        if (!name) return { ok: false, error: "Name is required." };
+        // Name is the identity key for preparedSpells, findSpell and
+        // concentration, so a duplicate is refused rather than merged.
+        if (nameCollides(s.character, name)) {
+          return { ok: false, error: `"${name}" is already on this sheet.` };
+        }
+        const key = bucketOf(s.activeCharacterId);
+        const stash = s.customSpells[key] ?? emptyCustomSpells();
+        const next: CustomSpells = isCantripDraft(draft)
+          ? { ...stash, cantrips: [...stash.cantrips, draftToCantrip(draft)] }
+          : { ...stash, spellbook: [...stash.spellbook, draftToSpell(draft)] };
+        set({
+          customSpells: { ...s.customSpells, [key]: next },
+          character: projectCustoms(s.character, next),
+        });
+        return { ok: true };
+      },
+
+      updateCustomSpell: (originalName, draft) => {
+        const s = get();
+        const key = bucketOf(s.activeCharacterId);
+        const stash = s.customSpells[key] ?? emptyCustomSpells();
+        const found = findInStash(stash, originalName);
+        if (!found) return { ok: false, error: "That spell is not yours to edit." };
+
+        const name = draft.name.trim();
+        if (!name) return { ok: false, error: "Name is required." };
+        if (nameCollides(s.character, name, originalName)) {
+          return { ok: false, error: `"${name}" is already on this sheet.` };
+        }
+        // Crossing the boundary would silently discard ritual/concentration and
+        // strand a name in preparedSpells that no spellbook entry answers to.
+        const wantsCantrip = isCantripDraft(draft);
+        if (wantsCantrip !== (found.kind === "cantrip")) {
+          return {
+            ok: false,
+            error: "A cantrip cannot become a leveled spell. Delete it and add it again.",
+          };
+        }
+
+        const next: CustomSpells =
+          found.kind === "cantrip"
+            ? {
+                ...stash,
+                cantrips: stash.cantrips.map((x, i) =>
+                  i === found.index ? draftToCantrip(draft) : x,
+                ),
+              }
+            : {
+                ...stash,
+                spellbook: stash.spellbook.map((x, i) =>
+                  i === found.index ? draftToSpell(draft) : x,
+                ),
+              };
+
+        const projected = projectCustoms(s.character, next);
+        set({
+          customSpells: { ...s.customSpells, [key]: next },
+          character: {
+            ...projected,
+            // Name is the identity key everywhere, so a rename has to be
+            // followed through or the spell silently unprepares.
+            preparedSpells: projected.preparedSpells.map((n) =>
+              n === originalName ? name : n,
+            ),
+            concentration:
+              projected.concentration?.spellName === originalName
+                ? { ...projected.concentration, spellName: name }
+                : projected.concentration,
+          },
+        });
+        return { ok: true };
+      },
+
+      removeCustomSpell: (name) =>
+        set((s) => {
+          const key = bucketOf(s.activeCharacterId);
+          const stash = s.customSpells[key] ?? emptyCustomSpells();
+          const found = findInStash(stash, name);
+          if (!found) return {};
+          const next: CustomSpells =
+            found.kind === "cantrip"
+              ? { ...stash, cantrips: stash.cantrips.filter((_, i) => i !== found.index) }
+              : { ...stash, spellbook: stash.spellbook.filter((_, i) => i !== found.index) };
+          const projected = projectCustoms(s.character, next);
+          return {
+            customSpells: { ...s.customSpells, [key]: next },
+            character: {
+              ...projected,
+              preparedSpells: projected.preparedSpells.filter((n) => n !== name),
+              concentration:
+                projected.concentration?.spellName === name ? null : projected.concentration,
             },
           };
         }),
@@ -448,8 +620,14 @@ export const useCharacter = create<CharacterState>()(
         }),
 
       loadCharacter: (c, opts) =>
-        set({
-          character: {
+        set((s) => {
+          const sourceGiven = Boolean(opts && "sourceId" in opts);
+          // Default to "custom" when the caller didn't tell us where the
+          // character came from (e.g. Settings file import).
+          const nextId = sourceGiven ? opts!.sourceId ?? null : "custom";
+          const key = bucketOf(nextId);
+
+          const incoming: Character = {
             ...c,
             // Tolerate older saves / hand-edited JSON missing the new fields.
             innateSpells: c.innateSpells ?? [],
@@ -459,17 +637,38 @@ export const useCharacter = create<CharacterState>()(
             // Library JSON and hand-edited files may author abilities as plain
             // numbers; coerce to the base/feat/magic breakdown shape.
             abilities: normalizeAbilities(c.abilities),
-          },
-          // Default to "custom" when the caller didn't tell us where the
-          // character came from (e.g. Settings file import).
-          activeCharacterId:
-            opts && "sourceId" in opts ? opts.sourceId ?? null : "custom",
-          // An import has no library origin, so it must CLEAR any revision left
-          // over from the character it replaced — otherwise the header would
-          // compare a custom sheet against someone else's library entry.
-          libraryRevision:
-            opts && "sourceId" in opts ? opts.revision ?? null : null,
+          };
+
+          // An import is a declared fresh start, and EVERY import shares the id
+          // "custom" — so without clearing, spells typed for one imported sheet
+          // would follow her onto the next.
+          const stash = sourceGiven
+            ? pruneCustoms(incoming, s.customSpells[key] ?? emptyCustomSpells())
+            : emptyCustomSpells();
+
+          return {
+            character: projectCustoms(incoming, stash),
+            customSpells: { ...s.customSpells, [key]: stash },
+            activeCharacterId: nextId,
+            // An import has no library origin, so it must CLEAR any revision
+            // left over from the character it replaced — otherwise the header
+            // would compare a custom sheet against someone else's library entry.
+            libraryRevision: sourceGiven ? opts!.revision ?? null : null,
+          };
         }),
+      applyRemoteSheet: (cid, sheet) =>
+        set((s) => {
+          const applied = applyDurable(s.character, sheet);
+          // Absent (older build) → keep what we have; taking it verbatim would
+          // silently delete every custom spell on every device. Present-but-
+          // empty → she deleted them, and that deletion is meant to travel.
+          const stash = sheet.customSpells ?? s.customSpells[cid] ?? emptyCustomSpells();
+          return {
+            character: projectCustoms(applied, stash),
+            customSpells: { ...s.customSpells, [cid]: stash },
+          };
+        }),
+
       resetToSample: () =>
         set({
           character: sampleWizard,
@@ -483,11 +682,13 @@ export const useCharacter = create<CharacterState>()(
       // v4: added activeCharacterId for the cloud character library.
       // v5: abilities became base/feat/magic breakdowns. Migrate in place so
       // users keep their active character instead of re-picking.
-      // v6: added libraryRevision. No migration body needed — zustand's default
-      // merge is {...currentState, ...persistedState}, so the absent key already
-      // resolves to the initial null. Do NOT rebuild the state object here; that
-      // is how you drop activeCharacterId.
-      version: 6,
+      // v6: added libraryRevision.
+      // v7: added customSpells (player-authored spells, keyed by character id).
+      // No migration body needed for either — zustand's default merge is
+      // {...currentState, ...persistedState}, so an absent key already resolves
+      // to the initial value. Do NOT rebuild the state object here; that is how
+      // you drop activeCharacterId.
+      version: 7,
       migrate: (persisted, version) => {
         const state = persisted as { character?: Character } | undefined;
         if (state?.character && version < 5) {
@@ -546,6 +747,21 @@ export function preparedRituals(c: Character): Spell[] {
 
 export function unpreparedRituals(c: Character): Spell[] {
   return c.spellbook.filter((s) => s.ritual && !c.preparedSpells.includes(s.name));
+}
+
+/**
+ * Spellbook rituals a NON-Wizard owns but has not prepared, and therefore
+ * cannot yet ritual-cast under the 2024 rules. Empty for Wizards, whose Ritual
+ * Adept already puts every spellbook ritual in `availableRituals` — listing
+ * them twice would be worse than not listing them at all.
+ *
+ * This exists because "I added a ritual and the Rituals tab does not show it"
+ * is indistinguishable from a bug when the page says nothing about preparation.
+ * Innate rituals are excluded: they need no preparing, so they are never here.
+ */
+export function ritualsNeedingPreparation(c: Character): Spell[] {
+  if (c.className.trim().toLowerCase() === "wizard") return [];
+  return unpreparedRituals(c);
 }
 
 export function preparedNonRituals(c: Character): Spell[] {

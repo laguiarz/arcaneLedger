@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { useCharacter } from "@/store/character";
-import type { Spell, SpellLevel } from "@/types/character";
+import type { Cantrip, Spell, SpellLevel } from "@/types/character";
 import Icon from "./ui/Icon";
 import { SpellComponentsText } from "./SpellComponentsText";
 import { SCHOOL_COLORS, SCHOOL_ICONS, SPELL_LEVELS } from "@/lib/constants";
+import CustomSpellControls, { CustomChip } from "@/components/spells/CustomSpellControls";
 
 interface Props {
   spell: Spell;
@@ -11,9 +12,16 @@ interface Props {
   ritualMode?: boolean;
   /** Show "prepare/unprepare" toggle (used in spellbook tab). */
   showPrepareToggle?: boolean;
+  /** Provided only where editing belongs — the Spellbook page, not Encounter. */
+  onEdit?: (s: Spell | Cantrip) => void;
 }
 
-export default function SpellCard({ spell, ritualMode = false, showPrepareToggle = false }: Props) {
+export default function SpellCard({
+  spell,
+  ritualMode = false,
+  showPrepareToggle = false,
+  onEdit,
+}: Props) {
   const c = useCharacter((s) => s.character);
   const cast = useCharacter((s) => s.castSpell);
   const togglePrepared = useCharacter((s) => s.togglePrepared);
@@ -58,6 +66,7 @@ export default function SpellCard({ spell, ritualMode = false, showPrepareToggle
                   Concentration
                 </span>
               )}
+              {spell.source === "custom" && <CustomChip />}
             </div>
             <div className="flex items-center gap-2">
               <Icon name={SCHOOL_ICONS[spell.school]} className="text-primary/70" />
@@ -68,6 +77,10 @@ export default function SpellCard({ spell, ritualMode = false, showPrepareToggle
           </button>
 
           <div className="flex items-center gap-1">
+            {spell.source === "custom" && (
+              <CustomSpellControls spell={spell} onEdit={onEdit} />
+            )}
+
             {showPrepareToggle && (
               <button
                 onClick={() => togglePrepared(spell.name)}
@@ -207,22 +220,37 @@ function SpellMeta({ spell }: { spell: Spell }) {
   );
 }
 
-export function CantripCard({ spell }: { spell: import("@/types/character").Cantrip }) {
+export function CantripCard({
+  spell,
+  onEdit,
+}: {
+  spell: Cantrip;
+  onEdit?: (s: Spell | Cantrip) => void;
+}) {
   const [open, setOpen] = useState(false);
   const school = SCHOOL_COLORS[spell.school];
   return (
-    <div
-      className="group relative glass-card brass-border rounded-xl overflow-hidden cursor-pointer"
-      onClick={() => setOpen((o) => !o)}
-    >
+    <div className="group relative glass-card brass-border rounded-xl overflow-hidden">
       <div className="leather-noise absolute inset-0" />
       <div className="relative p-sm">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+          {/* The whole card used to be one click target; it is a button now so
+              the edit/delete controls can sit beside it. */}
+          <button
+            type="button"
+            className="flex items-center gap-2 min-w-0 flex-1 text-left"
+            onClick={() => setOpen((o) => !o)}
+          >
             <Icon name={SCHOOL_ICONS[spell.school]} className="text-primary/70" />
             <span className="font-serif text-on-surface truncate">{spell.name}</span>
+          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {spell.source === "custom" && <CustomChip />}
+            <span className={`chip ${school.chip}`}>{spell.school}</span>
+            {spell.source === "custom" && (
+              <CustomSpellControls spell={spell} onEdit={onEdit} />
+            )}
           </div>
-          <span className={`chip ${school.chip} shrink-0`}>{spell.school}</span>
         </div>
         {open && (
           <>

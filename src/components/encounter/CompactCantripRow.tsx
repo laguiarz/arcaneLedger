@@ -22,6 +22,14 @@ export default function CompactCantripRow({ spell }: { spell: Cantrip }) {
         </span>
         <Icon name={SCHOOL_ICONS[spell.school]} size={14} className="text-primary/60 shrink-0" />
         <span className="font-serif text-sm text-on-surface truncate flex-1">{spell.name}</span>
+        {spell.source === "custom" && (
+          <span
+            title="You wrote this one"
+            className="shrink-0 chip text-[9px] px-1.5 py-0 border bg-primary/10 text-primary border-primary/30"
+          >
+            Custom
+          </span>
+        )}
         {spell.source === "race" && (
           <span
             title="Granted by race / lineage"

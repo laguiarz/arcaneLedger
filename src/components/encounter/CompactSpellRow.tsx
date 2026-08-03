@@ -84,6 +84,14 @@ export default function CompactSpellRow({ spell }: { spell: Spell }) {
               <Icon name="auto_stories" size={12} className="text-outline" />
             </span>
           )}
+          {spell.source === "custom" && (
+            <span
+              title="You wrote this one"
+              className="shrink-0 chip text-[9px] px-1.5 py-0 border bg-primary/10 text-primary border-primary/30"
+            >
+              Custom
+            </span>
+          )}
           {freeMax > 0 && (
             <span
               title="Innate spell · free cast per long rest, then costs a slot"

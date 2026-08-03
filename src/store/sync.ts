@@ -2,9 +2,9 @@ import { create } from "zustand";
 import type { CombatRecord } from "@/types/combatLog";
 import type { DurableSheet } from "@/lib/durableSheet";
 import type { SyncedState } from "@/lib/syncMerge";
-import { extractDurable, applyDurable } from "@/lib/durableSheet";
+import { extractDurable } from "@/lib/durableSheet";
 import { getRemote, putState, postCombat } from "@/lib/syncApi";
-import { digestState, syncFlags } from "@/lib/syncFlags";
+import { baselineFromRemote, digestState, syncFlags } from "@/lib/syncFlags";
 import {
   isSyncEnabled,
   setLastSynced,
@@ -173,17 +173,16 @@ export const useSync = create<SyncStoreState>()((set, get) => {
       withHydration(() => {
         if (combats.length > 0) useCombatLog.getState().mergeRecords(combats);
         if (remote) {
-          useCharacter.setState((s) => ({
-            character: applyDurable(s.character, remote.sheet as DurableSheet),
-          }));
+          useCharacter.getState().applyRemoteSheet(cid, remote.sheet as DurableSheet);
           useCoin.getState().applyRemotePurse(cid, remote.coin as Purse);
           setAppliedUpdatedAt(remote.updatedAt);
           setLastSynced(remote.updatedAt);
         }
       });
-      // Baseline becomes the digest of what we now hold, so finishing a pull
-      // doesn't leave the header immediately claiming there is work to save.
-      if (remote) setBaseline(digestState(payloadFor(cid)));
+      // The baseline is what the CLOUD holds, not what we merged into: an apply
+      // that backfilled data the remote lacked must leave this device dirty, so
+      // the header keeps offering Guardar instead of claiming "synced".
+      if (remote) setBaseline(baselineFromRemote(remote));
       set({
         remoteUpdatedAt: remote?.updatedAt ?? null,
         status: "ok",
