@@ -18,6 +18,33 @@ describe("extractDurable", () => {
   });
 });
 
+describe("extractDurable — custom spells", () => {
+  it("always emits customSpells, empty arrays included", () => {
+    // Empty means "she has none", which is how a deletion reaches the other
+    // devices. Omitting the key would make it indistinguishable from an older
+    // build's push.
+    const d = extractDurable(sampleWizard);
+    expect(d.customSpells).toEqual({ spellbook: [], cantrips: [] });
+  });
+
+  it("picks up custom entries and excludes library ones", () => {
+    const c: Character = {
+      ...sampleWizard,
+      spellbook: [
+        { name: "Shield", level: 1, school: "Abjuration", source: "class" },
+        { name: "Fireball", level: 3, school: "Evocation", source: "custom" },
+      ],
+      cantrips: [
+        { name: "Fire Bolt", school: "Evocation", source: "class" },
+        { name: "Spark", school: "Evocation", source: "custom" },
+      ],
+    };
+    const d = extractDurable(c);
+    expect(d.customSpells.spellbook.map((s) => s.name)).toEqual(["Fireball"]);
+    expect(d.customSpells.cantrips.map((s) => s.name)).toEqual(["Spark"]);
+  });
+});
+
 describe("applyDurable", () => {
   it("replaces durable fields but preserves volatile session state", () => {
     // Start from a character mid-fight: damaged, slots spent, a condition on.
