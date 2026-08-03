@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCharacter } from "@/store/character";
+import { useCharacter, findSpell } from "@/store/character";
 import type { RechargeType, Resource } from "@/types/character";
 import Icon from "../ui/Icon";
 import { useInspire } from "../InspireModal";
@@ -41,6 +41,10 @@ function ResourceCard({ resource }: { resource: Resource }) {
   const useResource = useCharacter((s) => s.useResource);
   const refund = useCharacter((s) => s.refundResource);
   const setUsed = useCharacter((s) => s.setResource);
+  const c = useCharacter((s) => s.character);
+  const itemSpell = resource.itemSpell
+    ? findSpell(c, resource.itemSpell.name)
+    : undefined;
   const [open, setOpen] = useState(false);
   const inspire = useInspire(resource.inspirePhraseDeck);
 
@@ -68,6 +72,14 @@ function ResourceCard({ resource }: { resource: Resource }) {
                   ? `Dawn ${resource.rechargeDice}`
                   : RECHARGE_LABEL[resource.recharge]}
               </span>
+              {itemSpell?.ritual && (
+                <span
+                  className="chip border border-tertiary/40 bg-tertiary/10 text-tertiary"
+                  title="Ritual — casting time + 10 min, no spell slot"
+                >
+                  Ritual
+                </span>
+              )}
               {inspire.enabled && (
                 <button
                   onClick={inspire.draw}

@@ -222,6 +222,31 @@
   ],
   "innateSpells": [
     {
+      "name": "Wild Cunning",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "Action (ritual only: +10 minutes)",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "desc": "You invoke nature spirits for aid, choosing one of the following effects:\n\tYou gain advantage on Wisdom (Survival) checks to track creatures within range for the next hour.\n\tYou locate edible forage within range.\n\tYou find clean drinking water within range.\n\tYou identify suitable shelter within range.\n\tThe spirits construct a campsite within range, complete with a fire, tents, bedrolls and supplies.\n\tThe spirits dismantle a campsite within range, extinguishing the fire, striking the tents, packing everything up and burying the waste.\n\nGranted by the Ritual-Grimoire; cast in ritual mode only (casting time + 10 minutes, no spell slot). A Druid/Ranger spell, off the Bard list entirely.\n\nSource: Unearthed Arcana 36 — Starter Spells (2017). Playtest material, never published in any Player's Handbook.",
+      "ritual": true,
+      "source": "item"
+    },
+    {
+      "name": "Guiding Hand",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "1 minute (ritual only: +10 minutes)",
+      "range": "5 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 8 hours",
+      "desc": "You manifest a tiny luminous hand in an empty space within range. After you name a landmark on the same plane of existence that appears on a historical map, the hand guides you toward it. When you move toward the hand, it retreats 5 feet ahead in the direction of the landmark. If you stay still, it beckons you onward every 1d4 minutes.\n\nGranted by the Ritual-Grimoire; cast in ritual mode only (casting time + 10 minutes, no spell slot). It IS on the Bard list, but it is not in Brunella's spellbook and ritual casting would otherwise require preparing it.\n\nSource: Unearthed Arcana 36 — Starter Spells (2017). Playtest material, never published in any Player's Handbook.",
+      "ritual": true,
+      "concentration": true,
+      "source": "item"
+    },
+    {
       "name": "Ensnaring Strike",
       "level": 1,
       "school": "Conjuration",
@@ -285,6 +310,24 @@
   ],
   "racialFreeCastsUsed": {},
   "resources": [
+    {
+      "name": "Wild Cunning",
+      "source": "Ritual-Grimoire",
+      "desc": "Ritual only: casting time + 10 minutes, no spell slot, unlimited uses. Track, forage, find water or shelter, or have the nature spirits pitch or strike the whole campsite.",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual",
+      "itemSpell": { "name": "Wild Cunning" }
+    },
+    {
+      "name": "Guiding Hand",
+      "source": "Ritual-Grimoire",
+      "desc": "Ritual only: casting time + 10 minutes, no spell slot, unlimited uses. A luminous hand leads you to a named landmark. Takes concentration — up to 8 hours.",
+      "max": 0,
+      "used": 0,
+      "recharge": "manual",
+      "itemSpell": { "name": "Guiding Hand" }
+    },
     {
       "name": "Longbow +2 — Charges",
       "source": "Magic item",
