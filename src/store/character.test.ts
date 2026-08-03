@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type { Character, Spell } from "@/types/character";
 import {
   availableRituals,
+  encounterRituals,
+  preparedNonRituals,
+  preparedRituals,
   ritualsNeedingPreparation,
   useCharacter,
 } from "@/store/character";
@@ -477,5 +480,110 @@ describe("ritualsNeedingPreparation", () => {
     const c = useCharacter.getState().character;
     expect(availableRituals(c).map((s) => s.name)).toEqual([]);
     expect(ritualsNeedingPreparation(c).map((s) => s.name)).toEqual(["Bard Probe Ritual"]);
+  });
+});
+
+/**
+ * `preparedNonRituals` filters only by preparation — it does NOT exclude
+ * rituals, despite the name. Encounter used to union it with preparedRituals,
+ * which rendered every prepared ritual twice with a duplicate React key. This
+ * pins the behaviour the view now relies on.
+ */
+describe("preparedNonRituals really includes rituals", () => {
+  const ritual: Spell = { name: "Detect Magic", level: 1, school: "Divination", ritual: true };
+  const plain: Spell = { name: "Magic Missile", level: 1, school: "Evocation" };
+
+  it("already contains a prepared ritual, so unioning preparedRituals duplicates it", () => {
+    const c = makeChar({
+      spellbook: [ritual, plain],
+      preparedSpells: ["Detect Magic", "Magic Missile"],
+    });
+    expect(preparedNonRituals(c).map((s) => s.name)).toContain("Detect Magic");
+
+    // The shape the view used to build. Kept as the regression guard: if
+    // someone reinstates the union, this count goes back to 2.
+    const unioned = [...preparedNonRituals(c), ...preparedRituals(c)].filter(
+      (s) => s.name === "Detect Magic",
+    );
+    expect(unioned).toHaveLength(2);
+  });
+});
+
+/**
+ * The Rituals section on /encounter must never list a spell the page already
+ * shows somewhere else. Every exclusion lives in this selector, not the view.
+ */
+describe("encounterRituals", () => {
+  const bookRitual: Spell = { name: "Illusory Script", level: 1, school: "Illusion", ritual: true };
+  const bookRitualPrepared: Spell = { name: "Alarm", level: 1, school: "Abjuration", ritual: true };
+  const lineageRitual: Spell = {
+    name: "Detect Magic", level: 1, school: "Divination", ritual: true, source: "race",
+  };
+  const itemRitual: Spell = {
+    name: "Guiding Hand", level: 1, school: "Divination", ritual: true, source: "item",
+  };
+
+  it("gives a Wizard the unprepared spellbook rituals and not the prepared ones", () => {
+    const names = encounterRituals(
+      makeChar({
+        spellbook: [bookRitual, bookRitualPrepared],
+        preparedSpells: ["Alarm"],
+        innateSpells: [],
+      }),
+    ).map((s) => s.name);
+    expect(names).toEqual(["Illusory Script"]);
+  });
+
+  it("excludes innate rituals entirely — Innate Casting already renders them", () => {
+    // The regression guard for the double-listing. A LINEAGE ritual is used on
+    // purpose: it is not item-bound, so subtracting only itemBoundSpellNames
+    // would let it through and this test would fail.
+    const names = encounterRituals(
+      makeChar({ spellbook: [bookRitual], preparedSpells: [], innateSpells: [lineageRitual] }),
+    ).map((s) => s.name);
+    expect(names).toEqual(["Illusory Script"]);
+    expect(names).not.toContain("Detect Magic");
+  });
+
+  it("excludes an item-bound ritual even when it also sits in the spellbook", () => {
+    const names = encounterRituals(
+      makeChar({
+        spellbook: [bookRitual, itemRitual],
+        preparedSpells: [],
+        innateSpells: [],
+        resources: [
+          { name: "Ritual-Grimoire", max: 0, used: 0, recharge: "manual",
+            itemSpell: { name: "Guiding Hand" } },
+        ],
+      }),
+    ).map((s) => s.name);
+    expect(names).toEqual(["Illusory Script"]);
+  });
+
+  it("is empty for a non-Wizard, structurally", () => {
+    // availableRituals already keeps only PREPARED spellbook rituals for a
+    // non-Wizard, and this selector subtracts exactly those — so group 1 is a
+    // Wizard list by construction. The unprepared ones are group 2's job.
+    expect(
+      encounterRituals(
+        makeChar({
+          className: "Bard",
+          spellbook: [bookRitual, bookRitualPrepared],
+          preparedSpells: ["Alarm"],
+          innateSpells: [],
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it("never returns non-ritual spells", () => {
+    const names = encounterRituals(
+      makeChar({
+        spellbook: [{ name: "Magic Missile", level: 1, school: "Evocation" }],
+        preparedSpells: [],
+        innateSpells: [],
+      }),
+    ).map((s) => s.name);
+    expect(names).toEqual([]);
   });
 });
