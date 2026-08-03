@@ -24,6 +24,7 @@ import {
   isCantripDraft,
   nameCollides,
   projectCustoms,
+  pruneCustoms,
   type CustomSpellDraft,
   type CustomSpells,
 } from "@/lib/customSpells";
@@ -611,8 +612,14 @@ export const useCharacter = create<CharacterState>()(
         }),
 
       loadCharacter: (c, opts) =>
-        set({
-          character: {
+        set((s) => {
+          const sourceGiven = Boolean(opts && "sourceId" in opts);
+          // Default to "custom" when the caller didn't tell us where the
+          // character came from (e.g. Settings file import).
+          const nextId = sourceGiven ? opts!.sourceId ?? null : "custom";
+          const key = bucketOf(nextId);
+
+          const incoming: Character = {
             ...c,
             // Tolerate older saves / hand-edited JSON missing the new fields.
             innateSpells: c.innateSpells ?? [],
@@ -622,16 +629,24 @@ export const useCharacter = create<CharacterState>()(
             // Library JSON and hand-edited files may author abilities as plain
             // numbers; coerce to the base/feat/magic breakdown shape.
             abilities: normalizeAbilities(c.abilities),
-          },
-          // Default to "custom" when the caller didn't tell us where the
-          // character came from (e.g. Settings file import).
-          activeCharacterId:
-            opts && "sourceId" in opts ? opts.sourceId ?? null : "custom",
-          // An import has no library origin, so it must CLEAR any revision left
-          // over from the character it replaced — otherwise the header would
-          // compare a custom sheet against someone else's library entry.
-          libraryRevision:
-            opts && "sourceId" in opts ? opts.revision ?? null : null,
+          };
+
+          // An import is a declared fresh start, and EVERY import shares the id
+          // "custom" — so without clearing, spells typed for one imported sheet
+          // would follow her onto the next.
+          const stash = sourceGiven
+            ? pruneCustoms(incoming, s.customSpells[key] ?? emptyCustomSpells())
+            : emptyCustomSpells();
+
+          return {
+            character: projectCustoms(incoming, stash),
+            customSpells: { ...s.customSpells, [key]: stash },
+            activeCharacterId: nextId,
+            // An import has no library origin, so it must CLEAR any revision
+            // left over from the character it replaced — otherwise the header
+            // would compare a custom sheet against someone else's library entry.
+            libraryRevision: sourceGiven ? opts!.revision ?? null : null,
+          };
         }),
       resetToSample: () =>
         set({

@@ -312,3 +312,66 @@ describe("updateCustomSpell / removeCustomSpell", () => {
     expect(useCharacter.getState().character.concentration?.spellName).toBe("Shield");
   });
 });
+
+describe("loadCharacter and the custom-spell stash", () => {
+  const lyari = () => makeChar({
+    name: "Lyari",
+    spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+    cantrips: [], innateSpells: [], preparedSpells: [],
+  });
+  const brunella = () => makeChar({
+    name: "Brunella",
+    spellbook: [{ name: "Vicious Mockery", level: 1, school: "Enchantment", source: "class" }],
+    cantrips: [], innateSpells: [], preparedSpells: [],
+  });
+
+  beforeEach(() => {
+    useCharacter.setState({ character: lyari(), activeCharacterId: "lyari", customSpells: {} });
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+  });
+
+  it("re-applies the customs when the same character reloads from the library", () => {
+    useCharacter.getState().loadCharacter(lyari(), { sourceId: "lyari", revision: "abc" });
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Shield", "Fireball"]);
+  });
+
+  it("does not hand them to a different character, and restores them on the way back", () => {
+    useCharacter.getState().loadCharacter(brunella(), { sourceId: "brunella" });
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Vicious Mockery"]);
+
+    useCharacter.getState().loadCharacter(lyari(), { sourceId: "lyari" });
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Shield", "Fireball"]);
+  });
+
+  it("drops a custom the library now provides itself (promotion)", () => {
+    const promoted = makeChar({
+      name: "Lyari",
+      spellbook: [
+        { name: "Shield", level: 1, school: "Abjuration", source: "class" },
+        { name: "Fireball", level: 3, school: "Evocation", source: "class" },
+      ],
+      cantrips: [], innateSpells: [], preparedSpells: [],
+    });
+    useCharacter.getState().loadCharacter(promoted, { sourceId: "lyari" });
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.filter((x) => x.name === "Fireball")).toHaveLength(1);
+    expect(s.character.spellbook.find((x) => x.name === "Fireball")?.source).toBe("class");
+    expect(s.customSpells["lyari"].spellbook).toHaveLength(0);
+  });
+
+  it("clears the shared custom bucket on an import", () => {
+    // Every Settings import lands in the same "custom" id, so spells typed for
+    // one imported sheet must not follow her onto the next.
+    useCharacter.getState().loadCharacter(brunella());
+    expect(useCharacter.getState().activeCharacterId).toBe("custom");
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name))
+      .toEqual(["Vicious Mockery"]);
+    useCharacter.getState().addCustomSpell({ name: "Bless", level: 1, school: "Enchantment" });
+    useCharacter.getState().loadCharacter(lyari());
+    expect(useCharacter.getState().character.spellbook.map((s) => s.name)).toEqual(["Shield"]);
+    expect(useCharacter.getState().customSpells["custom"]).toEqual({ spellbook: [], cantrips: [] });
+  });
+});
