@@ -8,6 +8,7 @@ import {
 } from "@/store/character";
 import type { Spell } from "@/types/character";
 import { SPELL_LEVELS } from "@/lib/constants";
+import { itemBoundSpellNames } from "@/lib/itemSpells";
 import {
   ACTION_FILTERS,
   type ActionFilter,
@@ -45,9 +46,7 @@ export default function Encounter() {
   // list. Left in here they would also render a slot-backed Cast button — which
   // for a spell off your class list is a cast you cannot legally make, and
   // under the Bonus filter the same spell would appear twice.
-  const itemSpellNames = new Set(
-    c.resources.flatMap((r) => (r.itemSpell ? [r.itemSpell.name] : [])),
-  );
+  const itemSpellNames = itemBoundSpellNames(c);
   const innate = c.innateSpells
     .filter((s) => !itemSpellNames.has(s.name))
     .filter((s) => castingTimeMatchesFilter(filter, s.castingTime));
