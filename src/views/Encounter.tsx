@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import {
   useCharacter,
   preparedNonRituals,
+  encounterRituals,
+  ritualsNeedingPreparation,
   spellSaveDc,
   spellAttackBonus,
 } from "@/store/character";
@@ -19,6 +21,7 @@ import ConcentrationBar from "@/components/panels/ConcentrationBar";
 import HpStrip from "@/components/encounter/HpStrip";
 import CompactSpellRow from "@/components/encounter/CompactSpellRow";
 import CompactCantripRow from "@/components/encounter/CompactCantripRow";
+import CompactRitualRow from "@/components/encounter/CompactRitualRow";
 import CompactResourceRow from "@/components/encounter/CompactResourceRow";
 
 export default function Encounter() {
@@ -38,6 +41,13 @@ export default function Encounter() {
   // list by design; the new Rituals section below lists only the ones that are
   // NOT here.
   const prepared = useMemo(() => preparedNonRituals(c), [c]);
+
+  // Rituals are not part of the action economy — ritualising is never an
+  // Action, Bonus Action or Reaction — so this section is `All`-only and is
+  // NOT wired into `nothingMatches`.
+  const ritualsCastable = useMemo(() => encounterRituals(c), [c]);
+  const ritualsToPrepare = useMemo(() => ritualsNeedingPreparation(c), [c]);
+  const showRituals = ritualsCastable.length > 0 || ritualsToPrepare.length > 0;
 
   // Apply the active action-economy filter to each list. Spells/cantrips match
   // by castingTime; resources by their actionType tag. "all" passes everything.
@@ -162,6 +172,31 @@ export default function Encounter() {
                 {cantrips.map((s) => (
                   <CompactCantripRow key={s.name} spell={s} />
                 ))}
+              </>
+            )}
+
+            {/* `All` only: under an action filter this section is meaningless,
+                so it disappears rather than lying about what a ritual costs. */}
+            {!filtering && showRituals && (
+              <>
+                <SubHeader
+                  icon="auto_stories"
+                  label="Rituals"
+                  count={ritualsCastable.length + ritualsToPrepare.length}
+                />
+                {ritualsCastable.map((s) => (
+                  <CompactRitualRow key={`ritual-${s.name}`} spell={s} />
+                ))}
+                {ritualsToPrepare.length > 0 && (
+                  <>
+                    <p className="text-[10px] text-outline italic px-2 pt-1">
+                      Needs preparing — tap the star, then it can be ritual-cast.
+                    </p>
+                    {ritualsToPrepare.map((s) => (
+                      <CompactRitualRow key={`prep-${s.name}`} spell={s} showPrepareToggle />
+                    ))}
+                  </>
+                )}
               </>
             )}
           </div>
