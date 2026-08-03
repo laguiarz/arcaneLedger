@@ -530,9 +530,18 @@ export function preparedNonRituals(c: Character): Spell[] {
  * Rituals the character can actually cast as rituals. Wizards (Ritual Adept)
  * cast any ritual in their spellbook even unprepared; every other class can
  * only ritual-cast spells it has prepared (2024 rules).
+ *
+ * Innate rituals — granted by lineage, a feat or an item — are always included:
+ * there is no preparation step for a spell that was never prepared in the first
+ * place. Without them, an item literally called a Ritual-Grimoire has its
+ * rituals missing from the page called Ritual Archive, and so does High Elf
+ * Detect Magic.
  */
 export function availableRituals(c: Character): Spell[] {
-  const rituals = c.spellbook.filter((s) => s.ritual);
-  if (c.className.trim().toLowerCase() === "wizard") return rituals;
-  return rituals.filter((s) => c.preparedSpells.includes(s.name));
+  const fromBook = c.spellbook.filter((s) => s.ritual);
+  const book =
+    c.className.trim().toLowerCase() === "wizard"
+      ? fromBook
+      : fromBook.filter((s) => c.preparedSpells.includes(s.name));
+  return [...book, ...c.innateSpells.filter((s) => s.ritual)];
 }

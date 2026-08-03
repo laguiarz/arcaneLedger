@@ -54,6 +54,55 @@ describe("availableRituals", () => {
   });
 });
 
+describe("availableRituals and innate rituals", () => {
+  const innateRitual: Spell = {
+    name: "Guiding Hand", level: 1, school: "Divination", ritual: true, source: "item",
+  };
+  const innateNonRitual: Spell = {
+    name: "Misty Step", level: 2, school: "Conjuration", source: "race",
+  };
+
+  it("includes innate rituals for a non-Wizard", () => {
+    // There is no preparation step for a spell you never prepared, so a ritual
+    // granted by lineage, a feat or an item is always available.
+    const names = availableRituals(
+      makeChar({
+        className: "Bard",
+        spellbook: [],
+        preparedSpells: [],
+        innateSpells: [innateRitual],
+      }),
+    ).map((s) => s.name);
+    expect(names).toEqual(["Guiding Hand"]);
+  });
+
+  it("still hides an unprepared spellbook ritual from a non-Wizard", () => {
+    const names = availableRituals(
+      makeChar({
+        className: "Bard",
+        preparedSpells: [],
+        innateSpells: [innateRitual],
+      }),
+    ).map((s) => s.name);
+    expect(names).not.toContain("Illusory Script");
+    expect(names).toContain("Guiding Hand");
+  });
+
+  it("gives a Wizard every spellbook ritual plus the innate ones", () => {
+    const names = availableRituals(makeChar({ innateSpells: [innateRitual] })).map(
+      (s) => s.name,
+    );
+    expect(names).toEqual(["Detect Magic", "Illusory Script", "Guiding Hand"]);
+  });
+
+  it("ignores innate spells that are not rituals", () => {
+    const names = availableRituals(
+      makeChar({ className: "Bard", innateSpells: [innateNonRitual] }),
+    ).map((s) => s.name);
+    expect(names).not.toContain("Misty Step");
+  });
+});
+
 describe("setMaxHp", () => {
   it("raises the max and leaves current HP alone", () => {
     useCharacter.setState({ character: makeChar() });
