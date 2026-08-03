@@ -241,3 +241,74 @@ describe("addCustomSpell", () => {
     expect(useCharacter.getState().character.preparedSpells).toEqual([]);
   });
 });
+
+describe("updateCustomSpell / removeCustomSpell", () => {
+  beforeEach(() => {
+    useCharacter.setState({
+      character: makeChar({
+        spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+        cantrips: [],
+        innateSpells: [],
+        preparedSpells: [],
+        concentration: null,
+      }),
+      activeCharacterId: "lyari",
+      customSpells: {},
+    });
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+    useCharacter.getState().togglePrepared("Fireball");
+    useCharacter.getState().setConcentration("Fireball", 3);
+  });
+
+  it("renames, carrying preparation and concentration with it", () => {
+    const res = useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Fire Ball", level: 3, school: "Evocation",
+    });
+    expect(res.ok).toBe(true);
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield", "Fire Ball"]);
+    expect(s.character.preparedSpells).toEqual(["Fire Ball"]);
+    expect(s.character.concentration?.spellName).toBe("Fire Ball");
+    expect(s.customSpells["lyari"].spellbook[0].name).toBe("Fire Ball");
+  });
+
+  it("refuses a rename onto an existing name but allows keeping its own", () => {
+    expect(useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Shield", level: 3, school: "Evocation",
+    }).ok).toBe(false);
+
+    expect(useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Fireball", level: 4, school: "Evocation",
+    }).ok).toBe(true);
+    expect(useCharacter.getState().character.spellbook[1].level).toBe(4);
+  });
+
+  it("refuses to move a spell across the cantrip boundary", () => {
+    expect(useCharacter.getState().updateCustomSpell("Fireball", {
+      name: "Fireball", level: 0, school: "Evocation",
+    })).toEqual({ ok: false, error: expect.stringContaining("cantrip") });
+  });
+
+  it("refuses to touch a library spell", () => {
+    expect(useCharacter.getState().updateCustomSpell("Shield", {
+      name: "Shielded", level: 1, school: "Abjuration",
+    }).ok).toBe(false);
+    useCharacter.getState().removeCustomSpell("Shield");
+    expect(useCharacter.getState().character.spellbook.map((x) => x.name)).toContain("Shield");
+  });
+
+  it("deletes, pruning preparation and dropping concentration", () => {
+    useCharacter.getState().removeCustomSpell("Fireball");
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield"]);
+    expect(s.character.preparedSpells).toEqual([]);
+    expect(s.character.concentration).toBeNull();
+    expect(s.customSpells["lyari"].spellbook).toHaveLength(0);
+  });
+
+  it("leaves concentration alone when it names a different spell", () => {
+    useCharacter.getState().setConcentration("Shield", 1);
+    useCharacter.getState().removeCustomSpell("Fireball");
+    expect(useCharacter.getState().character.concentration?.spellName).toBe("Shield");
+  });
+});

@@ -86,6 +86,17 @@ interface CharacterState {
    * so the form can render it inline.
    */
   addCustomSpell: (draft: CustomSpellDraft) => { ok: true } | { ok: false; error: string };
+  /**
+   * Edit a spell the player wrote. `originalName` identifies it — names are the
+   * identity key — so a rename has to be followed through into `preparedSpells`
+   * and `concentration`. Level may change within its kind, never across it.
+   */
+  updateCustomSpell: (
+    originalName: string,
+    draft: CustomSpellDraft,
+  ) => { ok: true } | { ok: false; error: string };
+  /** Delete a player-authored spell, pruning preparation and concentration. */
+  removeCustomSpell: (name: string) => void;
 
   // Concentration
   setConcentration: (spellName: string, level: SpellLevel) => void;
@@ -149,6 +160,23 @@ const SPELL_LEVELS: SpellLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
  */
 function bucketOf(activeCharacterId: string | null): string {
   return activeCharacterId ?? "custom";
+}
+
+/**
+ * Is `name` in this stash, and as which kind? Returning null is what makes
+ * "library spells are untouchable" a property of the model rather than of the
+ * rendering: a spell the player did not author simply is not there.
+ */
+function findInStash(
+  stash: CustomSpells,
+  name: string,
+): { kind: "spell" | "cantrip"; index: number } | null {
+  const needle = name.trim().toLowerCase();
+  const si = stash.spellbook.findIndex((s) => s.name.trim().toLowerCase() === needle);
+  if (si >= 0) return { kind: "spell", index: si };
+  const ci = stash.cantrips.findIndex((s) => s.name.trim().toLowerCase() === needle);
+  if (ci >= 0) return { kind: "cantrip", index: ci };
+  return null;
 }
 
 export const useCharacter = create<CharacterState>()(
@@ -331,6 +359,84 @@ export const useCharacter = create<CharacterState>()(
         });
         return { ok: true };
       },
+
+      updateCustomSpell: (originalName, draft) => {
+        const s = get();
+        const key = bucketOf(s.activeCharacterId);
+        const stash = s.customSpells[key] ?? emptyCustomSpells();
+        const found = findInStash(stash, originalName);
+        if (!found) return { ok: false, error: "That spell is not yours to edit." };
+
+        const name = draft.name.trim();
+        if (!name) return { ok: false, error: "Name is required." };
+        if (nameCollides(s.character, name, originalName)) {
+          return { ok: false, error: `"${name}" is already on this sheet.` };
+        }
+        // Crossing the boundary would silently discard ritual/concentration and
+        // strand a name in preparedSpells that no spellbook entry answers to.
+        const wantsCantrip = isCantripDraft(draft);
+        if (wantsCantrip !== (found.kind === "cantrip")) {
+          return {
+            ok: false,
+            error: "A cantrip cannot become a leveled spell. Delete it and add it again.",
+          };
+        }
+
+        const next: CustomSpells =
+          found.kind === "cantrip"
+            ? {
+                ...stash,
+                cantrips: stash.cantrips.map((x, i) =>
+                  i === found.index ? draftToCantrip(draft) : x,
+                ),
+              }
+            : {
+                ...stash,
+                spellbook: stash.spellbook.map((x, i) =>
+                  i === found.index ? draftToSpell(draft) : x,
+                ),
+              };
+
+        const projected = projectCustoms(s.character, next);
+        set({
+          customSpells: { ...s.customSpells, [key]: next },
+          character: {
+            ...projected,
+            // Name is the identity key everywhere, so a rename has to be
+            // followed through or the spell silently unprepares.
+            preparedSpells: projected.preparedSpells.map((n) =>
+              n === originalName ? name : n,
+            ),
+            concentration:
+              projected.concentration?.spellName === originalName
+                ? { ...projected.concentration, spellName: name }
+                : projected.concentration,
+          },
+        });
+        return { ok: true };
+      },
+
+      removeCustomSpell: (name) =>
+        set((s) => {
+          const key = bucketOf(s.activeCharacterId);
+          const stash = s.customSpells[key] ?? emptyCustomSpells();
+          const found = findInStash(stash, name);
+          if (!found) return {};
+          const next: CustomSpells =
+            found.kind === "cantrip"
+              ? { ...stash, cantrips: stash.cantrips.filter((_, i) => i !== found.index) }
+              : { ...stash, spellbook: stash.spellbook.filter((_, i) => i !== found.index) };
+          const projected = projectCustoms(s.character, next);
+          return {
+            customSpells: { ...s.customSpells, [key]: next },
+            character: {
+              ...projected,
+              preparedSpells: projected.preparedSpells.filter((n) => n !== name),
+              concentration:
+                projected.concentration?.spellName === name ? null : projected.concentration,
+            },
+          };
+        }),
 
       useResource: (resourceName, count = 1) =>
         set((s) => ({
