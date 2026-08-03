@@ -196,11 +196,11 @@ export default function Spellbook() {
             title="Ritual Archive"
             subtitle={
               c.className.trim().toLowerCase() === "wizard"
-                ? "Wizards can cast any ritual from the spellbook (+10 min, no slot)"
-                : "Cast only prepared rituals (+10 min, no slot)"
+                ? "Any ritual from the spellbook, plus granted ones (+10 min, no slot)"
+                : "Prepared rituals, plus ones granted by lineage, feats and items (+10 min, no slot)"
             }
           />
-          {ritualsAvail.length === 0 && <EmptyState text="No rituals in spellbook." />}
+          {ritualsAvail.length === 0 && <EmptyState text="No rituals available." />}
           {groupByLevel(ritualsAvail.filter(spellFilter)).map(([lvl, spells]) => (
             <LevelGroup key={lvl} level={lvl}>
               {spells.map((s) => (
