@@ -50,8 +50,17 @@ function seed(resource: Resource, concentration: ConcentrationState | null = nul
   }));
 }
 
+/**
+ * The bolt IS the cast button for an item that carries a spell — there is no
+ * separate one, because the bolt is how everything else in the app is spent.
+ */
 function castButton() {
   return screen.getByRole("button", { name: /cast ensnaring strike/i });
+}
+
+/** The details panel starts collapsed, like every other resource row. */
+function openDetails() {
+  fireEvent.click(screen.getByRole("button", { name: /toggle details/i }));
 }
 
 beforeEach(() => seed(bowCharges));
@@ -85,20 +94,28 @@ describe("CompactResourceRow with an item spell", () => {
     expect((castButton() as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it("warns that casting replaces an existing concentration", () => {
+  it("offers exactly one way to cast, not a second button", () => {
+    render(<CompactResourceRow resource={bowCharges} />);
+    expect(screen.getAllByRole("button", { name: /cast ensnaring strike/i })).toHaveLength(1);
+  });
+
+  it("warns in the row itself that casting replaces an existing concentration", () => {
+    // Collapsed: the warning has to be visible without opening anything,
+    // because the tooltip is useless on a tablet.
     seed(bowCharges, { spellName: "Faerie Fire", level: 1, rounds: 2 });
     render(<CompactResourceRow resource={bowCharges} />);
-    expect(screen.getByText(/replaces faerie fire/i)).toBeTruthy();
+    expect(screen.getByText(/drops faerie fire/i)).toBeTruthy();
   });
 
   it("does not warn when already concentrating on this same spell", () => {
     seed(bowCharges, { spellName: "Ensnaring Strike", level: 1, rounds: 1 });
     render(<CompactResourceRow resource={bowCharges} />);
-    expect(screen.queryByText(/replaces/i)).toBeNull();
+    expect(screen.queryByText(/drops /i)).toBeNull();
   });
 
   it("shows the item DC alongside the character's own", () => {
     render(<CompactResourceRow resource={bowCharges} />);
+    openDetails();
     // Bard DC = 8 + 3 proficiency + 4 (Cha 19) = 15.
     expect(screen.getByText(/DC 13 \(item\)/)).toBeTruthy();
     expect(screen.getByText(/DC 15 \(yours\)/)).toBeTruthy();
@@ -108,6 +125,10 @@ describe("CompactResourceRow with an item spell", () => {
     const dangling = { ...bowCharges, itemSpell: { name: "No Such Spell", saveDc: 13 } };
     seed(dangling);
     render(<CompactResourceRow resource={dangling} />);
+    // The bolt is back to being a plain "Use", and spending takes no concentration.
     expect(screen.queryByRole("button", { name: /^cast /i })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^use$/i }));
+    expect(useCharacter.getState().character.resources[0].used).toBe(1);
+    expect(useCharacter.getState().character.concentration).toBeNull();
   });
 });
