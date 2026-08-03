@@ -14,6 +14,7 @@ import { sampleWizard } from "@/data/sampleWizard";
 import { abilityMod, abilityScore, normalizeAbilities } from "@/lib/abilities";
 import { defaultArmorConfig } from "@/lib/armor";
 import { applyDurable, type DurableSheet } from "@/lib/durableSheet";
+import { itemBoundSpellNames } from "@/lib/itemSpells";
 import {
   clearLegacyGlobalPrompt,
   getLegacyGlobalPrompt,
@@ -762,6 +763,35 @@ export function unpreparedRituals(c: Character): Spell[] {
 export function ritualsNeedingPreparation(c: Character): Spell[] {
   if (c.className.trim().toLowerCase() === "wizard") return [];
   return unpreparedRituals(c);
+}
+
+/**
+ * Rituals for the Encounter page's Rituals section: castable as rituals right
+ * now AND not already rendered somewhere else on that page.
+ *
+ * Subtracts:
+ *  - prepared spells — already under "Prepared Spells";
+ *  - EVERY innate spell — already under "Innate Casting", or, when bound to an
+ *    item resource, under "Abilities & Items". Subtracting only the item-bound
+ *    ones leaves lineage rituals double-listed with two different affordances;
+ *  - item-bound names, defensively: a spell can be authored into the spellbook
+ *    AND named by a resource's `itemSpell`, and `findSpell` resolves the
+ *    spellbook copy first.
+ *
+ * Consequence worth knowing: this is a WIZARD list. `availableRituals` already
+ * keeps only prepared spellbook rituals for every other class, and this
+ * subtracts exactly those, so a non-Wizard always gets `[]` — their unprepared
+ * rituals are `ritualsNeedingPreparation`'s job.
+ */
+export function encounterRituals(c: Character): Spell[] {
+  const innate = new Set(c.innateSpells.map((s) => s.name));
+  const itemBound = itemBoundSpellNames(c);
+  return availableRituals(c).filter(
+    (s) =>
+      !c.preparedSpells.includes(s.name) &&
+      !innate.has(s.name) &&
+      !itemBound.has(s.name),
+  );
 }
 
 export function preparedNonRituals(c: Character): Spell[] {
