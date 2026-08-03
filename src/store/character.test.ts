@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type { Character, Spell } from "@/types/character";
 import {
   availableRituals,
+  preparedNonRituals,
+  preparedRituals,
   ritualsNeedingPreparation,
   useCharacter,
 } from "@/store/character";
@@ -477,5 +479,31 @@ describe("ritualsNeedingPreparation", () => {
     const c = useCharacter.getState().character;
     expect(availableRituals(c).map((s) => s.name)).toEqual([]);
     expect(ritualsNeedingPreparation(c).map((s) => s.name)).toEqual(["Bard Probe Ritual"]);
+  });
+});
+
+/**
+ * `preparedNonRituals` filters only by preparation — it does NOT exclude
+ * rituals, despite the name. Encounter used to union it with preparedRituals,
+ * which rendered every prepared ritual twice with a duplicate React key. This
+ * pins the behaviour the view now relies on.
+ */
+describe("preparedNonRituals really includes rituals", () => {
+  const ritual: Spell = { name: "Detect Magic", level: 1, school: "Divination", ritual: true };
+  const plain: Spell = { name: "Magic Missile", level: 1, school: "Evocation" };
+
+  it("already contains a prepared ritual, so unioning preparedRituals duplicates it", () => {
+    const c = makeChar({
+      spellbook: [ritual, plain],
+      preparedSpells: ["Detect Magic", "Magic Missile"],
+    });
+    expect(preparedNonRituals(c).map((s) => s.name)).toContain("Detect Magic");
+
+    // The shape the view used to build. Kept as the regression guard: if
+    // someone reinstates the union, this count goes back to 2.
+    const unioned = [...preparedNonRituals(c), ...preparedRituals(c)].filter(
+      (s) => s.name === "Detect Magic",
+    );
+    expect(unioned).toHaveLength(2);
   });
 });

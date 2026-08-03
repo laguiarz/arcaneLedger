@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import {
   useCharacter,
   preparedNonRituals,
-  preparedRituals,
   spellSaveDc,
   spellAttackBonus,
 } from "@/store/character";
@@ -32,11 +31,13 @@ export default function Encounter() {
 
   const [filter, setFilter] = useState<ActionFilter>("all");
 
-  const prepared = useMemo(() => {
-    const a = preparedNonRituals(c);
-    const b = preparedRituals(c);
-    return [...a, ...b].sort((x, y) => x.level - y.level || x.name.localeCompare(y.name));
-  }, [c]);
+  // `preparedNonRituals` already returns EVERY prepared spellbook spell,
+  // rituals included — the name is a lie (see character.ts), and it already
+  // sorts by level then name. Unioning `preparedRituals` on top rendered each
+  // prepared ritual twice, with a duplicate React key. Rituals stay in this
+  // list by design; the new Rituals section below lists only the ones that are
+  // NOT here.
+  const prepared = useMemo(() => preparedNonRituals(c), [c]);
 
   // Apply the active action-economy filter to each list. Spells/cantrips match
   // by castingTime; resources by their actionType tag. "all" passes everything.
