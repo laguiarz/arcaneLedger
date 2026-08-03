@@ -7,6 +7,7 @@ import LibraryPicker from "@/components/library/LibraryPicker";
 import CloudSyncSettings from "@/components/settings/CloudSyncSettings";
 import AboutPanel from "@/components/settings/AboutPanel";
 import { useTheme, type Theme } from "@/store/theme";
+import { useLibrary } from "@/store/library";
 
 export default function Settings() {
   const character = useCharacter((s) => s.character);
@@ -15,6 +16,7 @@ export default function Settings() {
   const resetToSample = useCharacter((s) => s.resetToSample);
   const theme = useTheme((s) => s.theme);
   const setTheme = useTheme((s) => s.setTheme);
+  const libraryError = useLibrary((s) => s.lastError);
 
   const [paste, setPaste] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +119,15 @@ export default function Settings() {
             Loading replaces the current session state.
           </p>
           <LibraryPicker variant="compact" />
+          {/* The update check runs in the background and shows nothing in the
+              header when it fails — deliberately, since a failed check proves
+              nothing either way. Without this line a week of failing checks
+              would be completely silent. */}
+          {libraryError && (
+            <p className="text-xs text-error mt-sm">
+              Last library check failed: {libraryError}
+            </p>
+          )}
         </div>
       </section>
 

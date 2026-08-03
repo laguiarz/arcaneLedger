@@ -13,6 +13,8 @@ import HeaderStatus from "./HeaderStatus";
 import CloudSyncSettings from "./settings/CloudSyncSettings";
 import { useCharacter } from "@/store/character";
 import { useSync } from "@/store/sync";
+import { useLibrary } from "@/store/library";
+import { useSwUpdate } from "@/lib/swUpdate";
 
 /**
  * Turning sync on in Settings has to be visible in the header immediately.
@@ -74,5 +76,68 @@ describe("HeaderStatus reacts to enabling sync in Settings", () => {
 
     expect(screen.queryByLabelText(OFF)).toBeNull();
     expect(screen.getByLabelText(SAVE)).toBeTruthy();
+  });
+});
+
+/**
+ * The second staleness axis: the library holds the PUBLISHED sheet, and until
+ * this existed a republished character never reached a device that had already
+ * loaded it.
+ */
+describe("HeaderStatus offers to reload from the library", () => {
+  const FICHA = /recargar/i;
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    useCharacter.getState().loadCharacter(
+      { ...useCharacter.getState().character },
+      { sourceId: "brunella", revision: "old" },
+    );
+    useLibrary.setState({
+      availableRevision: null,
+      checking: false,
+      reloading: false,
+      lastError: null,
+    });
+    useSwUpdate.setState({ needRefresh: false });
+  });
+
+  afterEach(cleanup);
+
+  it("shows the button when the library advertises a different revision", () => {
+    useLibrary.setState({ availableRevision: "new" });
+    render(<HeaderStatus />);
+    expect(screen.getByLabelText(FICHA)).toBeTruthy();
+  });
+
+  it("stays quiet when the revisions match", () => {
+    useLibrary.setState({ availableRevision: "old" });
+    render(<HeaderStatus />);
+    expect(screen.queryByLabelText(FICHA)).toBeNull();
+  });
+
+  it("stays quiet while an app update is waiting", () => {
+    // Reloading the sheet under the old bundle is what makes the reload look
+    // broken, so the app update has to be installed first.
+    useLibrary.setState({ availableRevision: "new" });
+    useSwUpdate.setState({ needRefresh: true });
+    render(<HeaderStatus />);
+    expect(screen.queryByLabelText(FICHA)).toBeNull();
+  });
+
+  it("stays quiet for an imported character", () => {
+    useCharacter.getState().loadCharacter({ ...useCharacter.getState().character });
+    useLibrary.setState({ availableRevision: "new" });
+    render(<HeaderStatus />);
+    expect(screen.queryByLabelText(FICHA)).toBeNull();
+  });
+
+  it("calls the reload when tapped", async () => {
+    const user = userEvent.setup();
+    const reload = vi.fn(async () => {});
+    useLibrary.setState({ availableRevision: "new", reload });
+    render(<HeaderStatus />);
+    await user.click(screen.getByLabelText(FICHA));
+    expect(reload).toHaveBeenCalled();
   });
 });

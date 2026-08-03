@@ -140,3 +140,44 @@ describe("setNarrationPrompt", () => {
     expect(useCharacter.getState().character.narrationPrompt).toBeUndefined();
   });
 });
+
+/**
+ * The origin fields decide whether the header offers to reload from the library,
+ * and until now nothing pinned them. The setter keys off the PRESENCE of
+ * `sourceId`, which is easy to break by accident.
+ */
+describe("loadCharacter origin tracking", () => {
+  it("records both the source and the revision for a library pick", () => {
+    useCharacter
+      .getState()
+      .loadCharacter(makeChar(), { sourceId: "brunella", revision: "abc" });
+    expect(useCharacter.getState().activeCharacterId).toBe("brunella");
+    expect(useCharacter.getState().libraryRevision).toBe("abc");
+  });
+
+  it("leaves the revision null when the manifest had none", () => {
+    useCharacter.getState().loadCharacter(makeChar(), { sourceId: "lyari" });
+    expect(useCharacter.getState().activeCharacterId).toBe("lyari");
+    expect(useCharacter.getState().libraryRevision).toBeNull();
+  });
+
+  it("marks an import custom and clears the previous revision", () => {
+    useCharacter
+      .getState()
+      .loadCharacter(makeChar(), { sourceId: "brunella", revision: "abc" });
+    useCharacter.getState().loadCharacter(makeChar());
+    expect(useCharacter.getState().activeCharacterId).toBe("custom");
+    // Otherwise the header would compare an imported sheet against someone
+    // else's library entry.
+    expect(useCharacter.getState().libraryRevision).toBeNull();
+  });
+
+  it("clears both when resetting to the sample", () => {
+    useCharacter
+      .getState()
+      .loadCharacter(makeChar(), { sourceId: "brunella", revision: "abc" });
+    useCharacter.getState().resetToSample();
+    expect(useCharacter.getState().activeCharacterId).toBe("sample");
+    expect(useCharacter.getState().libraryRevision).toBeNull();
+  });
+});

@@ -82,6 +82,28 @@ function activeCid(): string | null {
 
 /** True while applying remote data, so it doesn't echo back as a local change. */
 let hydrating = false;
+
+/**
+ * Apply a change to the character/coin stores without the subscriptions below
+ * treating it as a local edit worth uploading.
+ *
+ * Exported for the library reload: replacing the sheet from the library is not
+ * a user edit, and without this guard one unconfirmed tap in the header would,
+ * 1500 ms later, push the library's values over every OTHER device's synced
+ * work. Callers recompute afterwards, so the header still offers Guardar and
+ * the upload stays the user's decision.
+ *
+ * `fn` must be synchronous — the flag is global, and holding it across an await
+ * would swallow unrelated edits.
+ */
+export function withHydration<T>(fn: () => T): T {
+  hydrating = true;
+  try {
+    return fn();
+  } finally {
+    hydrating = false;
+  }
+}
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function offlineNow(): boolean {
@@ -148,8 +170,7 @@ export const useSync = create<SyncStoreState>()((set, get) => {
     set({ status: "syncing" });
     try {
       const { state: remote, combats } = await getRemote(cid);
-      hydrating = true;
-      try {
+      withHydration(() => {
         if (combats.length > 0) useCombatLog.getState().mergeRecords(combats);
         if (remote) {
           useCharacter.setState((s) => ({
@@ -159,9 +180,7 @@ export const useSync = create<SyncStoreState>()((set, get) => {
           setAppliedUpdatedAt(remote.updatedAt);
           setLastSynced(remote.updatedAt);
         }
-      } finally {
-        hydrating = false;
-      }
+      });
       // Baseline becomes the digest of what we now hold, so finishing a pull
       // doesn't leave the header immediately claiming there is work to save.
       if (remote) setBaseline(digestState(payloadFor(cid)));

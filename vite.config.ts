@@ -119,6 +119,11 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
+        // `json` is NOT in here on purpose, and must not be added. The character
+        // library manifest has to be fetched live so a device running a stale
+        // bundle can still learn that its sheet was republished — precaching it
+        // would freeze the revisions at build time and make the "Ficha" notice
+        // in the header permanently wrong.
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2}"],
         runtimeCaching: [
           {

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { HashRouter } from "react-router-dom";
 import App from "./App";
 import { useSync } from "./store/sync";
+import { useLibrary } from "./store/library";
 import { useCharacter } from "./store/character";
 import "./index.css";
 // Registers the service worker and starts the periodic update check.
@@ -27,6 +28,9 @@ function maybeCheck() {
   if (now - lastCheck < 5000) return;
   lastCheck = now;
   void useSync.getState().checkRemote();
+  // Same events, different question: the library holds the PUBLISHED sheet, and
+  // unlike the sync check this one runs even with cloud sync switched off.
+  void useLibrary.getState().check();
 }
 // Seed the flags before any network call: `enabled` lives in the store and the
 // header reads it, so without this a device with sync off (or a failing check)
@@ -44,6 +48,9 @@ useCharacter.subscribe(() => {
   if (cid === lastCid) return;
   lastCid = cid;
   useSync.setState({ remoteUpdatedAt: null });
+  // Same reasoning as the remote stamp above: the revision we last saw describes
+  // the character we just switched away from.
+  useLibrary.setState({ availableRevision: null, lastError: null });
   lastCheck = 0;
   maybeCheck();
 });
