@@ -65,3 +65,34 @@ describe("brunella's Enspelled Longbow", () => {
     expect(r?.recharge).toBe("dawn");
   });
 });
+
+describe("brunella's Ritual-Grimoire", () => {
+  const c = load(brunella);
+  const rows = c.resources.filter((r) => r.source === "Ritual-Grimoire");
+
+  it("has one row per ritual", () => {
+    expect(rows.map((r) => r.name).sort()).toEqual(["Guiding Hand", "Wild Cunning"]);
+  });
+
+  it("carries no charges", () => {
+    for (const r of rows) expect(r.max).toBe(0);
+  });
+
+  it("points at spells flagged as rituals", () => {
+    for (const r of rows) {
+      const s = c.innateSpells.find((x) => x.name === r.itemSpell!.name);
+      expect(s?.ritual, `${r.name} is not flagged as a ritual`).toBe(true);
+    }
+  });
+
+  it("keeps Guiding Hand's concentration and leaves Wild Cunning without it", () => {
+    const gh = c.innateSpells.find((s) => s.name === "Guiding Hand");
+    const wc = c.innateSpells.find((s) => s.name === "Wild Cunning");
+    expect(gh?.concentration).toBe(true);
+    expect(wc?.concentration).toBeUndefined();
+  });
+
+  it("authors no save DC, because neither spell has a saving throw", () => {
+    for (const r of rows) expect(r.itemSpell?.saveDc).toBeUndefined();
+  });
+});
