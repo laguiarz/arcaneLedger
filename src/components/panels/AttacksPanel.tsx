@@ -46,47 +46,52 @@ function WeaponBlock({ weapon }: { weapon: Weapon }) {
 
   return (
     <div>
-      <div className="flex items-center gap-md">
-        <div className="shrink-0 w-20 h-20 rounded-full border-2 border-primary/60 flex flex-col items-center justify-center bg-surface-container-low">
-          <span className="font-serif text-3xl text-primary leading-none">
-            {fmtBonus(attack)}
-          </span>
-          <span className="label-caps text-outline text-[9px] mt-0.5">ATK</span>
+      {/* Two columns once there is room: identity on the left, arithmetic on the
+          right. Stacked on narrow screens, and the breakdown is width-capped so
+          its values never drift a whole column away from their labels. */}
+      <div className="flex flex-col sm:flex-row sm:items-start gap-md">
+        <div className="flex items-center gap-md flex-1 min-w-0">
+          <div className="shrink-0 w-20 h-20 rounded-full border-2 border-primary/60 flex flex-col items-center justify-center bg-surface-container-low">
+            <span className="font-serif text-3xl text-primary leading-none">
+              {fmtBonus(attack)}
+            </span>
+            <span className="label-caps text-outline text-[9px] mt-0.5">ATK</span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="font-serif text-on-surface truncate">{weapon.name}</p>
+            <p className="font-mono text-sm text-on-surface-variant">
+              {weaponDamageLabel(c, weapon)}
+            </p>
+            {weapon.range && <p className="text-xs text-outline">{weapon.range}</p>}
+            {weapon.properties && weapon.properties.length > 0 && (
+              <p className="text-xs text-outline">{weapon.properties.join(" · ")}</p>
+            )}
+          </div>
         </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="font-serif text-on-surface truncate">{weapon.name}</p>
-          <p className="font-mono text-sm text-on-surface-variant">
-            {weaponDamageLabel(c, weapon)}
-          </p>
-          {weapon.range && <p className="text-xs text-outline">{weapon.range}</p>}
-          {weapon.properties && weapon.properties.length > 0 && (
-            <p className="text-xs text-outline">{weapon.properties.join(" · ")}</p>
-          )}
-        </div>
+        <ul className="space-y-0.5 text-sm w-full sm:w-56 shrink-0">
+          <BreakdownRow
+            label={ABILITY_LABEL[weapon.ability]}
+            value={abilityBonus}
+            signed
+          />
+          {/* Shown even when it does not apply: a missing row is indistinguishable
+              from a bug, and "why is my bonus low?" is exactly the question this
+              panel exists to answer. */}
+          <BreakdownRow
+            label="Proficiency"
+            value={weapon.proficient ? fmtBonus(c.proficiencyBonus) : "—"}
+            hint={weapon.proficient ? undefined : "not proficient"}
+          />
+          {weapon.magicBonus ? (
+            <BreakdownRow label="Magic bonus" value={weapon.magicBonus} signed />
+          ) : null}
+        </ul>
       </div>
 
-      <ul className="space-y-0.5 text-sm mt-sm">
-        <BreakdownRow
-          label={ABILITY_LABEL[weapon.ability]}
-          value={abilityBonus}
-          signed
-        />
-        {/* Shown even when it does not apply: a missing row is indistinguishable
-            from a bug, and "why is my bonus low?" is exactly the question this
-            panel exists to answer. */}
-        <BreakdownRow
-          label="Proficiency"
-          value={weapon.proficient ? fmtBonus(c.proficiencyBonus) : "—"}
-          hint={weapon.proficient ? undefined : "not proficient"}
-        />
-        {weapon.magicBonus ? (
-          <BreakdownRow label="Magic bonus" value={weapon.magicBonus} signed />
-        ) : null}
-      </ul>
-
       {weapon.note && (
-        <p className="text-[11px] text-on-surface-variant italic mt-1 leading-snug">
+        <p className="text-[11px] text-on-surface-variant italic mt-sm leading-snug">
           {weapon.note}
         </p>
       )}

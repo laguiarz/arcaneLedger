@@ -35,15 +35,18 @@ export default function Dashboard() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-start">
+        {/* HP and AC are tall; Abilities and Saves are not. Attacks goes in the
+            right column so the two sides end at roughly the same height, and so
+            the weapon's damage line and note get the wider column to breathe. */}
         <div className="md:col-span-4 space-y-md">
           <HpPanel />
           <AcPanel />
-          <AttacksPanel />
         </div>
 
         <div className="md:col-span-8 space-y-md">
           <AbilitiesPanel />
           <SavesPanel />
+          <AttacksPanel />
         </div>
       </div>
 
