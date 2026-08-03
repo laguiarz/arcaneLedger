@@ -132,3 +132,129 @@ describe("CompactResourceRow with an item spell", () => {
     expect(useCharacter.getState().character.concentration).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Chargeless item spells — the Ritual-Grimoire shape: max 0, unlimited use.
+// ---------------------------------------------------------------------------
+
+const guidingHand: Spell = {
+  name: "Guiding Hand",
+  level: 1,
+  school: "Divination",
+  castingTime: "1 minute",
+  duration: "Concentration, up to 8 hours",
+  desc: "You manifest a tiny luminous hand…",
+  ritual: true,
+  concentration: true,
+  source: "item",
+};
+
+const wildCunning: Spell = {
+  name: "Wild Cunning",
+  level: 1,
+  school: "Transmutation",
+  castingTime: "Action",
+  duration: "Instantaneous",
+  desc: "You invoke nature spirits for aid…",
+  ritual: true,
+  source: "item",
+};
+
+const chargeless = (name: string): Resource => ({
+  name,
+  source: "Ritual-Grimoire",
+  max: 0,
+  used: 0,
+  recharge: "manual",
+  itemSpell: { name },
+});
+
+function seedSpells(
+  spells: Spell[],
+  resource: Resource,
+  concentration: ConcentrationState | null = null,
+) {
+  useCharacter.setState((s) => ({
+    character: {
+      ...s.character,
+      innateSpells: spells,
+      resources: [resource],
+      concentration,
+    },
+  }));
+}
+
+describe("a chargeless item spell", () => {
+  it("gives a concentration ritual an ENABLED bolt", () => {
+    // remaining is 0 - 0 = 0 here; anything still keyed on it renders "Depleted".
+    const r = chargeless("Guiding Hand");
+    seedSpells([guidingHand], r);
+    render(<CompactResourceRow resource={r} />);
+    const b = screen.getByRole("button", {
+      name: /cast guiding hand/i,
+    }) as HTMLButtonElement;
+    expect(b.disabled).toBe(false);
+  });
+
+  it("does not promise a charge it never spends", () => {
+    const r = chargeless("Guiding Hand");
+    seedSpells([guidingHand], r);
+    render(<CompactResourceRow resource={r} />);
+    expect(screen.queryByRole("button", { name: /spends 1 charge/i })).toBeNull();
+  });
+
+  it("takes concentration when cast, and spends nothing", () => {
+    const r = chargeless("Guiding Hand");
+    seedSpells([guidingHand], r);
+    render(<CompactResourceRow resource={r} />);
+    fireEvent.click(screen.getByRole("button", { name: /cast guiding hand/i }));
+    const st = useCharacter.getState().character;
+    expect(st.concentration?.spellName).toBe("Guiding Hand");
+    expect(st.resources[0].used).toBe(0);
+  });
+
+  it("warns about replacing concentration with the row COLLAPSED", () => {
+    // Regression guard for PR #22: the warning used to live inside the counter
+    // branch, which a chargeless row never enters.
+    const r = chargeless("Guiding Hand");
+    seedSpells([guidingHand], r, { spellName: "Faerie Fire", level: 1, rounds: 2 });
+    render(<CompactResourceRow resource={r} />);
+    expect(screen.getByText(/drops faerie fire/i)).toBeTruthy();
+  });
+
+  it("gives a non-concentration ritual no bolt at all", () => {
+    const r = chargeless("Wild Cunning");
+    seedSpells([wildCunning], r);
+    render(<CompactResourceRow resource={r} />);
+    expect(screen.queryByRole("button", { name: /^cast /i })).toBeNull();
+  });
+
+  it("is not labelled passive", () => {
+    const r = chargeless("Wild Cunning");
+    seedSpells([wildCunning], r);
+    render(<CompactResourceRow resource={r} />);
+    expect(screen.queryByText(/passive/i)).toBeNull();
+  });
+
+  it("IS labelled passive when the reference dangles, rather than rendering empty", () => {
+    const r = chargeless("Nothing Here");
+    seedSpells([], r);
+    render(<CompactResourceRow resource={r} />);
+    expect(screen.getByText(/passive/i)).toBeTruthy();
+  });
+
+  it("shows a Ritual chip", () => {
+    const r = chargeless("Wild Cunning");
+    seedSpells([wildCunning], r);
+    render(<CompactResourceRow resource={r} />);
+    expect(screen.getByText(/^ritual$/i)).toBeTruthy();
+  });
+
+  it("shows no DC line for a spell with no saving throw", () => {
+    const r = chargeless("Guiding Hand");
+    seedSpells([guidingHand], r);
+    render(<CompactResourceRow resource={r} />);
+    fireEvent.click(screen.getByRole("button", { name: /toggle details/i }));
+    expect(screen.queryByText(/DC \d+ \(yours\)/)).toBeNull();
+  });
+});
