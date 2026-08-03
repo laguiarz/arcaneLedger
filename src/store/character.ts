@@ -749,6 +749,21 @@ export function unpreparedRituals(c: Character): Spell[] {
   return c.spellbook.filter((s) => s.ritual && !c.preparedSpells.includes(s.name));
 }
 
+/**
+ * Spellbook rituals a NON-Wizard owns but has not prepared, and therefore
+ * cannot yet ritual-cast under the 2024 rules. Empty for Wizards, whose Ritual
+ * Adept already puts every spellbook ritual in `availableRituals` — listing
+ * them twice would be worse than not listing them at all.
+ *
+ * This exists because "I added a ritual and the Rituals tab does not show it"
+ * is indistinguishable from a bug when the page says nothing about preparation.
+ * Innate rituals are excluded: they need no preparing, so they are never here.
+ */
+export function ritualsNeedingPreparation(c: Character): Spell[] {
+  if (c.className.trim().toLowerCase() === "wizard") return [];
+  return unpreparedRituals(c);
+}
+
 export function preparedNonRituals(c: Character): Spell[] {
   return c.spellbook
     .filter((s) => c.preparedSpells.includes(s.name))

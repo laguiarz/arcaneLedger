@@ -3,6 +3,7 @@ import {
   useCharacter,
   preparedNonRituals,
   availableRituals,
+  ritualsNeedingPreparation,
   spellSaveDc,
   spellAttackBonus,
 } from "@/store/character";
@@ -53,6 +54,7 @@ export default function Spellbook() {
 
   const prepared = useMemo(() => preparedNonRituals(c), [c]);
   const ritualsAvail = useMemo(() => availableRituals(c), [c]);
+  const ritualsToPrepare = useMemo(() => ritualsNeedingPreparation(c), [c]);
 
   const allSorted = useMemo(
     () =>
@@ -226,7 +228,9 @@ export default function Spellbook() {
                 : "Prepared rituals, plus ones granted by lineage, feats and items (+10 min, no slot)"
             }
           />
-          {ritualsAvail.length === 0 && <EmptyState text="No rituals available." />}
+          {ritualsAvail.length === 0 && ritualsToPrepare.length === 0 && (
+            <EmptyState text="No rituals available." />
+          )}
           {groupByLevel(ritualsAvail.filter(spellFilter)).map(([lvl, spells]) => (
             <LevelGroup key={lvl} level={lvl}>
               {spells.map((s) => (
@@ -234,6 +238,26 @@ export default function Spellbook() {
               ))}
             </LevelGroup>
           ))}
+
+          {/* Without this, a non-Wizard who owns a ritual but has not prepared
+              it sees nothing at all on the page named for rituals — which reads
+              as the spell having failed to save. */}
+          {ritualsToPrepare.length > 0 && (
+            <div className="space-y-md pt-md border-t border-outline-variant/30">
+              <SectionHeader
+                icon="star_border"
+                title="Needs preparing"
+                subtitle="Rituals in the spellbook. Tap the star to prepare one, then it can be ritual-cast."
+              />
+              {groupByLevel(ritualsToPrepare.filter(spellFilter)).map(([lvl, spells]) => (
+                <LevelGroup key={lvl} level={lvl}>
+                  {spells.map((s) => (
+                    <SpellCard key={s.name} spell={s} showPrepareToggle onEdit={openEdit} />
+                  ))}
+                </LevelGroup>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

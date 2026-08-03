@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type { Character, Spell } from "@/types/character";
-import { availableRituals, useCharacter } from "@/store/character";
+import {
+  availableRituals,
+  ritualsNeedingPreparation,
+  useCharacter,
+} from "@/store/character";
 import { toAbilityScores } from "@/lib/abilities";
 import { extractDurable } from "@/lib/durableSheet";
 
@@ -421,5 +425,57 @@ describe("applyRemoteSheet", () => {
       customSpells: { spellbook: [], cantrips: [] },
     });
     expect(useCharacter.getState().character.spellbook.map((x) => x.name)).toEqual(["Shield"]);
+  });
+});
+
+/**
+ * The Rituals tab used to show a non-Wizard only their PREPARED rituals, with
+ * no hint the others existed. Adding a ritual made that immediately visible:
+ * the spell saved fine, appeared under Spellbook, and was simply absent from
+ * the page named for rituals.
+ */
+describe("ritualsNeedingPreparation", () => {
+  const ritual: Spell = { name: "Detect Magic", level: 1, school: "Divination", ritual: true };
+  const other: Spell = { name: "Illusory Script", level: 1, school: "Illusion", ritual: true };
+
+  it("lists a Bard's unprepared spellbook rituals", () => {
+    const names = ritualsNeedingPreparation(
+      makeChar({ className: "Bard", spellbook: [ritual, other], preparedSpells: ["Detect Magic"] }),
+    ).map((s) => s.name);
+    expect(names).toEqual(["Illusory Script"]);
+  });
+
+  it("is empty for a Wizard, whose unprepared rituals are already castable", () => {
+    expect(
+      ritualsNeedingPreparation(
+        makeChar({ spellbook: [ritual, other], preparedSpells: [] }),
+      ),
+    ).toEqual([]);
+  });
+
+  it("never lists innate rituals, which need no preparation", () => {
+    const names = ritualsNeedingPreparation(
+      makeChar({
+        className: "Bard",
+        spellbook: [],
+        preparedSpells: [],
+        innateSpells: [{ name: "Guiding Hand", level: 1, school: "Divination", ritual: true }],
+      }),
+    ).map((s) => s.name);
+    expect(names).toEqual([]);
+  });
+
+  it("catches a freshly added custom ritual, which is never auto-prepared", () => {
+    useCharacter.setState({
+      character: makeChar({ className: "Bard", spellbook: [], preparedSpells: [], cantrips: [] }),
+      activeCharacterId: "brunella",
+      customSpells: {},
+    });
+    useCharacter.getState().addCustomSpell({
+      name: "Bard Probe Ritual", level: 1, school: "Evocation", ritual: true,
+    });
+    const c = useCharacter.getState().character;
+    expect(availableRituals(c).map((s) => s.name)).toEqual([]);
+    expect(ritualsNeedingPreparation(c).map((s) => s.name)).toEqual(["Bard Probe Ritual"]);
   });
 });

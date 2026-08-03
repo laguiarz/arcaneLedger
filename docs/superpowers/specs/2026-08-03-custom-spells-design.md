@@ -290,6 +290,23 @@ Noted rather than pre-solved.
 stash. The UI hides the controls; the guard is what makes "library spells are untouchable" a
 property of the model rather than of the rendering.
 
+### Rituals a non-Wizard has not prepared
+
+Found by the user testing the built feature on **Brunella**, a Bard: she added a ritual, it
+saved correctly and showed under **Spellbook**, and the **Rituals** tab did not list it.
+
+Not a bug in this feature — `availableRituals` filters a non-Wizard's spellbook rituals by
+preparation, which is RAW for 2024 (only the Wizard's Ritual Adept casts unprepared rituals
+from the book), and a new custom spell is deliberately not auto-prepared. But the page said
+nothing about preparation, so the only reading available to her was "the spell failed to
+save". The same gap already hid every unprepared ritual Brunella owned; adding spells just
+made it reachable in one step.
+
+So the Rituals tab gains a **"Needs preparing"** section, fed by a new pure selector
+`ritualsNeedingPreparation(c)` — empty for Wizards, since theirs are already castable and
+listing them twice is worse than not listing them — rendered with the prepare star so it is
+one tap to fix. Innate rituals are never in it: they need no preparing.
+
 ### A spell she cannot cast yet
 
 `SpellCard` derives its cast levels from `spellSlotsMax`, so a custom level-7 spell on a
