@@ -17,8 +17,7 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
   const refund = useCharacter((s) => s.refundResource);
   const c = useCharacter((s) => s.character);
   const setConcentration = useCharacter((s) => s.setConcentration);
-  // An item you can cast from should not hide its own button behind a chevron.
-  const [open, setOpen] = useState(Boolean(resource.itemSpell));
+  const [open, setOpen] = useState(false);
   const inspire = useInspire(resource.inspirePhraseDeck);
 
   const remaining = resource.max - resource.used;
@@ -82,6 +81,16 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
 
         {isCounter ? (
           <>
+            {/* Surfaced in the row, not just in the bolt's tooltip: this is
+                played on a tablet, where nothing hovers. */}
+            {replaces && (
+              <span
+                className="shrink-0 text-[10px] text-error"
+                title={`Casting drops your concentration on ${replaces}`}
+              >
+                drops {replaces}
+              </span>
+            )}
             <span className="font-mono text-xs text-on-surface-variant shrink-0">
               <span className="text-primary font-bold">{remaining}</span>/{resource.max}
             </span>
@@ -94,16 +103,28 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
             >
               <Icon name="undo" size={14} />
             </button>
+            {/* One affordance, not two: the bolt is how everything else in the
+                app is spent, so for an item that casts, the bolt casts. */}
             <button
-              onClick={() => useResource(resource.name)}
+              onClick={itemSpell ? castFromItem : () => useResource(resource.name)}
               disabled={remaining <= 0}
               className={`shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-md border transition ${
                 remaining > 0
                   ? "bg-primary/15 border-primary/50 text-primary hover:bg-primary/25"
                   : "bg-surface-container-low border-outline-variant/40 text-outline cursor-not-allowed"
               }`}
-              aria-label="Use"
-              title={remaining > 0 ? "Use" : "Depleted"}
+              aria-label={
+                itemSpell ? `Cast ${itemSpell.name} — spends 1 charge` : "Use"
+              }
+              title={
+                remaining <= 0
+                  ? "Depleted"
+                  : itemSpell
+                    ? replaces
+                      ? `Cast ${itemSpell.name} — drops concentration on ${replaces}`
+                      : `Cast ${itemSpell.name} — spends 1 charge`
+                    : "Use"
+              }
             >
               <Icon name="bolt" filled size={16} />
             </button>
@@ -136,31 +157,20 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
 
           {itemSpell && (
             <div className="mt-2 border-t border-outline-variant/30 pt-2 space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  onClick={castFromItem}
-                  disabled={remaining <= 0}
-                  className="btn-brass text-sm disabled:opacity-40"
-                  aria-label={`Cast ${itemSpell.name} — spends 1 charge`}
-                  title={
-                    replaces
-                      ? `Cast — drops concentration on ${replaces}`
-                      : `Cast ${itemSpell.name} — spends 1 charge`
-                  }
-                >
-                  <Icon name="auto_fix_high" filled size={16} /> Cast {itemSpell.name}
-                </button>
-                {replaces && (
-                  <span className="text-[10px] text-error">Replaces {replaces}</span>
-                )}
-              </div>
-
               <p className="text-[10px] text-outline font-mono">
+                <span className="text-on-surface-variant">{itemSpell.name}</span>
+                {" · "}
                 {resource.itemSpell?.saveDc !== undefined && (
                   <span>DC {resource.itemSpell.saveDc} (item) · </span>
                 )}
                 <span>DC {spellSaveDc(c)} (yours)</span>
               </p>
+
+              {replaces && (
+                <p className="text-[10px] text-error">
+                  Casting replaces your concentration on {replaces}.
+                </p>
+              )}
 
               {itemSpell.desc && (
                 <p className="text-[11px] text-on-surface-variant italic leading-snug whitespace-pre-line">
