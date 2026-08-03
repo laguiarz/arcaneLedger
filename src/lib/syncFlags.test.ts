@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { digestState, syncFlags, syncHeaderState } from "./syncFlags";
+import { baselineFromRemote, digestState, syncFlags, syncHeaderState } from "./syncFlags";
 
 describe("digestState", () => {
   it("is stable regardless of key order", () => {
@@ -87,5 +87,45 @@ describe("syncHeaderState", () => {
       kind: "error",
       message: "boom",
     });
+  });
+});
+
+describe("baselineFromRemote", () => {
+  it("leaves the device dirty when a backfill kept data the cloud lacks", () => {
+    const coin = { startingGold: 0, entries: [], treasure: [] };
+    // What a device on an older build pushes: no customSpells key at all.
+    const remoteSheet = { hpMax: 30 };
+    const localAfterBackfill = {
+      sheet: {
+        hpMax: 30,
+        customSpells: { spellbook: [{ name: "Fireball" }], cantrips: [] },
+      },
+      coin,
+    };
+    const flags = syncFlags({
+      baseline: baselineFromRemote({ sheet: remoteSheet, coin }),
+      current: digestState(localAfterBackfill),
+      lastAppliedUpdatedAt: 5,
+      remoteUpdatedAt: 5,
+      enabled: true,
+    });
+    // The cloud holds none of her spells, so the header MUST keep offering
+    // Guardar rather than claiming "synced".
+    expect(flags.dirty).toBe(true);
+  });
+
+  it("reads clean when local and remote agree", () => {
+    const payload = {
+      sheet: { hpMax: 30, customSpells: { spellbook: [], cantrips: [] } },
+      coin: {},
+    };
+    const flags = syncFlags({
+      baseline: baselineFromRemote(payload),
+      current: digestState(payload),
+      lastAppliedUpdatedAt: 5,
+      remoteUpdatedAt: 5,
+      enabled: true,
+    });
+    expect(flags.dirty).toBe(false);
   });
 });

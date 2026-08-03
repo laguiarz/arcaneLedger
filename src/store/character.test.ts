@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type { Character, Spell } from "@/types/character";
 import { availableRituals, useCharacter } from "@/store/character";
 import { toAbilityScores } from "@/lib/abilities";
+import { extractDurable } from "@/lib/durableSheet";
 
 const ritualPrepared: Spell = {
   name: "Detect Magic", level: 1, school: "Divination", ritual: true,
@@ -373,5 +374,52 @@ describe("loadCharacter and the custom-spell stash", () => {
     useCharacter.getState().loadCharacter(lyari());
     expect(useCharacter.getState().character.spellbook.map((s) => s.name)).toEqual(["Shield"]);
     expect(useCharacter.getState().customSpells["custom"]).toEqual({ spellbook: [], cantrips: [] });
+  });
+});
+
+describe("applyRemoteSheet", () => {
+  beforeEach(() => {
+    useCharacter.setState({
+      character: makeChar({
+        spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+        cantrips: [], innateSpells: [], preparedSpells: [],
+      }),
+      activeCharacterId: "lyari",
+      customSpells: {},
+    });
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+  });
+
+  it("takes the remote customs when the remote has them", () => {
+    const sheet = extractDurable(useCharacter.getState().character);
+    useCharacter.getState().applyRemoteSheet("lyari", {
+      ...sheet,
+      customSpells: {
+        spellbook: [{ name: "Counterspell", level: 3, school: "Abjuration", source: "custom" }],
+        cantrips: [],
+      },
+    });
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield", "Counterspell"]);
+    expect(s.customSpells["lyari"].spellbook.map((x) => x.name)).toEqual(["Counterspell"]);
+  });
+
+  it("keeps the local ones when the remote sheet predates the field", () => {
+    const sheet = extractDurable(useCharacter.getState().character);
+    // What a device on an older build pushes: no customSpells key at all.
+    const stale = { ...sheet } as Record<string, unknown>;
+    delete stale.customSpells;
+    useCharacter.getState().applyRemoteSheet("lyari", stale as never);
+    expect(useCharacter.getState().character.spellbook.map((x) => x.name))
+      .toEqual(["Shield", "Fireball"]);
+  });
+
+  it("applies an empty remote list as a deletion", () => {
+    const sheet = extractDurable(useCharacter.getState().character);
+    useCharacter.getState().applyRemoteSheet("lyari", {
+      ...sheet,
+      customSpells: { spellbook: [], cantrips: [] },
+    });
+    expect(useCharacter.getState().character.spellbook.map((x) => x.name)).toEqual(["Shield"]);
   });
 });

@@ -13,6 +13,7 @@ import type {
 import { sampleWizard } from "@/data/sampleWizard";
 import { abilityMod, abilityScore, normalizeAbilities } from "@/lib/abilities";
 import { defaultArmorConfig } from "@/lib/armor";
+import { applyDurable, type DurableSheet } from "@/lib/durableSheet";
 import {
   clearLegacyGlobalPrompt,
   getLegacyGlobalPrompt,
@@ -148,6 +149,13 @@ interface CharacterState {
     c: Character,
     opts?: { sourceId: string | null; revision?: string | null },
   ) => void;
+  /**
+   * Apply a durable sheet pulled from the cloud. Separate from `applyDurable`
+   * because custom spells live in the per-character stash, not inside the
+   * character — and because an older build's sheet has no `customSpells` key at
+   * all, which means "I know nothing about them", never "delete them".
+   */
+  applyRemoteSheet: (cid: string, sheet: DurableSheet) => void;
   resetToSample: () => void;
   exportJson: () => string;
 }
@@ -648,6 +656,19 @@ export const useCharacter = create<CharacterState>()(
             libraryRevision: sourceGiven ? opts!.revision ?? null : null,
           };
         }),
+      applyRemoteSheet: (cid, sheet) =>
+        set((s) => {
+          const applied = applyDurable(s.character, sheet);
+          // Absent (older build) → keep what we have; taking it verbatim would
+          // silently delete every custom spell on every device. Present-but-
+          // empty → she deleted them, and that deletion is meant to travel.
+          const stash = sheet.customSpells ?? s.customSpells[cid] ?? emptyCustomSpells();
+          return {
+            character: projectCustoms(applied, stash),
+            customSpells: { ...s.customSpells, [cid]: stash },
+          };
+        }),
+
       resetToSample: () =>
         set({
           character: sampleWizard,
