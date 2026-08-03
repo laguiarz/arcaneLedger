@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useCharacter } from "@/store/character";
+import { useCharacter, findSpell, spellSaveDc } from "@/store/character";
 import type { RechargeType, Resource } from "@/types/character";
 import Icon from "../ui/Icon";
 import { useInspire } from "../InspireModal";
+import DawnRecharge from "../DawnRecharge";
 
 const RECHARGE_LABEL: Record<RechargeType, string> = {
   long: "LR",
@@ -14,20 +15,52 @@ const RECHARGE_LABEL: Record<RechargeType, string> = {
 export default function CompactResourceRow({ resource }: { resource: Resource }) {
   const useResource = useCharacter((s) => s.useResource);
   const refund = useCharacter((s) => s.refundResource);
-  const [open, setOpen] = useState(false);
+  const c = useCharacter((s) => s.character);
+  const setConcentration = useCharacter((s) => s.setConcentration);
+  // An item you can cast from should not hide its own button behind a chevron.
+  const [open, setOpen] = useState(Boolean(resource.itemSpell));
   const inspire = useInspire(resource.inspirePhraseDeck);
 
   const remaining = resource.max - resource.used;
   const isCounter = resource.max > 0;
 
+  // findSpell searches the spellbook AND innateSpells — the same lookup
+  // ConcentrationBar uses, so the row and the bar can never disagree. An
+  // unresolvable reference degrades the row to a plain counter.
+  const itemSpell = resource.itemSpell
+    ? findSpell(c, resource.itemSpell.name)
+    : undefined;
+
+  // setConcentration overwrites without asking, so name what will be lost.
+  const replaces =
+    itemSpell?.concentration &&
+    c.concentration &&
+    c.concentration.spellName !== itemSpell.name
+      ? c.concentration.spellName
+      : null;
+
+  function castFromItem() {
+    if (!itemSpell || remaining <= 0) return;
+    // The charge is the whole cost — casting from an item never spends a slot.
+    useResource(resource.name);
+    if (itemSpell.concentration) {
+      setConcentration(itemSpell.name, itemSpell.level);
+    }
+  }
+
   return (
     <div className="bg-surface-container-low border border-outline-variant/40 rounded-md hover:border-primary/40 transition">
-      <div className="flex items-center gap-2 px-2 py-1.5">
+      {/* flex-wrap so the dawn control's input can drop to its own line. */}
+      <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
         <span
           className="shrink-0 w-6 h-6 inline-flex items-center justify-center rounded text-[9px] font-bold bg-surface-container-highest text-on-surface-variant border border-outline-variant/50"
-          title={`Recharge: ${resource.recharge}`}
+          title={
+            resource.rechargeDice
+              ? `Recharge: ${resource.rechargeDice} at dawn`
+              : `Recharge: ${resource.recharge}`
+          }
         >
-          {RECHARGE_LABEL[resource.recharge]}
+          {resource.rechargeDice ? "☀" : RECHARGE_LABEL[resource.recharge]}
         </span>
         <button
           className="flex-1 min-w-0 text-left"
@@ -52,6 +85,7 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
             <span className="font-mono text-xs text-on-surface-variant shrink-0">
               <span className="text-primary font-bold">{remaining}</span>/{resource.max}
             </span>
+            <DawnRecharge resource={resource} />
             <button
               onClick={() => refund(resource.name)}
               disabled={resource.used <= 0}
@@ -98,6 +132,42 @@ export default function CompactResourceRow({ resource }: { resource: Resource })
             <p className="text-[11px] text-on-surface-variant italic mt-1 leading-snug">
               {resource.desc}
             </p>
+          )}
+
+          {itemSpell && (
+            <div className="mt-2 border-t border-outline-variant/30 pt-2 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={castFromItem}
+                  disabled={remaining <= 0}
+                  className="btn-brass text-sm disabled:opacity-40"
+                  aria-label={`Cast ${itemSpell.name} — spends 1 charge`}
+                  title={
+                    replaces
+                      ? `Cast — drops concentration on ${replaces}`
+                      : `Cast ${itemSpell.name} — spends 1 charge`
+                  }
+                >
+                  <Icon name="auto_fix_high" filled size={16} /> Cast {itemSpell.name}
+                </button>
+                {replaces && (
+                  <span className="text-[10px] text-error">Replaces {replaces}</span>
+                )}
+              </div>
+
+              <p className="text-[10px] text-outline font-mono">
+                {resource.itemSpell?.saveDc !== undefined && (
+                  <span>DC {resource.itemSpell.saveDc} (item) · </span>
+                )}
+                <span>DC {spellSaveDc(c)} (yours)</span>
+              </p>
+
+              {itemSpell.desc && (
+                <p className="text-[11px] text-on-surface-variant italic leading-snug whitespace-pre-line">
+                  {itemSpell.desc}
+                </p>
+              )}
+            </div>
           )}
         </div>
       )}

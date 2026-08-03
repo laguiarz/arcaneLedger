@@ -41,7 +41,16 @@ export default function Encounter() {
   // by castingTime; resources by their actionType tag. "all" passes everything.
   const resources = c.resources.filter((r) => actionTypeMatchesFilter(filter, r.actionType));
   const cantrips = c.cantrips.filter((s) => castingTimeMatchesFilter(filter, s.castingTime));
-  const innate = c.innateSpells.filter((s) => castingTimeMatchesFilter(filter, s.castingTime));
+  // Item-bound spells are cast from their item's charges, over in the resource
+  // list. Left in here they would also render a slot-backed Cast button — which
+  // for a spell off your class list is a cast you cannot legally make, and
+  // under the Bonus filter the same spell would appear twice.
+  const itemSpellNames = new Set(
+    c.resources.flatMap((r) => (r.itemSpell ? [r.itemSpell.name] : [])),
+  );
+  const innate = c.innateSpells
+    .filter((s) => !itemSpellNames.has(s.name))
+    .filter((s) => castingTimeMatchesFilter(filter, s.castingTime));
   const preparedFiltered = prepared.filter((s) =>
     castingTimeMatchesFilter(filter, s.castingTime),
   );

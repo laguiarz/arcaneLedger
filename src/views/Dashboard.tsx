@@ -2,6 +2,7 @@ import { useCharacter } from "@/store/character";
 import { armorClass } from "@/lib/armor";
 import HpPanel from "@/components/panels/HpPanel";
 import AcPanel from "@/components/panels/AcPanel";
+import AttacksPanel from "@/components/panels/AttacksPanel";
 import AbilitiesPanel from "@/components/panels/AbilitiesPanel";
 import SavesPanel from "@/components/panels/SavesPanel";
 import ResourcesPanel from "@/components/panels/ResourcesPanel";
@@ -37,6 +38,7 @@ export default function Dashboard() {
         <div className="md:col-span-4 space-y-md">
           <HpPanel />
           <AcPanel />
+          <AttacksPanel />
         </div>
 
         <div className="md:col-span-8 space-y-md">

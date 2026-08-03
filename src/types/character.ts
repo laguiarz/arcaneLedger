@@ -83,6 +83,25 @@ export interface Resource {
    * without repeating until the deck is exhausted.
    */
   inspirePhraseDeck?: string;
+
+  /**
+   * Dice rolled to regain charges at dawn, e.g. "1d6". Only meaningful with
+   * `recharge: "dawn"`. Its presence is what stops a long rest refilling this
+   * resource outright — rolling the die is the whole mechanic.
+   */
+  rechargeDice?: string;
+
+  /**
+   * A spell this item casts. One nested object rather than loose sibling
+   * fields, so a DC cannot exist without a spell to belong to — and because
+   * the DMG's enspelled-item table binds DC and attack bonus together.
+   */
+  itemSpell?: {
+    /** Resolved with findSpell(), so it may live in innateSpells or the spellbook. */
+    name: string;
+    saveDc?: number;
+    attackBonus?: number;
+  };
 }
 
 export type ConditionId =
@@ -168,6 +187,31 @@ export interface ArmorConfig {
   miscBonus: number;
 }
 
+/**
+ * A weapon the character can attack with. Authored in the character JSON —
+ * there is no in-app editor, so there is no `id`: nothing keys a weapon, and
+ * React keys use `name + index` the way the resource lists already do.
+ */
+export interface Weapon {
+  name: string;
+  /** Which ability drives attack and damage. Ranged weapons use "dex". */
+  ability: Ability;
+  /** Whether the character's proficiency bonus applies. */
+  proficient: boolean;
+  /** A +N weapon: added to BOTH the attack roll and the damage. */
+  magicBonus?: number;
+  /** Damage dice as authored, e.g. "1d8". Never parsed — displayed only. */
+  damageDice: string;
+  /** e.g. "Piercing". */
+  damageType: string;
+  /** e.g. "150/600 ft". Free text. */
+  range?: string;
+  /** e.g. ["Ammunition", "Heavy", "Two-Handed"]. Displayed, never interpreted. */
+  properties?: string[];
+  /** Free text shown under the weapon, e.g. an enspelled note. */
+  note?: string;
+}
+
 export type SkillName =
   | "athletics" // STR
   | "acrobatics"
@@ -216,6 +260,12 @@ export interface Character {
    * and opt-in: absent for imported characters until the sheet configures it.
    */
   armor?: ArmorConfig;
+  /**
+   * Weapons. Optional and frequently `undefined` — sampleWizard and the XML
+   * importer never set it, and every store persisted before this field lacks
+   * it. Always read as `c.weapons ?? []`.
+   */
+  weapons?: Weapon[];
   initiativeBonus?: number;
   speed?: number;
 
