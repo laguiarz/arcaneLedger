@@ -17,6 +17,16 @@ import {
   clearLegacyGlobalPrompt,
   getLegacyGlobalPrompt,
 } from "@/lib/combatNarration";
+import {
+  draftToCantrip,
+  draftToSpell,
+  emptyCustomSpells,
+  isCantripDraft,
+  nameCollides,
+  projectCustoms,
+  type CustomSpellDraft,
+  type CustomSpells,
+} from "@/lib/customSpells";
 
 // Re-exported so existing `import { abilityMod } from "@/store/character"`
 // call sites keep working now that the helpers live in @/lib/abilities.
@@ -41,6 +51,15 @@ interface CharacterState {
    */
   libraryRevision: string | null;
 
+  /**
+   * Spells the player authored, keyed by character id — the same shape
+   * `useCoin.purses` uses, and for the same reason: `character` is replaced
+   * wholesale by every load, so anything that must outlive a reload cannot
+   * live inside it. This is the SOURCE OF TRUTH; the entries tagged
+   * `source: "custom"` in `character.spellbook`/`cantrips` are a projection.
+   */
+  customSpells: Record<string, CustomSpells>;
+
   // HP
   takeDamage: (amount: number) => void;
   heal: (amount: number) => void;
@@ -60,6 +79,13 @@ interface CharacterState {
   castSpellFree: (spellName: string, opts?: { concentration?: { level: SpellLevel } }) => void;
   refundSlot: (slotLevel: SpellLevel) => void;
   togglePrepared: (spellName: string) => void;
+
+  // Player-authored spells
+  /**
+   * Add a spell the player wrote herself. Returns an error instead of throwing
+   * so the form can render it inline.
+   */
+  addCustomSpell: (draft: CustomSpellDraft) => { ok: true } | { ok: false; error: string };
 
   // Concentration
   setConcentration: (spellName: string, level: SpellLevel) => void;
@@ -116,12 +142,22 @@ interface CharacterState {
 
 const SPELL_LEVELS: SpellLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+/**
+ * Which stash bucket the active character uses. Every Settings import shares
+ * the id "custom", which is why `loadCharacter` clears that bucket rather than
+ * carrying it forward.
+ */
+function bucketOf(activeCharacterId: string | null): string {
+  return activeCharacterId ?? "custom";
+}
+
 export const useCharacter = create<CharacterState>()(
   persist(
     (set, get) => ({
       character: sampleWizard,
       activeCharacterId: null,
       libraryRevision: null,
+      customSpells: {},
 
       takeDamage: (amount) =>
         set((s) => {
@@ -274,6 +310,27 @@ export const useCharacter = create<CharacterState>()(
             },
           };
         }),
+
+      addCustomSpell: (draft) => {
+        const s = get();
+        const name = draft.name.trim();
+        if (!name) return { ok: false, error: "Name is required." };
+        // Name is the identity key for preparedSpells, findSpell and
+        // concentration, so a duplicate is refused rather than merged.
+        if (nameCollides(s.character, name)) {
+          return { ok: false, error: `"${name}" is already on this sheet.` };
+        }
+        const key = bucketOf(s.activeCharacterId);
+        const stash = s.customSpells[key] ?? emptyCustomSpells();
+        const next: CustomSpells = isCantripDraft(draft)
+          ? { ...stash, cantrips: [...stash.cantrips, draftToCantrip(draft)] }
+          : { ...stash, spellbook: [...stash.spellbook, draftToSpell(draft)] };
+        set({
+          customSpells: { ...s.customSpells, [key]: next },
+          character: projectCustoms(s.character, next),
+        });
+        return { ok: true };
+      },
 
       useResource: (resourceName, count = 1) =>
         set((s) => ({
@@ -483,11 +540,13 @@ export const useCharacter = create<CharacterState>()(
       // v4: added activeCharacterId for the cloud character library.
       // v5: abilities became base/feat/magic breakdowns. Migrate in place so
       // users keep their active character instead of re-picking.
-      // v6: added libraryRevision. No migration body needed — zustand's default
-      // merge is {...currentState, ...persistedState}, so the absent key already
-      // resolves to the initial null. Do NOT rebuild the state object here; that
-      // is how you drop activeCharacterId.
-      version: 6,
+      // v6: added libraryRevision.
+      // v7: added customSpells (player-authored spells, keyed by character id).
+      // No migration body needed for either — zustand's default merge is
+      // {...currentState, ...persistedState}, so an absent key already resolves
+      // to the initial value. Do NOT rebuild the state object here; that is how
+      // you drop activeCharacterId.
+      version: 7,
       migrate: (persisted, version) => {
         const state = persisted as { character?: Character } | undefined;
         if (state?.character && version < 5) {

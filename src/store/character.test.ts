@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import type { Character, Spell } from "@/types/character";
 import { availableRituals, useCharacter } from "@/store/character";
 import { toAbilityScores } from "@/lib/abilities";
@@ -179,5 +179,65 @@ describe("loadCharacter origin tracking", () => {
     useCharacter.getState().resetToSample();
     expect(useCharacter.getState().activeCharacterId).toBe("sample");
     expect(useCharacter.getState().libraryRevision).toBeNull();
+  });
+});
+
+describe("addCustomSpell", () => {
+  beforeEach(() => {
+    useCharacter.setState({
+      character: makeChar({
+        spellbook: [{ name: "Shield", level: 1, school: "Abjuration", source: "class" }],
+        cantrips: [{ name: "Fire Bolt", school: "Evocation", source: "class" }],
+        innateSpells: [{ name: "Misty Step", level: 2, school: "Conjuration" }],
+        preparedSpells: [],
+      }),
+      activeCharacterId: "lyari",
+      customSpells: {},
+    });
+  });
+
+  it("puts a leveled spell in the spellbook and the stash, tagged custom", () => {
+    const res = useCharacter.getState().addCustomSpell({
+      name: "Fireball", level: 3, school: "Evocation",
+    });
+    expect(res.ok).toBe(true);
+    const s = useCharacter.getState();
+    expect(s.character.spellbook.map((x) => x.name)).toEqual(["Shield", "Fireball"]);
+    expect(s.character.spellbook[1].source).toBe("custom");
+    expect(s.customSpells["lyari"].spellbook).toHaveLength(1);
+  });
+
+  it("puts a level 0 spell in the cantrips", () => {
+    useCharacter.getState().addCustomSpell({ name: "Spark", level: 0, school: "Evocation" });
+    const s = useCharacter.getState();
+    expect(s.character.cantrips.map((x) => x.name)).toEqual(["Fire Bolt", "Spark"]);
+    expect(s.customSpells["lyari"].cantrips).toHaveLength(1);
+  });
+
+  it("refuses a duplicate name across casing, cantrips and innate spells", () => {
+    expect(useCharacter.getState().addCustomSpell({
+      name: "shield", level: 1, school: "Abjuration",
+    })).toEqual({ ok: false, error: expect.stringContaining("already") });
+
+    expect(useCharacter.getState().addCustomSpell({
+      name: "Fire Bolt", level: 0, school: "Evocation",
+    }).ok).toBe(false);
+
+    expect(useCharacter.getState().addCustomSpell({
+      name: "Misty Step", level: 2, school: "Conjuration",
+    }).ok).toBe(false);
+
+    expect(useCharacter.getState().customSpells["lyari"]).toBeUndefined();
+  });
+
+  it("refuses a blank name", () => {
+    expect(useCharacter.getState().addCustomSpell({
+      name: "   ", level: 1, school: "Evocation",
+    }).ok).toBe(false);
+  });
+
+  it("does not auto-prepare", () => {
+    useCharacter.getState().addCustomSpell({ name: "Fireball", level: 3, school: "Evocation" });
+    expect(useCharacter.getState().character.preparedSpells).toEqual([]);
   });
 });
