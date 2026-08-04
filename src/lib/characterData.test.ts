@@ -50,8 +50,16 @@ describe("brunella's Enspelled Longbow", () => {
     expect(bow).toBeDefined();
   });
 
-  it("hits at +5 — Dex 17, no proficiency, +2 magic", () => {
-    expect(weaponAttackBonus(c, bow!)).toBe(5);
+  // A DM rule in this campaign gives every elf proficiency with the longbow and
+  // the longsword, which a Bard would not otherwise have. It is a house rule, so
+  // nothing in the class data implies it — pin it here or a future edit silently
+  // drops 3 points off every shot.
+  it("is proficient, per the campaign's elf weapon rule", () => {
+    expect(bow!.proficient).toBe(true);
+  });
+
+  it("hits at +8 — Dex 17, proficiency +3, +2 magic", () => {
+    expect(weaponAttackBonus(c, bow!)).toBe(8);
   });
 
   it("deals 1d8+5 piercing", () => {
