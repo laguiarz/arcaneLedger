@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   useCharacter,
   preparedNonRituals,
+  preparesFromSpellbook,
   encounterRituals,
   ritualsNeedingPreparation,
   spellSaveDc,
@@ -215,7 +216,9 @@ export default function Encounter() {
               <>
                 <SubHeader
                   icon="auto_fix_high"
-                  label="Prepared Spells"
+                  // Same reason the Spellbook page drops its Prepared tab: for a
+                  // Bard there is no unprepared spell to tell these apart from.
+                  label={preparesFromSpellbook(c) ? "Prepared Spells" : "Spells"}
                   count={preparedFiltered.length}
                 />
                 <PreparedGrouped spells={preparedFiltered} />
