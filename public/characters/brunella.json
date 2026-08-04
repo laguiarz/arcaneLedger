@@ -33,13 +33,13 @@
     {
       "name": "Longbow +2",
       "ability": "dex",
-      "proficient": false,
+      "proficient": true,
       "magicBonus": 2,
       "damageDice": "1d8",
       "damageType": "Piercing",
       "range": "150/600 ft",
       "properties": ["Ammunition", "Heavy", "Two-Handed"],
-      "note": "Enspelled with Ensnaring Strike. Requires attunement. A longbow is a Martial weapon and the Bard is proficient with Simple weapons only, so no proficiency bonus applies."
+      "note": "Enspelled with Ensnaring Strike. Requires attunement. A longbow is a Martial weapon and the Bard is proficient with Simple weapons only, but a DM rule in this campaign grants every elf proficiency with the longbow and the longsword, so the proficiency bonus does apply."
     }
   ],
   "spellcastingAbility": "cha",
@@ -392,5 +392,5 @@
     "investigation": { "proficient": true },
     "performance": { "proficient": true }
   },
-  "notes": "High Elf · Bard 5 (College of Lore) · Acolyte background. Spellcasting ability: Charisma (DC 15, attack +7). Saving throw proficiencies: Dexterity, Charisma. High Elf traits: Darkvision 60 ft, Fey Ancestry (Advantage vs. Charmed, immune to magical sleep), Trance (4-hour long rest), Keen Senses (Perception). Tool proficiency: Calligrapher's Supplies. Jack of All Trades (+1) already baked into initiative (+3)."
+  "notes": "High Elf · Bard 5 (College of Lore) · Acolyte background. Spellcasting ability: Charisma (DC 15, attack +7). Saving throw proficiencies: Dexterity, Charisma. High Elf traits: Darkvision 60 ft, Fey Ancestry (Advantage vs. Charmed, immune to magical sleep), Trance (4-hour long rest), Keen Senses (Perception). DM rule (this campaign): every elf is proficient with the longbow and the longsword. Tool proficiency: Calligrapher's Supplies. Jack of All Trades (+1) already baked into initiative (+3)."
 }
