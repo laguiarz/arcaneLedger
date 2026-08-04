@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   useCharacter,
   preparedNonRituals,
+  preparesFromSpellbook,
   availableRituals,
   ritualsNeedingPreparation,
   spellSaveDc,
@@ -25,7 +26,21 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 export default function Spellbook() {
   const c = useCharacter((s) => s.character);
-  const [tab, setTab] = useState<Tab>("prepared");
+
+  // A Bard's prepared list is everything she knows, so a Prepared tab would be
+  // the Spellbook tab under a different name. Only classes that prepare out of
+  // a bigger pool get both.
+  const showPreparedTab = preparesFromSpellbook(c);
+  const tabs = useMemo(
+    () => TABS.filter((t) => t.id !== "prepared" || showPreparedTab),
+    [showPreparedTab],
+  );
+  const defaultTab: Tab = showPreparedTab ? "prepared" : "all";
+  const [tab, setTab] = useState<Tab>(defaultTab);
+
+  // Switching characters can pull the open tab out from under us — landing on a
+  // tab that no longer has a button is a blank page with no way back.
+  const activeTab: Tab = tabs.some((t) => t.id === tab) ? tab : defaultTab;
   const [query, setQuery] = useState("");
   const [levels, setLevels] = useState<Set<number>>(new Set());
   const [formOpen, setFormOpen] = useState(false);
@@ -71,7 +86,11 @@ export default function Spellbook() {
   }, [c.spellSlotsMax]);
 
   const tabSource: Spell[] =
-    tab === "prepared" ? prepared : tab === "rituals" ? ritualsAvail : allSorted;
+    activeTab === "prepared"
+      ? prepared
+      : activeTab === "rituals"
+        ? ritualsAvail
+        : allSorted;
 
   const levelCounts = useMemo(() => {
     const m = new Map<number, number>();
@@ -100,8 +119,8 @@ export default function Spellbook() {
 
       <div className="flex flex-wrap items-center gap-sm pt-sm border-t border-outline-variant/30">
         <div className="flex flex-wrap gap-1">
-          {TABS.map((t) => {
-            const active = tab === t.id;
+          {tabs.map((t) => {
+            const active = activeTab === t.id;
             const count =
               t.id === "prepared"
                 ? prepared.length
@@ -189,7 +208,7 @@ export default function Spellbook() {
 
       {formOpen && <SpellForm editing={editing} onClose={closeForm} />}
 
-      {tab === "prepared" && (
+      {activeTab === "prepared" && (
         <div className="space-y-md">
           <SectionHeader icon="star" title="Prepared Incantations" />
           {prepared.length === 0 && (
@@ -205,7 +224,7 @@ export default function Spellbook() {
         </div>
       )}
 
-      {tab === "cantrips" && (
+      {activeTab === "cantrips" && (
         <div className="space-y-sm">
           <SectionHeader icon="flash_on" title="Cantrips" subtitle="Always available, no slot cost" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
@@ -217,13 +236,13 @@ export default function Spellbook() {
         </div>
       )}
 
-      {tab === "rituals" && (
+      {activeTab === "rituals" && (
         <div className="space-y-md">
           <SectionHeader
             icon="auto_stories"
             title="Ritual Archive"
             subtitle={
-              c.className.trim().toLowerCase() === "wizard"
+              preparesFromSpellbook(c)
                 ? "Any ritual from the spellbook, plus granted ones (+10 min, no slot)"
                 : "Prepared rituals, plus ones granted by lineage, feats and items (+10 min, no slot)"
             }
@@ -261,7 +280,7 @@ export default function Spellbook() {
         </div>
       )}
 
-      {tab === "all" && (
+      {activeTab === "all" && (
         <div className="space-y-md">
           <SectionHeader
             icon="menu_book"

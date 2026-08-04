@@ -742,6 +742,26 @@ export function freeCastsRemaining(c: Character, spellName: string): number {
   return Math.max(0, spell.freeCastsPerLongRest - used);
 }
 
+/**
+ * Does this character prepare from a POOL that is larger than what she has
+ * prepared?
+ *
+ * Under the 2024 rules every class "prepares" spells, so the word alone no
+ * longer separates anybody. What separates them is where the prepared list
+ * comes from: a Wizard picks hers out of a spellbook she keeps adding to, so
+ * spellbook and prepared are genuinely two different lists. A Bard's prepared
+ * list IS everything she knows — there is no third place a spell can sit — so
+ * showing her a Prepared view and a Spellbook view means showing the same
+ * spells twice under two names.
+ *
+ * Keyed on class rather than on `prepared.length === spellbook.length` on
+ * purpose: the moment a Bard unprepares one spell the counts diverge, and a tab
+ * that appears and disappears as she stars things is worse than either choice.
+ */
+export function preparesFromSpellbook(c: Character): boolean {
+  return c.className.trim().toLowerCase() === "wizard";
+}
+
 export function preparedRituals(c: Character): Spell[] {
   return c.spellbook.filter((s) => s.ritual && c.preparedSpells.includes(s.name));
 }
@@ -761,7 +781,7 @@ export function unpreparedRituals(c: Character): Spell[] {
  * Innate rituals are excluded: they need no preparing, so they are never here.
  */
 export function ritualsNeedingPreparation(c: Character): Spell[] {
-  if (c.className.trim().toLowerCase() === "wizard") return [];
+  if (preparesFromSpellbook(c)) return [];
   return unpreparedRituals(c);
 }
 
@@ -814,7 +834,7 @@ export function preparedNonRituals(c: Character): Spell[] {
 export function availableRituals(c: Character): Spell[] {
   const fromBook = c.spellbook.filter((s) => s.ritual);
   const book =
-    c.className.trim().toLowerCase() === "wizard"
+    preparesFromSpellbook(c)
       ? fromBook
       : fromBook.filter((s) => c.preparedSpells.includes(s.name));
   return [...book, ...c.innateSpells.filter((s) => s.ritual)];
