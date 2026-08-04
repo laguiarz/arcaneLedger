@@ -209,14 +209,15 @@
       "source": "class"
     },
     {
-      "name": "Astral Flood",
+      "name": "Major Image",
       "level": 3,
-      "school": "Evocation",
+      "school": "Illusion",
       "castingTime": "Action",
-      "range": "Self (30-foot Cone)",
-      "components": "V, S, M (a mixture of water and powdered silver)",
-      "duration": "Instantaneous",
-      "desc": "You channel energy from the Astral Sea to unleash a torrent of magic from you in a 30-foot Cone. Each creature in the Cone must succeed on a Dexterity saving throw or take 4d10 Cold or Radiant damage (chosen when you cast this spell). Your choice of damage type determines an additional effect:\n\tCold Damage. The target has Disadvantage on the next D20 Test it makes before the end of your next turn.\n\tRadiant Damage. The target can see only within 15 feet of itself, and it has the Blinded condition for everything beyond that distance until the end of your next turn.\n\tUsing a Higher-Level Spell Slot. The damage increases by 1d10 for each spell slot level above 3.\n\nSource: D&D Beyond Drops, May 2026",
+      "range": "120 feet",
+      "components": "V, S, M (a bit of fleece)",
+      "duration": "Concentration, up to 10 minutes",
+      "desc": "You create the image of an object, a creature, or some other visible phenomenon that is no larger than a 20-foot Cube. The image appears at a spot you can see within range and lasts for the duration. It seems real, including sounds, smells, and temperature appropriate to the thing depicted, but it can't deal damage or cause a condition.\n\tIf you are within range of the illusion, you can take a Magic action to cause the image to move to any other spot within range. As the image changes location, you can alter its appearance so that its movements appear natural for the image. For example, if you create an image of a creature and move it, you can alter the image so that it appears to be walking. Similarly, you can cause the illusion to make different sounds at different times, even making it carry on a conversation.\n\tPhysical interaction with the image reveals it to be illusory, since things can pass through it. A creature that takes the Study action to examine the image can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the creature can see through the image, and any sounds it makes sound hollow to the creature.\n\tUsing a Higher-Level Spell Slot. The spell lasts until dispelled, without requiring Concentration, if cast with a level 4+ spell slot.\n\nSource: Player's Handbook 2024 p. 295",
+      "concentration": true,
       "source": "class"
     }
   ],
@@ -306,7 +307,7 @@
     "Lesser Restoration",
     "Dispel Magic",
     "Mass Healing Word",
-    "Astral Flood"
+    "Major Image"
   ],
   "racialFreeCastsUsed": {},
   "resources": [
