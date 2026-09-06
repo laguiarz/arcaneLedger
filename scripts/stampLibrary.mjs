@@ -8,6 +8,11 @@ import { digestCharacter } from "./libraryDigest.mjs";
  * so the app can tell that a published sheet changed under a device that
  * already loaded it.
  *
+ * It also re-derives the entry's display fields (`name`, `className`, `level`)
+ * from the sheet, because those are what the library picker renders. They used
+ * to be hand-written, and a level-up would leave the picker offering
+ * "Bard (Lore) · Level 5" for a sheet that had already moved on.
+ *
  * Two modes:
  *   node scripts/stampLibrary.mjs           writes the revisions back
  *   node scripts/stampLibrary.mjs --check   writes nothing, exits 1 if stale
@@ -55,21 +60,34 @@ if (!Array.isArray(entries)) {
 const stale = [];
 const changed = [];
 
+/** What the library picker shows for a sheet: "Wizard (Illusionist)". */
+function displayClass(character) {
+  return character.subclass
+    ? `${character.className} (${character.subclass})`
+    : character.className;
+}
+
 for (const entry of entries) {
   if (!entry || typeof entry.id !== "string") {
     fail(`a manifest entry has no id: ${JSON.stringify(entry)}`);
   }
-  const revision = digestCharacter(
-    readJson(characterPath(entry.id), `character "${entry.id}"`),
-  );
-  if (entry.revision === revision) continue;
-  if (check) {
-    stale.push(
-      `  ${entry.id}: manifest says ${entry.revision ?? "(none)"}, content is ${revision}`,
-    );
-  } else {
-    changed.push(`  ${entry.id}: ${entry.revision ?? "(none)"} -> ${revision}`);
-    entry.revision = revision;
+  const character = readJson(characterPath(entry.id), `character "${entry.id}"`);
+  const derived = {
+    name: character.name,
+    className: displayClass(character),
+    level: character.level,
+    revision: digestCharacter(character),
+  };
+
+  for (const [field, value] of Object.entries(derived)) {
+    if (entry[field] === value) continue;
+    const was = entry[field] ?? "(none)";
+    if (check) {
+      stale.push(`  ${entry.id}.${field}: manifest says ${was}, content is ${value}`);
+    } else {
+      changed.push(`  ${entry.id}.${field}: ${was} -> ${value}`);
+      entry[field] = value;
+    }
   }
 }
 
@@ -91,4 +109,4 @@ if (changed.length === 0) {
 }
 
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-console.log(`stampLibrary: stamped ${changed.length} entr(ies).\n${changed.join("\n")}`);
+console.log(`stampLibrary: stamped ${changed.length} field(s).\n${changed.join("\n")}`);

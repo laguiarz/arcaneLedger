@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { fetchLibraryManifest } from "./characterLibrary";
@@ -35,6 +36,26 @@ describe("the committed library manifest", () => {
         stdio: "pipe",
       }),
     ).not.toThrow();
+  });
+
+  // The picker renders `className · Level N` straight off the manifest, so a
+  // level-up that only touched the sheet used to leave it advertising the old
+  // level. --check covers these fields now; this pins the actual values so the
+  // two files can't agree on something wrong.
+  it("describes each character the way its sheet does", () => {
+    const manifest = JSON.parse(
+      readFileSync(join(repoRoot, "public", "characters", "manifest.json"), "utf8"),
+    );
+    for (const entry of manifest.characters) {
+      const sheet = JSON.parse(
+        readFileSync(join(repoRoot, "public", "characters", `${entry.id}.json`), "utf8"),
+      );
+      expect(entry.name).toBe(sheet.name);
+      expect(entry.level).toBe(sheet.level);
+      expect(entry.className).toBe(
+        sheet.subclass ? `${sheet.className} (${sheet.subclass})` : sheet.className,
+      );
+    }
   });
 });
 
