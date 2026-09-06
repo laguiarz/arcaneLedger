@@ -104,3 +104,33 @@ describe("brunella's Ritual-Grimoire", () => {
     for (const r of rows) expect(r.itemSpell?.saveDc).toBeUndefined();
   });
 });
+
+describe("brunella at Bard 6", () => {
+  const c = load(brunella);
+
+  it("is level 6 with 33 HP and six hit dice", () => {
+    expect(c.level).toBe(6);
+    expect(c.hp.max).toBe(33);
+    expect(c.hitDice.max).toBe(6);
+  });
+
+  it("has 4/3/3 spell slots", () => {
+    expect(c.spellSlotsMax).toEqual({ 1: 4, 2: 3, 3: 3 });
+  });
+
+  // The Bard table gives 10 prepared spells at level 6. Magical Discoveries
+  // (Lore L6) adds two more that are ALWAYS prepared and do NOT count against
+  // that 10 — so the list is 12 long by design. Anyone "fixing" it back to 10
+  // would be silently unpreparing a spell she is entitled to.
+  it("prepares 10 bard spells plus the two Magical Discoveries", () => {
+    const discoveries = c.spellbook.filter((s) => s.source === "subclass");
+    expect(discoveries.map((s) => s.name).sort()).toEqual(["Moonbeam", "Revivify"]);
+    expect(c.preparedSpells).toHaveLength(10 + discoveries.length);
+    for (const s of discoveries) expect(c.preparedSpells).toContain(s.name);
+  });
+
+  it("keeps every prepared spell resolvable in the spellbook", () => {
+    const known = new Set(c.spellbook.map((s) => s.name));
+    for (const n of c.preparedSpells) expect(known, `${n} is prepared but unknown`).toContain(n);
+  });
+});
